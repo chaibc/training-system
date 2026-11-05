@@ -91,15 +91,8 @@ public class AuthService {
             audit(null, "登录", "后台账号", null, "用户名不存在或非后台账号", ip(http), "FAIL");
             throw new BusinessException(401, "用户名或密码错误");
         }
-        if ("DISABLED".equals(user.getStatus())) {
-            throw new BusinessException(403, "账号已停用，请联系管理者");
-        }
+        assertAccountUsable(user);
         LocalDateTime now = LocalDateTime.now();
-        // 锁定期内直接拒绝，避免继续累加失败次数
-        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(now)) {
-            long minutes = Math.max(1, (long) Math.ceil(Duration.between(now, user.getLockedUntil()).toSeconds() / 60.0));
-            throw new BusinessException(423, "账号已锁定，请 " + minutes + " 分钟后再试");
-        }
         if (!StringUtils.hasText(user.getPasswordHash())
                 || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             int attempts = (user.getFailedAttempts() == null ? 0 : user.getFailedAttempts()) + 1;
@@ -149,12 +142,13 @@ public class AuthService {
 
         if (StringUtils.hasText(request.getPhone())) {
             // 教师手机号登录：优先于按 openid 找回账号，命中即把当前 openid 绑定到教师档案
+            // 这里不按 status 过滤，先取到人再统一校验，避免停用/锁定账号被报成「手机号未匹配」
             SysUser teacher = userMapper.selectOne(new LambdaQueryWrapper<SysUser>()
                     .eq(SysUser::getPhone, request.getPhone())
                     .eq(SysUser::getUserType, "TEACHER")
-                    .eq(SysUser::getStatus, "ENABLED")
                     .last("limit 1"));
             if (teacher != null) {
+                assertAccountUsable(teacher);
                 if (existing != null && !existing.getId().equals(teacher.getId())) {
                     throw new BusinessException(409, "当前微信已绑定其他账号，不能同时绑定教师身份");
                 }
@@ -171,14 +165,13 @@ public class AuthService {
             }
         }
 
-        // 已有 openid：直接登录原账号；后台账号、停用账号不允许
+        // 已有 openid：直接登录原账号；后台账号不允许，停用/锁定账号同样拒绝
         if (existing != null) {
             if ("ADMIN".equals(existing.getUserType())) {
                 throw new BusinessException(403, "后台账号不能使用小程序登录");
             }
-            if ("DISABLED".equals(existing.getStatus())) {
-                throw new BusinessException(403, "账号已停用，请联系机构");
-            }
+            // 与后台登录共用同一套校验：停用、LOCKED、临时锁定都拦，避免绕过密码锁定
+            assertAccountUsable(existing);
             existing.setLastLoginAt(LocalDateTime.now());
             existing.setLastLoginIp(ip(http));
             userMapper.updateById(existing);
@@ -357,6 +350,30 @@ public class AuthService {
     // 数据库用 0/1 表示权限，这里转成布尔
     private Boolean toBool(Integer value) {
         return value != null && value == 1;
+    }
+
+    /**
+     * 校验账号当前是否允许登录：停用、锁定（含临时锁定）一律拒绝。
+     *
+     * <p>锁定有两层含义：① status=LOCKED 表示人工/系统永久锁定（预留给管理端，目前没有写入点）；
+     * ② locked_until 表示连续输错密码后的临时锁定（5 分钟）。两者都要拦，否则后台密码锁定
+     * 可以被微信登录绕过。</p>
+     *
+     * @param user 待校验账号
+     * @throws BusinessException 403 账号已停用；423 账号锁定（临时锁定会带剩余分钟数）
+     */
+    private void assertAccountUsable(SysUser user) {
+        if ("DISABLED".equals(user.getStatus())) {
+            throw new BusinessException(403, "账号已停用，请联系管理者");
+        }
+        if ("LOCKED".equals(user.getStatus())) {
+            throw new BusinessException(423, "账号已锁定，请联系管理者解锁");
+        }
+        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now())) {
+            long minutes = Math.max(1, (long) Math.ceil(
+                    Duration.between(LocalDateTime.now(), user.getLockedUntil()).toSeconds() / 60.0));
+            throw new BusinessException(423, "账号已锁定，请 " + minutes + " 分钟后再试");
+        }
     }
 
     /**

@@ -134,7 +134,7 @@ public class AdminWorkflowService {
      * <p>副作用（@Transactional 内）：① upsert attendance（uk_lesson_student 唯一）；
      * ② delta≠0 时 hour_account.remaining -= delta、used_hours += delta，并写一条
      * hour_ledger（type=CONSUME，change_hours=-delta，balance_after 为变动后余额）；
-     * ③ 课次置 DONE；④ 写审计日志。点名不校验账户余额，可能出现负剩余。</p>
+     * ③ 全部在班学员都已标记时课次置 DONE，仍有未标记则保持原状态；④ 写审计日志。点名不校验账户余额，可能出现负剩余。</p>
      *
      * @param lessonId 课次 ID
      * @param request  学员出勤明细列表（至少 1 条，学员不可重复）
@@ -201,11 +201,21 @@ public class AdminWorkflowService {
                         "教务点名（第 " + lesson.getLessonNo() + " 课）" + (delta.signum() > 0 ? "消课" : "修正"));
             }
         }
-        // 点名即置 DONE（即使仍有学员未标记），课次状态用于列表筛选与统计
-        lesson.setStatus("DONE");
-        lessonMapper.updateById(lesson);
-        audit(operator, "点名消课", "课次", lesson.getId(), "教务完成点名，共 " + request.items().size() + " 人");
-        return roster(lessonId);
+        // 只有「全部在班学员都已标记」才置 DONE；仍有未标记时保持原状态，
+        // 否则统计与「待点名」提醒会把半截点名当成已完成。已 DONE 的课次不回退（学员后加班等场景）。
+        Map<String, Object> result = roster(lessonId);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> summary = (Map<String, Object>) result.get("summary");
+        long unmarked = summary == null ? 0 : ((Number) summary.getOrDefault("unmarked", 0)).longValue();
+        if (unmarked == 0) {
+            lesson.setStatus("DONE");
+            lessonMapper.updateById(lesson);
+        }
+        audit(operator, "点名消课", "课次", lesson.getId(),
+                "教务点名 " + request.items().size() + " 人"
+                        + (unmarked == 0 ? "，全部在班学员已标记，课次完成" : "，仍有 " + unmarked + " 人未标记"));
+        // result 是更新前的快照，置 DONE 后重查一次，保证返回给前端的课次状态与库一致
+        return unmarked == 0 ? roster(lessonId) : result;
     }
 
     /**
