@@ -97,6 +97,12 @@ export const useAuthStore = defineStore('auth', {
       }
       return !!p[map[action] || 'canView']
     },
+    // 改密成功后清除「强制改密」标记：后端已把 force_change_password 置 0，这里同步本地缓存
+    markPasswordChanged() {
+      if (!this.user) return
+      this.user = { ...this.user, forceChangePassword: false }
+      localStorage.setItem('hanmo_user', JSON.stringify(this.user))
+    },
     // 前端登出：清空内存与 localStorage；服务端注销由调用方先调 authApi.logout()
     logout() {
       this.token = ''

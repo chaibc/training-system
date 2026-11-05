@@ -8,6 +8,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import AdminLayout from '../layouts/AdminLayout.vue'
 import Login from '../views/Login.vue'
+import ChangePassword from '../views/ChangePassword.vue'
 import Dashboard from '../views/Dashboard.vue'
 import Users from '../views/Users.vue'
 import Students from '../views/Students.vue'
@@ -26,6 +27,8 @@ import Settings from '../views/Settings.vue'
 const routes = [
   // 登录页：meta.public 标记为免登录，守卫对其放行
   { path: '/login', name: 'login', component: Login, meta: { public: true, title: '登录' } },
+  // 强制改密页：需要登录但不进入后台框架（没有侧边栏），改密完成前守卫会拦在这里
+  { path: '/change-password', name: 'changePassword', component: ChangePassword, meta: { title: '修改密码' } },
   {
     path: '/',
     // 后台主框架，子路由渲染在其 <router-view /> 中；访问根路径默认进看板
@@ -102,6 +105,12 @@ router.beforeEach(async (to) => {
       return { path: '/login', query: { expired: '1' } }
     }
   }
+  // 强制改密：账号被重置或首次登录（forceChangePassword=true）时，任何业务页都先跳到改密页；
+  // 改完（标记为 false）再访问改密页则回看板，避免出现「已改完还停在改密页」
+  if (auth.user && auth.user.forceChangePassword) {
+    return to.path === '/change-password' ? true : { path: '/change-password' }
+  }
+  if (to.path === '/change-password') return '/dashboard'
   // 管理端专属页面（用户与权限）非 ADMIN 一律回看板
   if (to.meta.managerOnly && !auth.isManager) return '/dashboard'
   // 模块权限：没有 view 权限的模块既不出现在菜单里，也禁止通过地址栏直达
