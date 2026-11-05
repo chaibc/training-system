@@ -336,13 +336,15 @@ public class AdminReportService {
      * ② hour_account 累加 lessons（无账户则先建 0 额度账户）；③ hour_ledger 写 PURCHASE 流水；
      * ④ sys_audit_log 记「续费登记」。不改变报名状态、不动班级名单。</p>
      *
-     * <p>注意：本方法没有幂等键/去重检查，重复提交会重复充值，前端需自行防抖；
-     * 有效期在原值过期或为空时顺延 12 个月，未过期则保持不变。</p>
+     * <p>幂等：60 秒内同一学员 + 相同金额的续费会被判定为重复提交并返回 409，
+     * 用于拦住双击、网关重试与超时重发；超过该窗口的再次续费视为新的业务动作。</p>
+     *
+     * <p>有效期在原值过期或为空时顺延 12 个月，未过期则保持不变。</p>
      *
      * @param request  学员、金额、缴费方式、课时（均必填，金额与课时须为正）、项目、备注
      * @param operator 操作人，写入 registered_by、流水与审计
      * @return paymentNo / studentName / lessons / amount / remainingHours / validUntil
-     * @throws BusinessException 404 学员不存在；400 缴费方式不存在、金额或课时非正
+     * @throws BusinessException 404 学员不存在；400 缴费方式不存在、金额或课时非正；409 疑似重复提交
      */
     @Transactional
     public Map<String, Object> renew(RenewalRequest request, LoginUser operator) {
@@ -355,6 +357,19 @@ public class AdminReportService {
         }
         if (request.lessons() == null || request.lessons() <= 0) {
             throw new BusinessException(400, "续费课时必须大于 0");
+        }
+
+        // ⓪ 幂等保护：60 秒内同一学员 + 相同金额的续费视为重复提交（双击、网关重试、超时重发都会命中）。
+        //    续费没有业务唯一键，重复执行会重复充值课时并多记一条缴费流水，因此必须先拦截。
+        PaymentRecord duplicated = paymentMapper.selectOne(new LambdaQueryWrapper<PaymentRecord>()
+                .eq(PaymentRecord::getType, "RENEW")
+                .eq(PaymentRecord::getStudentId, student.getId())
+                .eq(PaymentRecord::getAmount, request.amount())
+                .ge(PaymentRecord::getPaidAt, LocalDateTime.now().minusSeconds(60))
+                .last("limit 1"));
+        if (duplicated != null) {
+            throw new BusinessException(409, "检测到 60 秒内相同学员、相同金额的续费记录（单号 "
+                    + duplicated.getPaymentNo() + "），已阻止重复提交；如确需再次续费请稍后再试");
         }
 
         // ① 缴费记录：type=RENEW，item 缺省为「续费 N 课时」，payment_no = JF+日期+4 位随机

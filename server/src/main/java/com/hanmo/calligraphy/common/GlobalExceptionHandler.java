@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     /**
-     * 处理业务异常：401/403/404/409/423 分别映射为同名 HTTP 状态码，其余按 400 返回。
+     * 处理业务异常：401/403/404/405/409/423 分别映射为同名 HTTP 状态码，其余按 400 返回。
      *
      * @param e 业务异常
      * @return 携带业务错误码的失败响应
@@ -34,6 +34,7 @@ public class GlobalExceptionHandler {
             case 401 -> HttpStatus.UNAUTHORIZED;
             case 403 -> HttpStatus.FORBIDDEN;
             case 404 -> HttpStatus.NOT_FOUND;
+            case 405 -> HttpStatus.METHOD_NOT_ALLOWED;
             case 409 -> HttpStatus.CONFLICT;
             case 423 -> HttpStatus.LOCKED;
             default -> HttpStatus.BAD_REQUEST;

@@ -32,6 +32,10 @@ import java.util.List;
  * 因此走通用通道可以绕过 admin 子包中定制接口的业务校验（点名消课、缴费充值、作品授权复核等），
  * 各控制器注释里会写明该风险。</p>
  *
+ * <p>为规避上述风险，{@link #writeChannelsEnabled()} 提供开关：默认开放写通道；
+ * 对「必须走业务接口」的模块（作品、点名记录、课时账户/流水、请假、作品授权、补课、缴费、试听），
+ * 子类覆盖为 false 后，POST/PUT/DELETE 一律返回 405，只保留 page/list/{id} 查询通道。</p>
+ *
  * <p>提供 /page、/list、/{id} 与 POST / PUT / DELETE 六类通用端点；关键字模糊查询只作用于
  * name / title / studentName / parentName / phone / ruleKey 中首个存在的 String 字段。</p>
  */
@@ -55,6 +59,29 @@ public abstract class BaseCrudController<T> {
     protected BaseCrudController(BaseMapper<T> mapper, Class<T> type) {
         this.mapper = mapper;
         this.type = type;
+    }
+
+    /**
+     * 是否开放通用写通道（POST / PUT / DELETE）。
+     *
+     * <p>默认开放。对「必须走业务接口」的模块，子类覆盖返回 false：这三个方法会直接抛 405，
+     * 避免绕过定制接口里的授权校验、课时扣减、审批联动与审计留痕。</p>
+     *
+     * @return true 表示允许通用新增/修改/删除
+     */
+    protected boolean writeChannelsEnabled() {
+        return true;
+    }
+
+    /**
+     * 写通道开关校验：关闭时统一抛 405，提示改用业务接口。
+     *
+     * @throws BusinessException 该模块已关闭通用写通道（405）
+     */
+    private void assertWriteEnabled() {
+        if (!writeChannelsEnabled()) {
+            throw new BusinessException(405, "该模块不支持通用增删改，请使用对应的业务接口");
+        }
     }
 
     /**
@@ -129,6 +156,7 @@ public abstract class BaseCrudController<T> {
      */
     @PostMapping
     public ApiResponse<T> create(@RequestBody JsonNode body) {
+        assertWriteEnabled();
         T value = objectMapper.convertValue(body, type);
         mapper.insert(value);
         return ApiResponse.ok(value);
@@ -148,6 +176,7 @@ public abstract class BaseCrudController<T> {
      */
     @PutMapping("/{id}")
     public ApiResponse<T> update(@PathVariable Long id, @RequestBody JsonNode body) {
+        assertWriteEnabled();
         T value = objectMapper.convertValue(body, type);
         // 以路径 id 覆盖请求体中的 id，防止请求体伪造主键改到其他记录
         try {
@@ -172,6 +201,7 @@ public abstract class BaseCrudController<T> {
      */
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(@PathVariable Long id) {
+        assertWriteEnabled();
         mapper.deleteById(id);
         return ApiResponse.ok();
     }
