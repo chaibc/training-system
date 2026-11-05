@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -38,6 +39,8 @@ public class GlobalExceptionHandler {
             case 405 -> HttpStatus.METHOD_NOT_ALLOWED;
             case 409 -> HttpStatus.CONFLICT;
             case 423 -> HttpStatus.LOCKED;
+            // 业务层用 500 表示「服务端契约被破坏」（如实体缺少 id 字段），HTTP 也用 500，避免被当成参数错误
+            case 500 -> HttpStatus.INTERNAL_SERVER_ERROR;
             default -> HttpStatus.BAD_REQUEST;
         };
         return ResponseEntity.status(status).body(ApiResponse.fail(e.getCode(), e.getMessage()));
@@ -79,6 +82,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleMediaType(HttpMediaTypeNotSupportedException e) {
         return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
                 .body(ApiResponse.fail(415, "请求格式不被支持，请使用 application/json"));
+    }
+
+    /**
+     * 处理 HTTP 方法不被支持（例如对着只接受 POST 的接口发 GET），返回 405 而不是 500。
+     *
+     * @param e 方法不支持异常
+     * @return 405 失败响应
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(ApiResponse.fail(405, "请求方法不被支持：" + e.getMethod()));
     }
 
     /**

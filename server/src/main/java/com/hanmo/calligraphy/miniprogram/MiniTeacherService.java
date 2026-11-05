@@ -587,12 +587,14 @@ public class MiniTeacherService {
     private Student requireLessonStudent(Lesson lesson, Long studentId) {
         Student student = studentMapper.selectById(studentId);
         if (student == null) throw new BusinessException(404, "学员不存在");
+        // 与点名名单口径保持一致：只把 ACTIVE 的班级关系算作「在班」
         long linked = classStudentMapper.selectCount(new LambdaQueryWrapper<ClassStudent>()
                 .eq(ClassStudent::getClassId, lesson.getClassId())
-                .eq(ClassStudent::getStudentId, studentId));
+                .eq(ClassStudent::getStudentId, studentId)
+                .eq(ClassStudent::getStatus, "ACTIVE"));
         long attendance = attendanceMapper.selectCount(new LambdaQueryWrapper<Attendance>()
                 .eq(Attendance::getLessonId, lesson.getId()).eq(Attendance::getStudentId, studentId));
-        // 兼容历史数据：班级里已有该学员的记录（含非 ACTIVE）或已有出勤时，仍允许点名修正
+        // 已退班但留下该课次出勤记录的，仍允许点名修正
         if (linked == 0 && attendance == 0) {
             throw new BusinessException(400, student.getName() + " 不在该班级名单中");
         }

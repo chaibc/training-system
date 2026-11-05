@@ -299,7 +299,8 @@ public class MiniParentService {
                 student = studentMapper.selectById(request.studentId());
                 if (student == null) throw new BusinessException(404, "学员档案不存在");
                 if (StringUtils.hasText(request.studentNo())
-                        && !student.getStudentNo().equalsIgnoreCase(request.studentNo().trim())) {
+                        // 用请求侧做 equalsIgnoreCase：档案里 student_no 为 null 时也不抛 NPE
+                        && !request.studentNo().trim().equalsIgnoreCase(student.getStudentNo())) {
                     throw new BusinessException(400, "学员编号与档案不匹配");
                 }
             } else {
@@ -454,8 +455,9 @@ public class MiniParentService {
         }
         Map<String, Object> data = lessonMap(lesson, studentId);
         data.put("child", childSummary(student, requireBinding(user.getId(), studentId)));
-        data.put("leave", leaveOfLesson(studentId, lessonId));
+        // 同一课次的请假只查一次，下面判断 canLeave 还要用
         LeaveRequest leave = leaveOfLesson(studentId, lessonId);
+        if (leave != null) data.put("leave", leave);
         LocalDateTime start = LocalDateTime.of(lesson.getLessonDate(), lesson.getStartTime());
         long hours = Duration.between(LocalDateTime.now(), start).toHours();
         int cutoff = ruleInt("leave_cutoff_hours", 4);

@@ -481,8 +481,9 @@ public class AdminWorkflowService {
         HourLedger ledger = new HourLedger();
         ledger.setStudentId(studentId);
         ledger.setLessonId(lessonId);
-        // 扣课与返还都记 CONSUME：change_hours 带符号，返还时为正数；类型没有区分 CORRECT
-        ledger.setType("CONSUME");
+        // 类型按方向区分：消课记 CONSUME（change 为负），返还/修正记 CORRECT（change 为正）。
+        // 这样流水类型与 change_hours 的符号不再互相矛盾，报表按 type 汇总时也不会把返还算成消课。
+        ledger.setType(change.signum() < 0 ? "CONSUME" : "CORRECT");
         ledger.setChangeHours(change);
         ledger.setBalanceAfter(after);
         ledger.setOperatorId(operatorId);

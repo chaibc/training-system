@@ -1,5 +1,8 @@
 package com.hanmo.calligraphy.admin.enrollment;
 
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,10 +43,11 @@ public class EnrollmentAdminDtos {
      * <p>classId 可空（先报名后分班）；amount 为应缴金额，缴费时仍可调整。</p>
      */
     public record CreateEnrollmentRequest(
-            Long studentId,
-            Long courseId,
+            @NotNull(message = "请选择学员") Long studentId,
+            @NotNull(message = "请选择课程") Long courseId,
             Long classId,
-            BigDecimal amount,
+            // 应缴金额可空（先报名后定价）；非空时不能为负，避免把负金额写进 NOT NULL 列
+            @DecimalMin(value = "0", message = "应缴金额不能为负数") BigDecimal amount,
             String remark
     ) {}
 

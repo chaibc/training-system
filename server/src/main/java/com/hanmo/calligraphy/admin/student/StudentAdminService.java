@@ -240,19 +240,28 @@ public class StudentAdminService {
         }
         // 三种调整类型语义不同：ADD 增加总额与余额；DEDUCT 只减余额；CORRECT 按带符号值修余额
         BigDecimal delta;
+        // ADD 是「新增购买的课时」，只加总额与余额；DEDUCT/CORRECT 是消耗或纠错，需要同时累加 used_hours
+        boolean increasesTotal = false;
         switch (request.type()) {
             case "ADD" -> {
                 delta = hours.abs();
-                account.setTotalHours(account.getTotalHours().add(delta));
+                increasesTotal = true;
+                BigDecimal total = account.getTotalHours() == null ? BigDecimal.ZERO : account.getTotalHours();
+                account.setTotalHours(total.add(delta));
             }
             case "DEDUCT" -> delta = hours.abs().negate();
             case "CORRECT" -> delta = hours;
             default -> throw new BusinessException(400, "未知调整类型");
         }
-        // 余额不允许为负：扣课超过剩余课时直接拒绝，避免出现负数账户
-        BigDecimal balance = account.getRemainingHours().add(delta);
-        if (balance.compareTo(BigDecimal.ZERO) < 0) throw new BusinessException(400, "调整后剩余课时不能为负数");
+        // 余额允许为负：点名消课本身就可能把余额扣成负数，手动调整若强行拦截反而无法对账。
+        // 同时维护 used_hours，保证 total - used = remaining 的恒等式与点名、审批口径一致。
+        BigDecimal remaining = account.getRemainingHours() == null ? BigDecimal.ZERO : account.getRemainingHours();
+        BigDecimal used = account.getUsedHours() == null ? BigDecimal.ZERO : account.getUsedHours();
+        BigDecimal balance = remaining.add(delta);
         account.setRemainingHours(balance);
+        if (!increasesTotal) {
+            account.setUsedHours(used.subtract(delta));
+        }
         hourAccountMapper.updateById(account);
         HourLedger ledger = new HourLedger();
         ledger.setStudentId(id);

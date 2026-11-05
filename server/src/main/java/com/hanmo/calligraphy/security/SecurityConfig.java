@@ -45,6 +45,15 @@ public class SecurityConfig {
     private String allowedOrigins;
 
     /**
+     * 是否放行 H2 控制台：只有显式开启 H2 控制台（dev/本地）时才注册这条放行规则。
+     *
+     * <p>生产 profile 下 {@code spring.h2.console.enabled=false}，因此 /h2-console/** 不会放行，
+     * 即使有人误开了控制台也不会变成匿名可访问。</p>
+     */
+    @Value("${spring.h2.console.enabled:false}")
+    private boolean h2ConsoleEnabled;
+
+    /**
      * 密码编码器：BCrypt。
      *
      * <p>BCrypt 每次编码使用随机盐，密文自带盐值，校验用 matches 而非明文比较；
@@ -80,7 +89,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
+                        // H2 控制台只在开发环境开启时放行；生产（h2.console.enabled=false）换成永不匹配的占位路径
+                        .requestMatchers(h2ConsoleEnabled ? "/h2-console/**" : "/__h2_console_disabled__/**").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // 教务在作品授权/展示中需要家长下拉；其余用户管理接口仍仅管理者

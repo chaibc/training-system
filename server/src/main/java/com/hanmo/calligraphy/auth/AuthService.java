@@ -196,8 +196,8 @@ public class AuthService {
         parent.setUserType("PARENT");
         parent.setRoleId(parentRole.getId());
         parent.setName(StringUtils.hasText(request.getName()) ? request.getName().trim() : "微信用户");
-        // 走到这里 phone 必为空：手机号非空且未匹配教师已在上方抛 404
-        parent.setPhone(request.getPhone());
+        // 走到这里 phone 必为空（手机号非空且未匹配教师已在上方抛 404），因此不再写 phone，
+        // 家长手机号后续由教务在后台补录，避免写入一个永远是 null 的字段
         parent.setWechatOpenid(openid);
         parent.setStatus("ENABLED");
         parent.setFailedAttempts(0);

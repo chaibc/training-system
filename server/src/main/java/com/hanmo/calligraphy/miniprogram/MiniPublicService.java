@@ -398,7 +398,8 @@ public class MiniPublicService {
         CoursePrice price = minPrice(c.getId());
         map.put("price", price == null ? null : price.getPrice());
         // priceNote 把课时数拼成前端直接显示的文案；TIME 计价单位的量词是“次”
-        map.put("priceNote", price == null ? "待定价" : price.getLessons() + (price.getUnit().equals("TIME") ? " 次" : " 课时"));
+        // 用字面量在前的 equals 做空值安全比较：历史数据里 unit 可能为 null
+        map.put("priceNote", price == null ? "待定价" : price.getLessons() + ("TIME".equals(price.getUnit()) ? " 次" : " 课时"));
         return map;
     }
 

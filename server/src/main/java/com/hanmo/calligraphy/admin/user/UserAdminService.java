@@ -427,6 +427,11 @@ public class UserAdminService {
         ParentStudent binding = parentStudentMapper.selectById(id);
         if (binding == null) throw new BusinessException(404, "绑定申请不存在");
         boolean unbind = "UNBIND".equals(binding.getSource());
+        // 状态机前置校验：新绑定只有 PENDING 可审，解绑申请只有 ACTIVE 可审；
+        // 否则重复点击会把已生效/已驳回的单子再次改写，并重复写审计
+        if (unbind ? !"ACTIVE".equals(binding.getStatus()) : !"PENDING".equals(binding.getStatus())) {
+            throw new BusinessException(400, "该申请已处理，请刷新列表");
+        }
         if (!unbind) {
             long activeGuardians = parentStudentMapper.selectCount(new LambdaQueryWrapper<ParentStudent>()
                     .eq(ParentStudent::getStudentId, binding.getStudentId())
@@ -453,6 +458,8 @@ public class UserAdminService {
         binding.setVerifiedBy(operator.getId());
         binding.setVerifiedAt(LocalDateTime.now());
         parentStudentMapper.updateById(binding);
+        // 主联系人对齐：解绑可能把主联系人置空，这里补选一位有效监护人并回写学员档案
+        syncPrimaryParent(binding.getStudentId());
         audit(operator, "绑定审核", "家长-学员", binding.getId(), unbind ? "通过家长解绑申请" : "通过家长绑定");
         return toBinding(binding);
     }
@@ -474,12 +481,18 @@ public class UserAdminService {
         ParentStudent binding = parentStudentMapper.selectById(id);
         if (binding == null) throw new BusinessException(404, "绑定申请不存在");
         boolean unbind = "UNBIND".equals(binding.getSource());
+        // 与通过接口同一套状态机校验：已处理的单子不允许再驳回/恢复
+        if (unbind ? !"ACTIVE".equals(binding.getStatus()) : !"PENDING".equals(binding.getStatus())) {
+            throw new BusinessException(400, "该申请已处理，请刷新列表");
+        }
         binding.setStatus(unbind ? "ACTIVE" : "REJECTED");
         // 驳回解绑：关系恢复 ACTIVE，source 改回 SELF，否则会一直留在待审核列表
         if (unbind) binding.setSource("SELF");
         binding.setVerifiedBy(operator.getId());
         binding.setVerifiedAt(LocalDateTime.now());
         parentStudentMapper.updateById(binding);
+        // 驳回解绑会恢复 ACTIVE，可能产生「没有主联系人」的状态，这里统一对齐一次
+        syncPrimaryParent(binding.getStudentId());
         audit(operator, "绑定审核", "家长-学员", binding.getId(), unbind ? "驳回家长解绑申请" : "驳回家长绑定");
         return toBinding(binding);
     }
@@ -535,6 +548,8 @@ public class UserAdminService {
         // 复用历史 REJECTED/REVOKED 行（唯一键限制不能新插），没有历史才 insert
         if (binding.getId() == null) parentStudentMapper.insert(binding);
         else parentStudentMapper.updateById(binding);
+        // 新增绑定后对齐主联系人：学员原来没有主家长时，本条会成为主联系人
+        syncPrimaryParent(student.getId());
         audit(operator, "绑定审核", "家长-学员", binding.getId(), exists == null ? "新增家长绑定" : "恢复家长绑定");
         return toBinding(binding);
     }
@@ -554,11 +569,61 @@ public class UserAdminService {
     public BindingView unbindBinding(Long id, LoginUser operator) {
         ParentStudent binding = parentStudentMapper.selectById(id);
         if (binding == null) throw new BusinessException(404, "绑定关系不存在");
+        // 只有生效中的关系才能解除；待审核/已驳回/已解除的单子直接拒绝，避免误操作
+        if (!"ACTIVE".equals(binding.getStatus())) {
+            throw new BusinessException(400, "只有生效中的绑定才能解除");
+        }
         // 管理员直接解除：置 REVOKED；source 保留原值，便于追溯是自绑还是管理员加的
         binding.setStatus("REVOKED");
+        binding.setIsPrimary(0);
         parentStudentMapper.updateById(binding);
+        // 解除的若是主联系人，自动把另一位有效监护人设为主联系人（没有则清空学员上的主家长）
+        syncPrimaryParent(binding.getStudentId());
         audit(operator, "绑定审核", "家长-学员", binding.getId(), "解除家长绑定");
         return toBinding(binding);
+    }
+
+    /**
+     * 主联系人对齐：保证 parent_student.is_primary 与 student.primary_parent_user_id 指向同一位家长。
+     *
+     * <p>规则：若该学员仍有 ACTIVE 监护人，取「已是主联系人的那条」，否则取 id 最小的一条设为主联系人，
+     * 并把它回写到 student.primary_parent_user_id；若已无有效监护人，则清空学员上的主家长字段。</p>
+     *
+     * <p>副作用：可能更新 parent_student.is_primary 与 student.primary_parent_user_id，无审计。</p>
+     *
+     * @param studentId 学员 ID
+     */
+    private void syncPrimaryParent(Long studentId) {
+        List<ParentStudent> actives = parentStudentMapper.selectList(new LambdaQueryWrapper<ParentStudent>()
+                .eq(ParentStudent::getStudentId, studentId)
+                .eq(ParentStudent::getStatus, "ACTIVE")
+                .orderByAsc(ParentStudent::getId));
+        com.hanmo.calligraphy.domain.entity.Student student = studentMapper.selectById(studentId);
+        if (actives.isEmpty()) {
+            // 没有有效监护人：清空学员档案上的主家长，避免报名单继续指向已解绑家长。
+            // 注意必须用 UpdateWrapper 显式 set null：updateById 默认忽略 null 字段，写了也不会生效。
+            if (student != null && student.getPrimaryParentUserId() != null) {
+                studentMapper.update(null, new LambdaUpdateWrapper<com.hanmo.calligraphy.domain.entity.Student>()
+                        .eq(com.hanmo.calligraphy.domain.entity.Student::getId, studentId)
+                        .set(com.hanmo.calligraphy.domain.entity.Student::getPrimaryParentUserId, null));
+            }
+            return;
+        }
+        ParentStudent primary = actives.stream()
+                .filter(b -> Integer.valueOf(1).equals(b.getIsPrimary()))
+                .findFirst().orElse(actives.get(0));
+        if (!Integer.valueOf(1).equals(primary.getIsPrimary())) {
+            // 主联系人唯一：先清空该学员所有关系，再写回选中的这条
+            parentStudentMapper.update(null, new LambdaUpdateWrapper<ParentStudent>()
+                    .eq(ParentStudent::getStudentId, studentId)
+                    .set(ParentStudent::getIsPrimary, 0));
+            primary.setIsPrimary(1);
+            parentStudentMapper.updateById(primary);
+        }
+        if (student != null && !primary.getParentUserId().equals(student.getPrimaryParentUserId())) {
+            student.setPrimaryParentUserId(primary.getParentUserId());
+            studentMapper.updateById(student);
+        }
     }
 
     /**
