@@ -1,0 +1,20 @@
+# ============================================================
+# 统一换行符处理，避免 Windows 开发机与 Linux 服务器之间来回改写
+# ============================================================
+
+# 文本文件由 Git 自动识别，仓库内统一存 LF
+* text=auto
+
+# 脚本按平台固定
+*.sh   text eol=lf
+*.bat  text eol=crlf
+
+# 二进制文件不做换行转换
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.docx binary
+*.xlsx binary
+*.pdf  binary
