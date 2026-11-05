@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.time.*;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Data;
 
 /**
@@ -27,4 +28,8 @@ public class CourseCategory {
     private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // 逻辑删除标记：0 正常 / 1 已删除（查询由 @TableLogic 自动过滤）
+    @TableLogic
+    private Integer deleted;
 }

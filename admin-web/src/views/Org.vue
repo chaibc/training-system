@@ -41,7 +41,7 @@ const qualLoading = ref(false)
 const qualOpen = ref(false)
 const qualSaving = ref(false)
 const editingQual = ref(null)
-// 资质表单：validUntil 是文本（支持「长期」），visible 用布尔，提交时转 1/0
+// 资质表单：validUntil 为日期字符串（yyyy-MM-dd），留空表示「长期有效」；visible 用布尔，提交时转 1/0
 const qualForm = reactive({ name: '', code: '', validUntil: '', verifyStatus: 'VERIFIED', visible: true, sort: 0 })
 
 const notices = ref([])
@@ -171,9 +171,13 @@ function openQual(row) {
 // 保存资质：名称必填，visible 转 1/0、排序转数字
 async function submitQual() {
   if (!qualForm.name) { message.warning('请填写资质名称'); return }
+  // 后端 valid_until 已改为 DATE 类型：只接受 yyyy-MM-dd 或空（空=长期有效）
+  if (qualForm.validUntil && !/^\d{4}-\d{2}-\d{2}$/.test(qualForm.validUntil)) {
+    message.warning('有效期格式应为 yyyy-MM-dd，留空表示长期有效'); return
+  }
   qualSaving.value = true
   try {
-    const payload = { ...qualForm, visible: qualForm.visible ? 1 : 0, sort: Number(qualForm.sort || 0) }
+    const payload = { ...qualForm, validUntil: qualForm.validUntil || null, visible: qualForm.visible ? 1 : 0, sort: Number(qualForm.sort || 0) }
     if (editingQual.value) await qualificationApi.update(editingQual.value.id, payload)
     else await qualificationApi.create(payload)
     message.success('资质已保存')
@@ -341,7 +345,7 @@ onMounted(async () => {
           <a-table :data-source="quals" :loading="qualLoading" row-key="id" size="small" :pagination="false">
             <a-table-column title="资质名称" data-index="name" key="name" width="180" />
             <a-table-column title="编号" data-index="code" key="code" width="180" />
-            <a-table-column title="有效期至" data-index="validUntil" key="validUntil" width="120" />
+            <a-table-column title="有效期至" key="validUntil" width="120"><template #default="{ record }">{{ record.validUntil || '长期有效' }}</template></a-table-column>
             <a-table-column title="核验状态" data-index="verifyStatus" key="verifyStatus" width="100" />
             <a-table-column title="展示" key="visible" width="80">
               <template #default="{ record }"><a-switch :checked="Number(record.visible) === 1" size="small" @change="toggleQual(record)" /></template>
@@ -398,7 +402,7 @@ onMounted(async () => {
         <a-form-item label="资质名称" required><a-input v-model:value="qualForm.name" /></a-form-item>
         <a-row :gutter="12">
           <a-col :span="12"><a-form-item label="编号"><a-input v-model:value="qualForm.code" /></a-form-item></a-col>
-          <a-col :span="12"><a-form-item label="有效期至"><a-input v-model:value="qualForm.validUntil" placeholder="长期 / 2028-06-30" /></a-form-item></a-col>
+          <a-col :span="12"><a-form-item label="有效期至"><a-input v-model:value="qualForm.validUntil" placeholder="2028-06-30，留空表示长期有效" /></a-form-item></a-col>
           <a-col :span="12"><a-form-item label="核验状态"><a-select v-model:value="qualForm.verifyStatus"><a-select-option value="VERIFIED">已核验</a-select-option><a-select-option value="PENDING">待更新</a-select-option></a-select></a-form-item></a-col>
           <a-col :span="12"><a-form-item label="小程序展示"><a-switch v-model:checked="qualForm.visible" /></a-form-item></a-col>
         </a-row>

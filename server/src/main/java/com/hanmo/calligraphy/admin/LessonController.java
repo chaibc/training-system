@@ -44,6 +44,8 @@ public class LessonController {
      * @param size     每页条数，缺省 10，上限 500
      * @param dateFrom 可选起始上课日期（含），格式 yyyy-MM-dd
      * @param dateTo   可选结束上课日期（含），格式 yyyy-MM-dd
+     * @param classId  可选班级 ID
+     * @param status   可选课次状态（SCHEDULED/DONE/CANCELLED）
      */
     @Operation(summary = "课次分页")
     @GetMapping("/page")
@@ -52,8 +54,10 @@ public class LessonController {
                                                 @RequestParam(required = false)
                                                 @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
                                                 @RequestParam(required = false)
-                                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo) {
-        return ApiResponse.ok(lessonService.page(current, size, dateFrom, dateTo));
+                                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
+                                                @RequestParam(required = false) Long classId,
+                                                @RequestParam(required = false) String status) {
+        return ApiResponse.ok(lessonService.page(current, size, dateFrom, dateTo, classId, status));
     }
 
     /**

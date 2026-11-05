@@ -66,12 +66,15 @@ public class LessonAdminService {
      * @param dateTo   可选结束上课日期（含）
      * @return 课次分页
      */
-    public PageResult<Lesson> page(long current, long size, LocalDate dateFrom, LocalDate dateTo) {
+    public PageResult<Lesson> page(long current, long size, LocalDate dateFrom, LocalDate dateTo,
+                                   Long classId, String status) {
         Page<Lesson> page = new Page<>(Math.max(1, current), Math.min(Math.max(1, size), 500));
-        // 日期区间为可选条件：不传时行为与原实现一致（全量倒序分页）
+        // 日期区间、班级、状态都是可选条件：不传时行为与原实现一致（全量倒序分页）
         lessonMapper.selectPage(page, new LambdaQueryWrapper<Lesson>()
                 .ge(dateFrom != null, Lesson::getLessonDate, dateFrom)
                 .le(dateTo != null, Lesson::getLessonDate, dateTo)
+                .eq(classId != null, Lesson::getClassId, classId)
+                .eq(org.springframework.util.StringUtils.hasText(status), Lesson::getStatus, status)
                 .orderByDesc(Lesson::getLessonDate).orderByAsc(Lesson::getStartTime));
         return PageResult.of(page.getRecords(), page.getTotal(), page.getCurrent(), page.getSize());
     }

@@ -341,8 +341,14 @@ public class UserAdminService {
         if ("TEACHER".equals(role.getCode()) || "PARENT".equals(role.getCode())) {
             throw new BusinessException(400, "教师/家长为小程序身份，权限不可在后台修改");
         }
-        // 数据范围只落库并随登录下发，服务端查询并未据此过滤（前端按它做展示控制）
-        if (StringUtils.hasText(request.dataScope())) role.setDataScope(request.dataScope());
+        // 数据范围只落库并随登录下发，服务端查询并未据此过滤（前端按它做展示控制）；
+        // 这里限制为四个已知枚举值，避免写入脏数据导致前端判断失效
+        if (StringUtils.hasText(request.dataScope())) {
+            if (!List.of("ALL", "OWN_CLASS", "OWN_CHILDREN", "SELF").contains(request.dataScope())) {
+                throw new BusinessException(400, "数据范围取值不正确");
+            }
+            role.setDataScope(request.dataScope());
+        }
         roleMapper.updateById(role);
         permissionMapper.delete(new LambdaQueryWrapper<SysRolePermission>().eq(SysRolePermission::getRoleId, roleId));
         if (request.permissions() != null) {
@@ -665,7 +671,7 @@ public class UserAdminService {
                         .eq(SysUser::getUserType, "PARENT")
                         .eq(SysUser::getStatus, "ENABLED")
                         .orderByDesc(SysUser::getId))
-                .stream().map(u -> new ParentOption(u.getId(), u.getName(), u.getPhone())).toList();
+                .stream().map(u -> new ParentOption(u.getId(), u.getName(), maskPhone(u.getPhone()))).toList();
     }
 
     /**

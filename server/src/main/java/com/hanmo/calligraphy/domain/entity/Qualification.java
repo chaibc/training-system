@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.time.*;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Data;
 
 /**
@@ -22,7 +23,7 @@ public class Qualification {
     // 证书编号
     private String code;
     // 有效期（按原文以字符串存储）
-    private String validUntil;
+    private java.time.LocalDate validUntil;
     // 核验状态：VERIFIED 已核验 / PENDING 待核验
     private String verifyStatus;
     // 是否前台展示：1=展示 / 0=隐藏
@@ -30,4 +31,8 @@ public class Qualification {
     private Integer sort;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // 逻辑删除标记：0 正常 / 1 已删除（查询由 @TableLogic 自动过滤）
+    @TableLogic
+    private Integer deleted;
 }

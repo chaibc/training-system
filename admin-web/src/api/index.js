@@ -159,8 +159,6 @@ export const priceApi = {
 export const outlineApi = {
   // 大纲分页查询
   page: (params) => http.get('/admin/course-outlines/page', { params }),
-  // 指定课程的大纲列表，courseId 必填（按课程分组展示）
-  list: (courseId) => http.get('/admin/course-outlines/list', { params: { courseId } }),
   // 新增大纲阶段
   create: (data) => http.post('/admin/course-outlines', data),
   // 修改大纲阶段（切换显示/隐藏也走这里）

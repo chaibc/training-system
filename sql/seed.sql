@@ -250,7 +250,7 @@ INSERT INTO `institution_image` (`institution_id`,`image_url`,`title`,`sort`) VA
 (1,'/uploads/demo/gallery.jpg','作品墙',3);
 
 INSERT INTO `qualification` (`name`,`code`,`valid_until`,`verify_status`,`visible`,`sort`) VALUES
-('营业执照','9144**********','长期','VERIFIED',1,1),
+('营业执照','9144**********',NULL,'VERIFIED',1,1),
 ('非学科类培训备案','××-2024-×××','2028-06-30','VERIFIED',1,2),
 ('消防备案','XF-2024-1182','2027-12-31','VERIFIED',1,3);
 
