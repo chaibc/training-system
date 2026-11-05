@@ -52,14 +52,3 @@ server/uploads/*
 Thumbs.db
 desktop.ini
 
-# ---------- AI 助手工作目录（不随代码入库）----------
-# WorkBuddy / Claude Code / Cursor / Aider 等工具产生的会话记忆与本地清单
-.workbuddy/
-.wbapp_*.genie
-*.genie
-.claude/
-CLAUDE.md
-.cursor/
-.aider*
-.continue/
-
