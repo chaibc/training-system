@@ -137,7 +137,7 @@ onMounted(load)
       <div class="actions">
         <span class="tag gold">小程序下拉与筛选项来源</span>
         <a-button size="small" @click="load"><ReloadOutlined /> 刷新</a-button>
-        <a-button type="primary" size="small" @click="openCreate"><PlusOutlined /> {{ config.add }}</a-button>
+        <a-button v-if="$auth.can('basic','create')" type="primary" size="small" @click="openCreate"><PlusOutlined /> {{ config.add }}</a-button>
       </div>
     </div>
 
@@ -156,9 +156,9 @@ onMounted(load)
           <template v-if="column.key === 'status'"><span class="tag" :class="record.status === 'ENABLED' ? 'green' : 'gray'">{{ record.status === 'ENABLED' ? '启用' : '停用' }}</span></template>
           <template v-if="column.key === 'actions'">
             <div class="ops">
-              <a-button type="link" size="small" @click="openEdit(record)">编辑</a-button>
-              <a-button type="link" size="small" @click="toggle(record)">{{ record.status === 'ENABLED' ? '停用' : '启用' }}</a-button>
-              <a-popconfirm title="确认删除该数据？" @confirm="remove(record)"><a-button type="link" size="small" danger>删除</a-button></a-popconfirm>
+              <a-button v-if="$auth.can('basic','edit')" type="link" size="small" @click="openEdit(record)">编辑</a-button>
+              <a-button v-if="$auth.can('basic','edit')" type="link" size="small" @click="toggle(record)">{{ record.status === 'ENABLED' ? '停用' : '启用' }}</a-button>
+              <a-popconfirm v-if="$auth.can('basic','delete')" title="确认删除该数据？" @confirm="remove(record)"><a-button type="link" size="small" danger>删除</a-button></a-popconfirm>
             </div>
           </template>
         </template>

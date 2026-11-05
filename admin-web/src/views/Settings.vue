@@ -82,7 +82,7 @@ onMounted(load)
         <a-table-column title="当前值" data-index="ruleValue" key="ruleValue" width="150" />
         <a-table-column title="说明" data-index="description" key="description" />
         <a-table-column title="操作" key="actions" width="80">
-          <template #default="{ record }"><a-button type="link" size="small" @click="openEdit(record)">编辑</a-button></template>
+          <template #default="{ record }"><a-button v-if="$auth.can('settings','edit')" type="link" size="small" @click="openEdit(record)">编辑</a-button></template>
         </a-table-column>
       </a-table>
       <div class="footnote">规则变更影响全机构；修改后新业务立即按新规则执行，历史记录不变。</div>

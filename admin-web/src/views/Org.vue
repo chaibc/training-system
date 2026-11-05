@@ -254,10 +254,10 @@ onMounted(async () => {
       <div class="sp"></div>
       <div class="actions">
         <a-button size="small" @click="onTab(activeTab)"><ReloadOutlined /> 刷新</a-button>
-        <a-button v-if="activeTab === 'info'" type="primary" size="small" :loading="infoSaving" @click="saveInfo">保存资料</a-button>
-        <a-button v-else-if="activeTab === 'teachers'" type="primary" size="small" @click="openTeacher()"><PlusOutlined /> 新增教师</a-button>
-        <a-button v-else-if="activeTab === 'quals'" type="primary" size="small" @click="openQual()"><PlusOutlined /> 新增资质</a-button>
-        <a-button v-else type="primary" size="small" @click="openNotice()"><PlusOutlined /> 新增公告</a-button>
+        <a-button v-if="activeTab === 'info' && $auth.can('org','edit')" type="primary" size="small" :loading="infoSaving" @click="saveInfo">保存资料</a-button>
+        <a-button v-else-if="activeTab === 'teachers' && $auth.can('org','create')" type="primary" size="small" @click="openTeacher()"><PlusOutlined /> 新增教师</a-button>
+        <a-button v-else-if="activeTab === 'quals' && $auth.can('org','create')" type="primary" size="small" @click="openQual()"><PlusOutlined /> 新增资质</a-button>
+        <a-button v-else-if="$auth.can('org','create')" type="primary" size="small" @click="openNotice()"><PlusOutlined /> 新增公告</a-button>
       </div>
     </div>
 
@@ -293,7 +293,7 @@ onMounted(async () => {
                 <div class="card-title" style="margin:0">教学环境图片</div>
                 <!-- 上传环境图片：before-upload 内完成上传与建记录 -->
                 <a-upload :before-upload="beforeImageUpload" :show-upload-list="false" accept="image/*">
-                  <a-button size="small" :loading="imageUploading"><UploadOutlined /> 上传环境图片</a-button>
+                  <a-button v-if="$auth.can('org','create')" size="small" :loading="imageUploading"><UploadOutlined /> 上传环境图片</a-button>
                 </a-upload>
               </div>
               <a-spin :spinning="imageLoading">
@@ -301,7 +301,7 @@ onMounted(async () => {
                   <div v-for="img in images" :key="img.id" class="org-image-card">
                     <a-image :src="img.imageUrl" :height="100" style="width:100%;object-fit:cover" />
                     <a-input v-model:value="img.title" size="small" placeholder="图片说明" @blur="saveImage(img)" />
-                    <a-button type="text" size="small" danger @click="removeImage(img)"><DeleteOutlined /> 删除</a-button>
+                    <a-button v-if="$auth.can('org','delete')" type="text" size="small" danger @click="removeImage(img)"><DeleteOutlined /> 删除</a-button>
                   </div>
                   <a-upload :before-upload="beforeImageUpload" :show-upload-list="false" accept="image/*">
                     <div class="org-image-add">
@@ -329,7 +329,7 @@ onMounted(async () => {
               <template #default="{ record }"><span class="tag" :class="record.status === 'ACTIVE' ? 'green' : 'gray'">{{ record.status === 'ACTIVE' ? '在职' : '停用' }}</span></template>
             </a-table-column>
             <a-table-column title="操作" key="actions" width="160">
-              <template #default="{ record }"><a-button type="link" size="small" @click="openTeacher(record)">编辑</a-button><a-button type="link" size="small" @click="toggleTeacher(record)">{{ record.status === 'ACTIVE' ? '停用' : '启用' }}</a-button></template>
+              <template #default="{ record }"><a-button v-if="$auth.can('org','edit')" type="link" size="small" @click="openTeacher(record)">编辑</a-button><a-button v-if="$auth.can('org','edit')" type="link" size="small" @click="toggleTeacher(record)">{{ record.status === 'ACTIVE' ? '停用' : '启用' }}</a-button></template>
             </a-table-column>
           </a-table>
           <div class="footnote">教师账号由后台师资团队创建；教师微信登录后按手机号自动匹配，小程序不提供身份申请。</div>
@@ -347,7 +347,7 @@ onMounted(async () => {
               <template #default="{ record }"><a-switch :checked="record.visible === 1" size="small" @change="toggleQual(record)" /></template>
             </a-table-column>
             <a-table-column title="操作" key="actions" width="140">
-              <template #default="{ record }"><a-button type="link" size="small" @click="openQual(record)">编辑</a-button><a-popconfirm title="删除资质？" @confirm="removeQual(record)"><a-button type="link" size="small" danger>删除</a-button></a-popconfirm></template>
+              <template #default="{ record }"><a-button v-if="$auth.can('org','edit')" type="link" size="small" @click="openQual(record)">编辑</a-button><a-popconfirm v-if="$auth.can('org','delete')" title="删除资质？" @confirm="removeQual(record)"><a-button type="link" size="small" danger>删除</a-button></a-popconfirm></template>
             </a-table-column>
           </a-table>
         </a-tab-pane>
@@ -365,7 +365,7 @@ onMounted(async () => {
               <template #default="{ record }"><span class="tag" :class="record.status === 'PUBLISHED' ? 'green' : 'gray'">{{ noticeStatus[record.status] || record.status }}</span></template>
             </a-table-column>
             <a-table-column title="操作" key="actions" width="180">
-              <template #default="{ record }"><a-button type="link" size="small" @click="openNotice(record)">编辑</a-button><a-button type="link" size="small" @click="toggleNotice(record)">{{ record.status === 'PUBLISHED' ? '隐藏' : '发布' }}</a-button><a-popconfirm title="删除公告？" @confirm="removeNotice(record)"><a-button type="link" size="small" danger>删除</a-button></a-popconfirm></template>
+              <template #default="{ record }"><a-button v-if="$auth.can('org','edit')" type="link" size="small" @click="openNotice(record)">编辑</a-button><a-button v-if="$auth.can('org','edit')" type="link" size="small" @click="toggleNotice(record)">{{ record.status === 'PUBLISHED' ? '隐藏' : '发布' }}</a-button><a-popconfirm v-if="$auth.can('org','delete')" title="删除公告？" @confirm="removeNotice(record)"><a-button type="link" size="small" danger>删除</a-button></a-popconfirm></template>
             </a-table-column>
           </a-table>
           <div class="footnote">公告在小程序「作品墙 → 机构公告」展示；本期不设活动、招生海报与投票评选。</div>

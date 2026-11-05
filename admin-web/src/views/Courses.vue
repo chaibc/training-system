@@ -311,7 +311,7 @@ onMounted(async () => {
       <div class="sp"></div>
       <div class="actions">
         <a-button size="small" @click="onTab(activeTab)"><ReloadOutlined /> 刷新</a-button>
-        <a-button type="primary" size="small" @click="openCreateCourse"><PlusOutlined /> 新建课程</a-button>
+        <a-button v-if="$auth.can('courses','create')" type="primary" size="small" @click="openCreateCourse"><PlusOutlined /> 新建课程</a-button>
       </div>
     </div>
 
@@ -345,9 +345,9 @@ onMounted(async () => {
               <template v-if="column.key === 'status'"><span class="tag" :class="record.status === 'ON' ? 'green' : 'gray'">{{ record.status === 'ON' ? '上架中' : '已下架' }}</span></template>
               <template v-if="column.key === 'actions'">
                 <div class="ops">
-                  <a-button type="link" size="small" @click="openEditCourse(record)">编辑</a-button>
+                  <a-button v-if="$auth.can('courses','edit')" type="link" size="small" @click="openEditCourse(record)">编辑</a-button>
                   <a-button type="link" size="small" @click="() => { outlineCourseId = record.id; activeTab = 'outline'; loadOutlines() }">大纲</a-button>
-                  <a-popconfirm title="删除课程？关联价格与大纲将一并删除" @confirm="removeCourse(record)"><a-button type="link" size="small" danger>删除</a-button></a-popconfirm>
+                  <a-popconfirm v-if="$auth.can('courses','delete')" title="删除课程？关联价格与大纲将一并删除" @confirm="removeCourse(record)"><a-button type="link" size="small" danger>删除</a-button></a-popconfirm>
                 </div>
               </template>
             </template>
@@ -363,7 +363,7 @@ onMounted(async () => {
             </a-select>
             <a-button size="small" @click="loadPrices"><ReloadOutlined /> 刷新</a-button>
             <div class="sp"></div>
-            <a-button type="primary" size="small" @click="openCreatePrice"><PlusOutlined /> 新增班型价格</a-button>
+            <a-button v-if="$auth.can('courses','create')" type="primary" size="small" @click="openCreatePrice"><PlusOutlined /> 新增班型价格</a-button>
           </div>
           <!-- 价格表格：计价单位 TERM 显示「课时」、TIME 显示「次」 -->
           <a-table :columns="priceColumns" :data-source="filteredPrices" :loading="priceLoading" row-key="id" size="small">
@@ -374,8 +374,8 @@ onMounted(async () => {
               <template v-if="column.key === 'price'"><b class="num">¥{{ Number(record.price).toLocaleString() }}</b></template>
               <template v-if="column.key === 'status'"><span class="tag" :class="record.status === 'ON' ? 'green' : 'gray'">{{ record.status === 'ON' ? '在售' : '停售' }}</span></template>
               <template v-if="column.key === 'actions'">
-                <a-button type="link" size="small" @click="openEditPrice(record)">编辑</a-button>
-                <a-popconfirm title="删除该价格？" @confirm="removePrice(record)"><a-button type="link" size="small" danger>删除</a-button></a-popconfirm>
+                <a-button v-if="$auth.can('courses','edit')" type="link" size="small" @click="openEditPrice(record)">编辑</a-button>
+                <a-popconfirm v-if="$auth.can('courses','delete')" title="删除该价格？" @confirm="removePrice(record)"><a-button type="link" size="small" danger>删除</a-button></a-popconfirm>
               </template>
             </template>
           </a-table>
@@ -391,7 +391,7 @@ onMounted(async () => {
             </a-select>
             <a-button size="small" @click="loadOutlines"><ReloadOutlined /> 刷新</a-button>
             <div class="sp"></div>
-            <a-button type="primary" size="small" @click="openCreateOutline"><PlusOutlined /> 新增阶段</a-button>
+            <a-button v-if="$auth.can('courses','create')" type="primary" size="small" @click="openCreateOutline"><PlusOutlined /> 新增阶段</a-button>
           </div>
           <!-- 大纲表格：显示列是开关，切换即时生效；隐藏后小程序详情不再展示 -->
           <a-table :columns="outlineColumns" :data-source="filteredOutlines" :loading="outlineLoading" row-key="id" size="small" :pagination="false">
@@ -399,8 +399,8 @@ onMounted(async () => {
               <template v-if="column.key === 'visible'"><a-switch :checked="record.visible === 1" size="small" @change="toggleOutline(record)" /></template>
               <template v-if="column.key === 'actions'">
                 <div class="ops">
-                  <a-button type="link" size="small" @click="openEditOutline(record)">编辑</a-button>
-                  <a-popconfirm title="删除该大纲阶段？" @confirm="removeOutline(record)"><a-button type="link" size="small" danger>删除</a-button></a-popconfirm>
+                  <a-button v-if="$auth.can('courses','edit')" type="link" size="small" @click="openEditOutline(record)">编辑</a-button>
+                  <a-popconfirm v-if="$auth.can('courses','delete')" title="删除该大纲阶段？" @confirm="removeOutline(record)"><a-button type="link" size="small" danger>删除</a-button></a-popconfirm>
                 </div>
               </template>
             </template>

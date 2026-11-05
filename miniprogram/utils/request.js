@@ -6,6 +6,37 @@
 
 const config = require('../config');
 
+// 401 只跳一次登录页：同一页面可能有多个并发请求同时失效，避免连续压入多个登录页
+let redirectingToLogin = false;
+
+/**
+ * 登录失效统一处理：清本地凭证 + 清内存登录态，非静默请求再提示并跳登录页。
+ *
+ * @param {string} message 后端返回的提示语，缺省用「登录已失效，请重新登录」
+ * @param {boolean} silent 静默请求（公开页、后台轮询）只清凭证，不提示、不跳转
+ */
+function handleUnauthorized(message, silent) {
+  wx.removeStorageSync('hanmo_token');
+  wx.removeStorageSync('hanmo_user');
+  // 同步清掉 App 内存里的用户快照，否则页面仍按「已登录」渲染上一份数据
+  const app = typeof getApp === 'function' ? getApp() : null;
+  if (app && app.globalData) app.globalData.user = null;
+  if (silent) return;
+  wx.showToast({ title: message || '登录已失效，请重新登录', icon: 'none' });
+  const pages = typeof getCurrentPages === 'function' ? getCurrentPages() : [];
+  const current = pages.length ? pages[pages.length - 1].route : '';
+  // 已在登录页就不重复跳；等 400ms 让 Toast 先显示，避免被页面切换盖掉
+  if (current && current.indexOf('pages/login/login') === -1 && !redirectingToLogin) {
+    redirectingToLogin = true;
+    setTimeout(() => {
+      wx.navigateTo({
+        url: '/pages/login/login',
+        complete() { redirectingToLogin = false; }
+      });
+    }, 400);
+  }
+}
+
 // 每次请求现取 JWT，登录/退出后无需重启小程序也不会用到旧 token
 function token() {
   return wx.getStorageSync('hanmo_token') || '';
@@ -47,14 +78,9 @@ function request(method, url, data, options) {
           resolve(body.data);
           return;
         }
-        // 401 = token 缺失/过期：清掉本地凭证，避免页面继续按已登录渲染；
-        // 这里只提示不自动跳转，跳登录页由各页面守卫决定（公开页可继续浏览）。
+        // 401 = token 缺失/过期：清凭证与内存登录态，提示后跳登录页（登录页本身与静默请求除外）
         if (res.statusCode === 401) {
-          wx.removeStorageSync('hanmo_token');
-          wx.removeStorageSync('hanmo_user');
-          if (!opts.silent) {
-            wx.showToast({ title: body.message || '登录已失效，请重新登录', icon: 'none' });
-          }
+          handleUnauthorized(body.message, opts.silent);
         } else if (!opts.silent) {
           wx.showToast({ title: body.message || '请求失败', icon: 'none' });
         }
