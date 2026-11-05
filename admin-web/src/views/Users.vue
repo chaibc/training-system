@@ -72,7 +72,7 @@ const staffForm = reactive({ name: '', username: '', phone: '', password: '' })
 const editOpen = ref(false)
 const editSaving = ref(false)
 // 编辑账号表单：id 为被编辑账号，type 用于判断用户名是否可改（仅后台账号可改）
-const editForm = reactive({ id: null, name: '', username: '', phone: '', type: 'ADMIN' })
+const editForm = reactive({ id: null, name: '', username: '', phone: '', phoneMasked: false, type: 'ADMIN' })
 const resetOpen = ref(false)
 // 重置密码弹窗：后端返回的临时密码与对应账号名
 const resetPassword = ref('')
@@ -252,17 +252,25 @@ async function submitCreate() {
   }
 }
 
-// 打开编辑弹窗：列表里的手机号是脱敏的（含 *），编辑前去掉 * 再回填，避免把掩码写回后端
+// 打开编辑弹窗：列表手机号是脱敏的（138****1234），不能去掉 * 回填——
+// 否则用户只改姓名保存时会把 1381234 当成真实号码提交。含 * 时置空并提示重新输入，不填则按「未修改」提交。
 function openEdit(row) {
+  const masked = (row.phone || '').includes('*')
   Object.assign(editForm, {
     id: row.id, name: row.name, username: row.username || '',
-    phone: (row.phone || '').replace(/\*/g, ''), type: row.userType
+    phone: masked ? '' : (row.phone || ''),
+    phoneMasked: masked,
+    type: row.userType
   })
   editOpen.value = true
 }
 
 // 保存账号资料：用户名/手机号为空时传 undefined，让后端按「未修改」处理
 async function submitEdit() {
+  // 手机号选填；填了就必须是 11 位大陆号码，避免脱敏残留或半截号码写进库
+  if (editForm.phone && !/^1\d{10}$/.test(editForm.phone)) {
+    return message.warning('手机号格式不正确，应为 11 位数字')
+  }
   editSaving.value = true
   try {
     await userApi.update(editForm.id, {
@@ -344,7 +352,11 @@ async function submitBinding() {
 }
 
 // 首屏只加载账号列表，其它页签切换时再取
-onMounted(loadUsers)
+onMounted(async () => {
+  await loadUsers()
+  // 顶部指标卡的「待审核绑定」要在登录后立即有值，不能等用户切到绑定页签才加载
+  loadBindings()
+})
 </script>
 
 <template>
@@ -592,7 +604,7 @@ onMounted(loadUsers)
         <a-row :gutter="12">
           <a-col :span="12"><a-form-item label="姓名"><a-input v-model:value="editForm.name" /></a-form-item></a-col>
           <a-col :span="12"><a-form-item label="用户名"><a-input v-model:value="editForm.username" :disabled="editForm.type !== 'ADMIN'" /></a-form-item></a-col>
-          <a-col :span="12"><a-form-item label="手机号"><a-input v-model:value="editForm.phone" maxlength="11" /></a-form-item></a-col>
+          <a-col :span="12"><a-form-item label="手机号"><a-input v-model:value="editForm.phone" maxlength="11" :placeholder="editForm.phoneMasked ? '原号码已脱敏，如需修改请重新输入' : ''" /></a-form-item></a-col>
           <a-col :span="12"><a-form-item label="类型"><a-input :value="typeText[editForm.type]" disabled /></a-form-item></a-col>
         </a-row>
         <div class="login-note">教师 / 家长手机号变更后会自动解除微信绑定，需要重新登录匹配。</div>

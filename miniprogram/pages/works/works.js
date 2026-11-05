@@ -34,18 +34,19 @@ Page({
     this.load().finally(() => wx.stopPullDownRefresh());
   },
 
-  // 软笔/硬笔由后端按 type 过滤；「本月」后端无此参数，前端按 createdAt 前缀 yyyy-MM 就地过滤
+  // 软笔/硬笔按 type 过滤；「本月」传 month=yyyy-MM 交给后端按 created_at 过滤，
+  // 避免前端拉全量再筛导致条数失真（数据量大时尤其明显）
   async load() {
     this.setData({ loading: true });
     try {
       const filter = this.data.filter;
-      const query = filter === 'HARD' || filter === 'SOFT' ? { type: filter } : {};
-      let list = (await api.get('/public/works', query)) || [];
+      const query = {};
+      if (filter === 'HARD' || filter === 'SOFT') query.type = filter;
       if (filter === 'MONTH') {
         const now = new Date();
-        const prefix = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-        list = list.filter(w => String(w.createdAt || '').startsWith(prefix));
+        query.month = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
       }
+      const list = (await api.get('/public/works', query)) || [];
       const works = list.map(view.work);
       this.setData({ works, total: works.length, loading: false });
     } catch (error) {

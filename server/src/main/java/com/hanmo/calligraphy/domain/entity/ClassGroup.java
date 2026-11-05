@@ -1,6 +1,7 @@
 package com.hanmo.calligraphy.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -42,5 +43,14 @@ public class ClassGroup {
     // 逻辑删除标记：0 正常 / 1 已删除（查询由 @TableLogic 自动过滤）
     @TableLogic
     private Integer deleted;
+
+    /**
+     * 班级在读人数（class_student 中 status=ACTIVE 的条数）。
+     *
+     * <p>不是表字段，由 {@code /api/admin/classes/page} 一次性聚合填充，
+     * 避免前端为每个班级单独请求名单来数人数。</p>
+     */
+    @TableField(exist = false)
+    private Integer studentCount;
 
 }

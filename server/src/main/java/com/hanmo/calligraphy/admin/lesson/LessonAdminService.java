@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -59,13 +60,18 @@ public class LessonAdminService {
      *
      * <p>纯查询，无副作用；每页上限 500。</p>
      *
-     * @param current 页码，最小 1
-     * @param size    每页条数，限制 1~500
+     * @param current  页码，最小 1
+     * @param size     每页条数，限制 1~500
+     * @param dateFrom 可选起始上课日期（含），用于周课表按周取数
+     * @param dateTo   可选结束上课日期（含）
      * @return 课次分页
      */
-    public PageResult<Lesson> page(long current, long size) {
+    public PageResult<Lesson> page(long current, long size, LocalDate dateFrom, LocalDate dateTo) {
         Page<Lesson> page = new Page<>(Math.max(1, current), Math.min(Math.max(1, size), 500));
+        // 日期区间为可选条件：不传时行为与原实现一致（全量倒序分页）
         lessonMapper.selectPage(page, new LambdaQueryWrapper<Lesson>()
+                .ge(dateFrom != null, Lesson::getLessonDate, dateFrom)
+                .le(dateTo != null, Lesson::getLessonDate, dateTo)
                 .orderByDesc(Lesson::getLessonDate).orderByAsc(Lesson::getStartTime));
         return PageResult.of(page.getRecords(), page.getTotal(), page.getCurrent(), page.getSize());
     }

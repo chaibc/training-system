@@ -164,7 +164,7 @@ function openEditCourse(row) {
     name: row.name, categoryId: row.categoryId, stageId: row.stageId, ageRange: row.ageRange,
     lessons: row.lessons, frequency: row.frequency, durationMinutes: row.durationMinutes,
     coverChar: row.coverChar, coverColor: row.coverColor, description: row.description,
-    goal: row.goal, tags: row.tags, featured: row.featured === 1,
+    goal: row.goal, tags: row.tags, featured: Number(row.featured) === 1,
     status: row.status, sort: row.sort || 0
   })
   courseOpen.value = true
@@ -252,7 +252,7 @@ function openCreateOutline() {
 // 编辑大纲阶段：visible 后端存 1/0，这里转成布尔给 switch
 function openEditOutline(row) {
   editingOutline.value = row
-  Object.assign(outlineForm, { ...row, visible: row.visible === 1 })
+  Object.assign(outlineForm, { ...row, visible: Number(row.visible) === 1 })
   outlineOpen.value = true
 }
 // 提交大纲阶段：课程与阶段标题必填，visible 转 1/0
@@ -274,8 +274,8 @@ async function submitOutline() {
 }
 // 行内开关切换显示/隐藏：整行回传并翻转 visible；row 本身未改，提示语按旧值判断
 async function toggleOutline(row) {
-  await outlineApi.update(row.id, { ...row, visible: row.visible === 1 ? 0 : 1 })
-  message.success(row.visible === 1 ? '阶段已隐藏，小程序不再展示' : '阶段已显示')
+  await outlineApi.update(row.id, { ...row, visible: Number(row.visible) === 1 ? 0 : 1 })
+  message.success(Number(row.visible) === 1 ? '阶段已隐藏，小程序不再展示' : '阶段已显示')
   await loadOutlines()
 }
 // 删除大纲阶段
@@ -341,7 +341,7 @@ onMounted(async () => {
               <template v-if="column.key === 'cat'">{{ categoryName(record.categoryId) }} · {{ stageName(record.stageId) }}</template>
               <template v-if="column.key === 'lessons'">{{ record.lessons }} 课时<br><span class="muted" style="font-size:9px">{{ record.frequency }}</span></template>
               <template v-if="column.key === 'tags'"><span class="tag">{{ record.tags }}</span></template>
-              <template v-if="column.key === 'featured'"><span class="tag" :class="record.featured === 1 ? 'gold' : 'gray'">{{ record.featured === 1 ? '推荐' : '否' }}</span></template>
+              <template v-if="column.key === 'featured'"><span class="tag" :class="Number(record.featured) === 1 ? 'gold' : 'gray'">{{ Number(record.featured) === 1 ? '推荐' : '否' }}</span></template>
               <template v-if="column.key === 'status'"><span class="tag" :class="record.status === 'ON' ? 'green' : 'gray'">{{ record.status === 'ON' ? '上架中' : '已下架' }}</span></template>
               <template v-if="column.key === 'actions'">
                 <div class="ops">
@@ -396,7 +396,7 @@ onMounted(async () => {
           <!-- 大纲表格：显示列是开关，切换即时生效；隐藏后小程序详情不再展示 -->
           <a-table :columns="outlineColumns" :data-source="filteredOutlines" :loading="outlineLoading" row-key="id" size="small" :pagination="false">
             <template #bodyCell="{ column, record }">
-              <template v-if="column.key === 'visible'"><a-switch :checked="record.visible === 1" size="small" @change="toggleOutline(record)" /></template>
+              <template v-if="column.key === 'visible'"><a-switch :checked="Number(record.visible) === 1" size="small" @change="toggleOutline(record)" /></template>
               <template v-if="column.key === 'actions'">
                 <div class="ops">
                   <a-button v-if="$auth.can('courses','edit')" type="link" size="small" @click="openEditOutline(record)">编辑</a-button>

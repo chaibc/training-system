@@ -86,18 +86,23 @@ function openCreate() {
 }
 
 // 打开编辑弹窗：先用列表行回填可复用的字段，再异步用详情接口补生日与备注
-function openEdit(row) {
+async function openEdit(row) {
   editingId.value = row.id
   Object.assign(form, {
     name: row.name, gender: row.gender || '男', birthDate: null,
     school: row.school || '', grade: row.grade || '', status: row.status, remark: ''
   })
-  // 详情里拿完整生日与备注
-  studentApi.detail(row.id).then((d) => {
+  // 先取详情再打开弹窗：原来「先开弹窗、详情回填」会在用户手快时用空值覆盖生日与备注
+  formOpen.value = true
+  try {
+    const d = await studentApi.detail(row.id)
     form.birthDate = d.birthDate ? dayjs(d.birthDate) : null
     form.remark = d.remark || ''
-  })
-  formOpen.value = true
+  } catch (e) {
+    message.error('学员详情加载失败，请重试')
+    formOpen.value = false
+    return
+  }
 }
 
 // 提交档案：姓名必填；生日是 dayjs 对象，需转成 YYYY-MM-DD 再提交

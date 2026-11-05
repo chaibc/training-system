@@ -47,7 +47,9 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -243,12 +245,26 @@ public class MiniPublicService {
      *
      * @param type    书体类型，null/空表示不限
      * @param keyword 标题模糊关键字
+     * @param month   可选月份，格式 yyyy-MM；按作品 created_at 落在该自然月内过滤
      * @return 作品 Map 列表，仅 DISPLAYED，按 id 倒序
+     * @throws BusinessException 400 月份格式不正确
      */
-    public List<Map<String, Object>> works(String type, String keyword) {
+    public List<Map<String, Object>> works(String type, String keyword, String month) {
         LambdaQueryWrapper<Work> qw = new LambdaQueryWrapper<Work>().eq(Work::getStatus, "DISPLAYED");
         if (StringUtils.hasText(type)) qw.eq(Work::getWorkType, type);
         if (StringUtils.hasText(keyword)) qw.like(Work::getTitle, keyword);
+        if (StringUtils.hasText(month)) {
+            // 前端传 yyyy-MM，这里换成 [当月 1 日 00:00, 次月 1 日 00:00) 的半开区间由数据库过滤，
+            // 避免前端拉全量再按字符串前缀筛选导致 total 失真
+            YearMonth ym;
+            try {
+                ym = YearMonth.parse(month.trim());
+            } catch (DateTimeParseException e) {
+                throw new BusinessException(400, "月份格式应为 yyyy-MM");
+            }
+            qw.ge(Work::getCreatedAt, ym.atDay(1).atStartOfDay())
+                    .lt(Work::getCreatedAt, ym.plusMonths(1).atDay(1).atStartOfDay());
+        }
         qw.orderByDesc(Work::getId);
         return workMapper.selectList(qw).stream().map(this::workMap).toList();
     }

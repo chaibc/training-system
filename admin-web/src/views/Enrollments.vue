@@ -324,7 +324,7 @@ onMounted(async () => {
                 <div class="ops">
                   <a-button v-if="record.status === 'PENDING_CONFIRM'" type="link" size="small" @click="openConfirm(record)">确认报名</a-button>
                   <a-button v-if="record.status === 'PENDING_PAYMENT'" type="link" size="small" @click="openPay(record)">登记缴费</a-button>
-                  <a-button v-if="['PENDING_CONFIRM','PENDING_PAYMENT'].includes(record.status)" type="link" size="small" danger @click="cancel(record)">取消</a-button>
+                  <a-popconfirm v-if="['PENDING_CONFIRM','PENDING_PAYMENT'].includes(record.status)" title="确认取消该报名？" ok-text="确认取消" cancel-text="再想想" @confirm="cancel(record)"><a-button type="link" size="small" danger>取消</a-button></a-popconfirm>
                   <span v-if="record.status === 'ENROLLED'" class="muted" style="font-size:9px">已入班</span>
                 </div>
               </template>

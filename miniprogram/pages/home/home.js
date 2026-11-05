@@ -219,11 +219,13 @@ Page({
   // 作品有图直接系统预览，无图则跳作品详情
   previewWork(e) {
     const item = this.data.works[e.currentTarget.dataset.index];
-    if (item && item.image) {
+    // data-index 可能越界（列表刷新后旧节点仍被点击），先判空再取字段，避免 item.id 抛 TypeError
+    if (!item) return;
+    if (item.image) {
       wx.previewImage({ current: item.image, urls: [item.image] });
-    } else {
-      wx.navigateTo({ url: '/pages/work-detail/work-detail?id=' + item.id });
+      return;
     }
+    wx.navigateTo({ url: '/pages/work-detail/work-detail?id=' + item.id });
   },
 
   // 分享首页

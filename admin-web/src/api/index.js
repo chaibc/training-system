@@ -296,6 +296,8 @@ export const attendanceApi = {
 export const leaveApi = {
   // 请假单分页查询
   page: (params) => http.get('/admin/leave/page', { params }),
+  // 请假状态统计（指标卡用全量口径，不受分页影响）
+  stats: () => http.get('/admin/leave/stats'),
   // 修改请假单（调整原因、时间等）
   update: (id, data) => http.put(`/admin/leave/${id}`, data),
   // 通过请假审批，是否扣课时由后端按请假规则判定

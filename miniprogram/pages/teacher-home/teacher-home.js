@@ -92,12 +92,6 @@ Page({
   goUpload() {
     wx.navigateTo({ url: '/pages/upload-work/upload-work' });
   },
-
-  // 跳课表页；注意课表页只做了家长守卫（requireParent），教师进入会被拦下
-  goWeek() {
-    wx.navigateTo({ url: '/pages/schedule/schedule' });
-  },
-
   // 教师登录入口（未登录时工作台为 blocked 态）
   goLogin() {
     wx.navigateTo({ url: '/pages/login/login' });

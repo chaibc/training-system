@@ -39,7 +39,15 @@ Page({
 
   // 切换「教师登录」表单：教师必须再填手机号，后端按手机号匹配教师账号
   toggleTeacher() {
-    this.setData({ teacherOpen: !this.data.teacherOpen });
+    const open = !this.data.teacherOpen;
+    const patch = { teacherOpen: open };
+    // 开发模式：教师表单默认切到教师演示 code，避免沿用家长 code 时后端返回
+    // 409「当前微信已绑定其他账号」；收起表单时再切回家长 code
+    if (this.data.isDev) {
+      if (open && this.data.devCode === 'seed_parent_wang') patch.devCode = 'seed_teacher_wang';
+      if (!open && this.data.devCode === 'seed_teacher_wang') patch.devCode = 'seed_parent_wang';
+    }
+    this.setData(patch);
   },
 
   // 教师手机号输入：去首尾空格后存 data.phone，供格式校验与提交

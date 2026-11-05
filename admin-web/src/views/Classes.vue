@@ -40,18 +40,37 @@ const weekDays = computed(() => {
       label: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'][i],
       day: date.format('MM-DD'),
       today: key === dayjs().format('YYYY-MM-DD'),
-      lessons: lessons.value.filter((l) => l.lessonDate === key).sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)))
+      lessons: weekLessons.value.filter((l) => l.lessonDate === key).sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)))
     }
   })
 })
-// 上一周 / 下一周：只移动基准日期，周课表由 weekDays 自动重算，不重新请求接口
-function changeWeek(delta) {
+// 周课表数据单独维护：课次总量可能超过 200 条，只拉一次全量会让跨周/跨月翻页出现空白
+const weekLessons = ref([])
+// 按当前基准日期所在自然周（周一起）向后端取这一周的课次
+async function loadWeekLessons() {
+  const base = dayjs(weekDate.value)
+  const weekday = base.day() || 7
+  const monday = base.subtract(weekday - 1, 'day')
+  try {
+    const data = await lessonApi.page({
+      current: 1,
+      size: 500,
+      dateFrom: monday.format('YYYY-MM-DD'),
+      dateTo: monday.add(6, 'day').format('YYYY-MM-DD')
+    })
+    weekLessons.value = data.records
+  } catch (e) {
+    // 单周取数失败不阻塞页面，按空周展示
+    weekLessons.value = []
+  }
+}
+// 上一周 / 下一周：移动基准日期并重新取这一周的课次
+async function changeWeek(delta) {
   weekDate.value = weekDate.value.add(delta, 'week')
+  await loadWeekLessons()
 }
 // HH:mm:ss 截成 HH:mm 展示，空值显示 —
 function timeShort(value) { return value ? String(value).slice(0, 5) : '—' }
-// 班级在读人数缓存：班级分页接口不返回人数，只能逐班查学员列表后自己统计
-const classCounts = ref({})
 const rosterOpen = ref(false)
 const rosterLoading = ref(false)
 // 学员名单抽屉数据：classApi.students 返回的整包（班级信息 + 学员 + 人数 + 剩余名额）
@@ -111,23 +130,12 @@ async function loadBasics() {
   teachers.value = t
   classrooms.value = r
 }
-// 拉班级列表后逐班补人数：接口不返回在读人数，只能对每个班并发查询学员列表
+// 班级分页已由后端一次性聚合 studentCount，不再逐班请求名单（原实现最多 200 次额外请求）
 async function loadClasses() {
   classLoading.value = true
   try {
     const data = await classApi.page({ current: 1, size: 200 })
     classes.value = data.records
-    const counts = {}
-    await Promise.all(data.records.map(async (row) => {
-      try {
-        // 单个班级查询失败时按 0 人处理，不让一个班拖垮整张表
-        const info = await classApi.students(row.id)
-        counts[row.id] = info.count
-      } catch (error) {
-        counts[row.id] = 0
-      }
-    }))
-    classCounts.value = counts
   } finally { classLoading.value = false }
 }
 
@@ -143,13 +151,20 @@ async function openRoster(row) {
   } finally { rosterLoading.value = false }
 }
 
+// 名单变更后把人数写回列表行，避免为一个人重新拉整张班级表
+function syncClassCount() {
+  const row = classes.value.find((item) => item.id === roster.value.classId)
+  if (row) row.studentCount = roster.value.count
+}
+
 // 加入班级：接口返回更新后的整包名单，用它回写抽屉与列表人数，避免整表重查
 async function addRosterStudent() {
   if (!addStudentId.value) return message.warning('请选择学员')
   addStudentSaving.value = true
   try {
     roster.value = await classApi.addStudent(roster.value.classId, addStudentId.value)
-    classCounts.value[roster.value.classId] = roster.value.count
+    // 名单变了，同步回写列表里该班级的在读人数（避免为一个人重新拉整表）
+    syncClassCount()
     addStudentId.value = undefined
     message.success('学员已加入班级')
   } finally { addStudentSaving.value = false }
@@ -158,7 +173,7 @@ async function addRosterStudent() {
 // 移出班级：同样用返回的整包回写；row.id 是班级-学员关联 ID，不是学员 ID
 async function removeRosterStudent(row) {
   roster.value = await classApi.removeStudent(roster.value.classId, row.id)
-  classCounts.value[roster.value.classId] = roster.value.count
+  syncClassCount()
   message.success('学员已移出班级')
 }
 
@@ -262,6 +277,7 @@ async function submitLesson() {
     message.success('课次已保存')
     lessonOpen.value = false
     await loadLessons()
+    await loadWeekLessons()
   } finally { lessonSaving.value = false }
 }
 // 删除课次（已点名的课次是否允许删除由后端判断）
@@ -269,18 +285,20 @@ async function removeLesson(row) {
   await lessonApi.remove(row.id)
   message.success('课次已删除')
   await loadLessons()
+  await loadWeekLessons()
 }
 
 // 切换页签：只有课次列表需要重新拉取，周课表复用同一份 lessons 数据
 function onTab(key) {
   activeTab.value = key
   if (key === 'lessons') loadLessons()
+  if (key === 'week') loadWeekLessons()
 }
 
 // 先加载下拉字典（班级/课次表格都要翻译 ID），再并发加载班级与课次
 onMounted(async () => {
   await loadBasics()
-  await Promise.all([loadClasses(), loadLessons()])
+  await Promise.all([loadClasses(), loadLessons(), loadWeekLessons()])
 })
 </script>
 
@@ -314,7 +332,7 @@ onMounted(async () => {
               <template v-if="column.key === 'time'">{{ weekdays[(record.weekday || 1) - 1] }} {{ record.startTime?.slice(0,5) }}–{{ record.endTime?.slice(0,5) }}</template>
               <template v-if="column.key === 'room'">{{ roomName(record.classroomId) }}</template>
               <template v-if="column.key === 'count'">
-                <span class="tag" :class="classCounts[record.id] >= record.capacity ? 'red' : 'green'">{{ classCounts[record.id] ?? 0 }} / {{ record.capacity }}</span>
+                <span class="tag" :class="(record.studentCount ?? 0) >= record.capacity ? 'red' : 'green'">{{ record.studentCount ?? 0 }} / {{ record.capacity }}</span>
               </template>
               <template v-if="column.key === 'status'"><span class="tag" :class="record.status === 'ACTIVE' ? 'green' : 'gray'">{{ record.status === 'ACTIVE' ? '在读' : record.status }}</span></template>
               <template v-if="column.key === 'actions'">

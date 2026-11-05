@@ -164,7 +164,7 @@ function openQual(row) {
   editingQual.value = row || null
   Object.assign(qualForm, row ? {
     name: row.name, code: row.code, validUntil: row.validUntil,
-    verifyStatus: row.verifyStatus, visible: row.visible === 1, sort: row.sort || 0
+    verifyStatus: row.verifyStatus, visible: Number(row.visible) === 1, sort: row.sort || 0
   } : { name: '', code: '', validUntil: '', verifyStatus: 'VERIFIED', visible: true, sort: 0 })
   qualOpen.value = true
 }
@@ -183,8 +183,8 @@ async function submitQual() {
 }
 // 切换资质是否在小程序展示：整行回传并翻转 visible
 async function toggleQual(row) {
-  await qualificationApi.update(row.id, { ...row, visible: row.visible === 1 ? 0 : 1 })
-  message.success(row.visible === 1 ? '资质已隐藏' : '资质已展示')
+  await qualificationApi.update(row.id, { ...row, visible: Number(row.visible) === 1 ? 0 : 1 })
+  message.success(Number(row.visible) === 1 ? '资质已隐藏' : '资质已展示')
   await loadQuals()
 }
 // 删除资质
@@ -344,7 +344,7 @@ onMounted(async () => {
             <a-table-column title="有效期至" data-index="validUntil" key="validUntil" width="120" />
             <a-table-column title="核验状态" data-index="verifyStatus" key="verifyStatus" width="100" />
             <a-table-column title="展示" key="visible" width="80">
-              <template #default="{ record }"><a-switch :checked="record.visible === 1" size="small" @change="toggleQual(record)" /></template>
+              <template #default="{ record }"><a-switch :checked="Number(record.visible) === 1" size="small" @change="toggleQual(record)" /></template>
             </a-table-column>
             <a-table-column title="操作" key="actions" width="140">
               <template #default="{ record }"><a-button v-if="$auth.can('org','edit')" type="link" size="small" @click="openQual(record)">编辑</a-button><a-popconfirm v-if="$auth.can('org','delete')" title="删除资质？" @confirm="removeQual(record)"><a-button type="link" size="small" danger>删除</a-button></a-popconfirm></template>

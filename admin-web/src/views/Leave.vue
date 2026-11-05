@@ -51,8 +51,9 @@ const columns = [
 const filteredRows = computed(() => statusFilter.value === 'ALL'
   ? rows.value
   : rows.value.filter((r) => r.status === statusFilter.value))
-// 顶部指标：待审批数量
-const pendingCount = computed(() => rows.value.filter((r) => r.status === 'PENDING').length)
+// 顶部指标：走后端 /stats 的全量口径，避免翻页/取数上限导致数字变化
+const stats = ref({ PENDING: 0, APPROVED: 0, REJECTED: 0, PENDING_MAKEUP: 0 })
+const pendingCount = computed(() => stats.value.PENDING || 0)
 // 学员 ID → 姓名；查不到时显示「学员 #id」，避免出现空白单元格
 const studentName = (id) => students.value.find((x) => x.id === id)?.name || `学员 #${id}`
 // 课次 ID → 「班级 · 第 N 课 · 日期」，用于下拉与表格展示
@@ -67,10 +68,11 @@ const lessonTitle = (id) => {
 async function load() {
   loading.value = true
   try {
-    const [d, s, l, c] = await Promise.all([
-      leaveApi.page({ current: 1, size: 200 }), studentApi.options(), lessonApi.list(), classApi.list()
+    const [d, s, l, c, st] = await Promise.all([
+      leaveApi.page({ current: 1, size: 200 }), studentApi.options(), lessonApi.list(), classApi.list(), leaveApi.stats()
     ])
     rows.value = d.records
+    stats.value = st
     students.value = s
     lessons.value = l
     classes.value = c
@@ -154,9 +156,9 @@ onMounted(load)
     <!-- 顶部指标卡：待审批 / 已通过 / 已驳回 / 待补课 -->
     <div class="stats">
       <div class="stat-card"><div class="lbl">待审批</div><div class="v">{{ pendingCount }}<em>条</em></div><div class="foot">需要教务或教师处理</div></div>
-      <div class="stat-card jade"><div class="lbl">已通过</div><div class="v">{{ rows.filter(r => r.status === 'APPROVED').length }}<em>条</em></div><div class="foot">按规则扣课 / 不扣课</div></div>
-      <div class="stat-card red"><div class="lbl">已驳回</div><div class="v">{{ rows.filter(r => r.status === 'REJECTED').length }}<em>条</em></div><div class="foot">驳回原因对家长可见</div></div>
-      <div class="stat-card blue"><div class="lbl">待补课</div><div class="v">{{ rows.filter(r => r.makeupStatus === 'PENDING').length }}<em>条</em></div><div class="foot">家长已提交补课申请</div></div>
+      <div class="stat-card jade"><div class="lbl">已通过</div><div class="v">{{ stats.APPROVED }}<em>条</em></div><div class="foot">按规则扣课 / 不扣课</div></div>
+      <div class="stat-card red"><div class="lbl">已驳回</div><div class="v">{{ stats.REJECTED }}<em>条</em></div><div class="foot">驳回原因对家长可见</div></div>
+      <div class="stat-card blue"><div class="lbl">待补课</div><div class="v">{{ stats.PENDING_MAKEUP }}<em>条</em></div><div class="foot">家长已提交补课申请</div></div>
     </div>
 
     <div class="paper-card" style="padding:16px">

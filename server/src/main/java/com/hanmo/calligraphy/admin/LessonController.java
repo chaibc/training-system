@@ -9,8 +9,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -38,14 +40,20 @@ public class LessonController {
      * <p>本方法只接收分页参数，没有 keyword / 班级 / 日期等筛选条件；size 由服务层夹到 [1,500]
      * （比通用 CRUD 的 200 宽，因为排课页一次要拉较多课次）。</p>
      *
-     * @param current 页码，从 1 开始，小于 1 按 1 处理
-     * @param size    每页条数，缺省 10，上限 500
+     * @param current  页码，从 1 开始，小于 1 按 1 处理
+     * @param size     每页条数，缺省 10，上限 500
+     * @param dateFrom 可选起始上课日期（含），格式 yyyy-MM-dd
+     * @param dateTo   可选结束上课日期（含），格式 yyyy-MM-dd
      */
     @Operation(summary = "课次分页")
     @GetMapping("/page")
     public ApiResponse<PageResult<Lesson>> page(@RequestParam(defaultValue = "1") long current,
-                                                @RequestParam(defaultValue = "10") long size) {
-        return ApiResponse.ok(lessonService.page(current, size));
+                                                @RequestParam(defaultValue = "10") long size,
+                                                @RequestParam(required = false)
+                                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+                                                @RequestParam(required = false)
+                                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo) {
+        return ApiResponse.ok(lessonService.page(current, size, dateFrom, dateTo));
     }
 
     /**

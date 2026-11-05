@@ -288,7 +288,7 @@ onMounted(async () => {
               <template v-if="column.key === 'title'"><b>{{ record.title }}</b><div class="muted" style="font-size:9px">{{ teacherName(record.teacherId) }} · {{ record.comment }}</div></template>
               <template v-if="column.key === 'student'">{{ studentName(record.studentId) }}</template>
               <template v-if="column.key === 'workType'">{{ record.workType === 'SOFT' ? '软笔' : '硬笔' }}</template>
-              <template v-if="column.key === 'authorized'"><span class="tag" :class="record.authorized === 1 ? 'green' : 'red'">{{ record.authorized === 1 ? '已授权' : '缺授权' }}</span></template>
+              <template v-if="column.key === 'authorized'"><span class="tag" :class="Number(record.authorized) === 1 ? 'green' : 'red'">{{ Number(record.authorized) === 1 ? '已授权' : '缺授权' }}</span></template>
               <template v-if="column.key === 'status'"><span class="tag" :class="statusMap[record.status]?.cls">{{ statusMap[record.status]?.text || record.status }}</span></template>
               <template v-if="column.key === 'createdAt'">{{ record.createdAt ? dayjs(record.createdAt).format('MM-DD') : '—' }}</template>
               <template v-if="column.key === 'actions'">

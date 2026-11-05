@@ -140,13 +140,15 @@ public class MiniPublicController {
      *
      * @param type    书体类型 HARD（硬笔）/ SOFT（软笔），可选
      * @param keyword 作品标题模糊关键字，可选
+     * @param month   月份 yyyy-MM，可选；按作品创建时间过滤到该自然月
      * @return 作品数组：学员名、班级、教师、标题、书体、内容字、图片、点评、点赞数
      */
     @Operation(summary = "作品列表")
     @GetMapping("/works")
     public ApiResponse<List<Map<String, Object>>> works(@RequestParam(required = false) String type,
-                                                        @RequestParam(required = false) String keyword) {
-        return ApiResponse.ok(publicService.works(type, keyword));
+                                                        @RequestParam(required = false) String keyword,
+                                                        @RequestParam(required = false) String month) {
+        return ApiResponse.ok(publicService.works(type, keyword, month));
     }
 
     /**
