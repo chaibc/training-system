@@ -1,0 +1,64 @@
+<view class="page">
+  <view class="page-head">
+    <view class="eyebrow">LEAVE RECORDS</view>
+    <view class="h1">请假记录</view>
+    <view class="sub">查看审批状态、扣课时判定与补课安排。审批留痕包括审批人与审批时间。</view>
+  </view>
+
+  <view wx:if="{{blocked}}" class="empty" style="padding-top:160rpx"><view class="seal">登</view>请先使用家长账号登录</view>
+
+  <view wx:elif="{{!hasChildren}}" class="empty" style="padding-top:130rpx">
+    <view class="seal">学</view>暂未绑定学员
+    <button class="btn primary sm" style="margin-top:24rpx" bindtap="goAccount">去绑定学员</button>
+  </view>
+
+  <block wx:else>
+    <scroll-view scroll-x class="chips" enhanced show-scrollbar="{{false}}" style="margin-top:16rpx">
+      <view wx:for="{{children}}" wx:key="id" class="chip {{childId === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="selectChild">{{item.name}}</view>
+    </scroll-view>
+
+    <view class="pad" style="margin-top:22rpx">
+      <view class="seg">
+        <view class="s {{filter === 'ALL' ? 'on' : ''}}" data-status="ALL" bindtap="setFilter">全部</view>
+        <view class="s {{filter === 'PENDING' ? 'on' : ''}}" data-status="PENDING" bindtap="setFilter">待审批</view>
+        <view class="s {{filter === 'APPROVED' ? 'on' : ''}}" data-status="APPROVED" bindtap="setFilter">已通过</view>
+        <view class="s {{filter === 'REJECTED' ? 'on' : ''}}" data-status="REJECTED" bindtap="setFilter">已驳回</view>
+      </view>
+    </view>
+
+    <view class="stack pad" style="margin-top:24rpx">
+      <view wx:for="{{records}}" wx:key="id" class="card leave-card">
+        <view class="between">
+          <view>
+            <view class="lv-no">请假单 {{item.leaveNo}}</view>
+            <view class="lv-time">提交于 {{item.timeText}}</view>
+          </view>
+          <text class="tag {{item.statusClass}}">{{item.statusText}}</text>
+        </view>
+        <view class="hr"></view>
+        <view class="lv-lesson" bindtap="goLesson" data-lesson="{{item.lessonId}}">
+          <view class="flex1">
+            <view class="bold" style="font-size:25rpx">{{item.lesson.className || '课次'}}</view>
+            <view class="muted small" style="margin-top:4rpx">{{item.lessonText}}</view>
+          </view>
+          <text class="muted">›</text>
+        </view>
+        <view class="kv"><text class="k">请假原因</text><text class="v">{{item.reasonText}}</text></view>
+        <view class="kv"><text class="k">课时判定</text><text class="v {{item.deductHours ? 'red' : 'green'}}">{{item.deductText}}</text></view>
+        <view class="kv" wx:if="{{item.approverName}}"><text class="k">审批人</text><text class="v">{{item.approverName}} · {{item.approvedAt}}</text></view>
+        <view wx:if="{{item.rejectReason}}" class="reject-box">驳回原因：{{item.rejectReason}}</view>
+        <view wx:if="{{item.status === 'APPROVED'}}" class="makeup-row">
+          <text class="tag {{item.makeupStatus === 'PENDING' ? 'gold' : item.makeupStatus === 'ARRANGED' ? 'green' : 'line'}}">{{item.makeupText}}</text>
+          <button wx:if="{{item.canMakeup}}" class="btn sm soft" bindtap="makeup" data-id="{{item.id}}">申请补课</button>
+        </view>
+      </view>
+      <view wx:if="{{!records.length && !loading}}" class="empty">
+        <view class="seal">假</view>没有符合条件的请假记录
+        <button class="btn primary sm" style="margin-top:24rpx" bindtap="goLeave">发起请假</button>
+      </view>
+    </view>
+  </block>
+
+  <view class="foot-note">审批结果不会主动推送，请在本页主动查看
+已通过且未安排补课的请假可申请补课</view>
+</view>

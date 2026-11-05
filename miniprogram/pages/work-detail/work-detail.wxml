@@ -1,0 +1,74 @@
+<view wx:if="{{work}}" class="page" style="padding-bottom:{{isParent ? '180rpx' : '60rpx'}}">
+  <view class="work-hero" bindtap="preview">
+    <image wx:if="{{work.hasImage}}" src="{{work.image}}" mode="aspectFit" />
+    <text wx:else class="ch">{{work.displayChar}}</text>
+    <view class="wh-stamp">翰墨
+学堂</view>
+  </view>
+
+  <view class="pad" style="margin-top:28rpx">
+    <view class="between">
+      <view class="flex1">
+        <view class="wd-title serif">{{work.title}}</view>
+        <view class="wd-meta">{{work.studentName}} · {{work.className || '学员作品'}} · {{work.typeText}}</view>
+      </view>
+      <text class="tag gold">{{work.dateText}}</text>
+    </view>
+
+    <view class="card padc" style="margin-top:22rpx">
+      <view class="teacher-comment">
+        <view class="tc-label">教师点评</view>
+        <view class="tc-text">{{work.comment || '教师点评整理中'}}</view>
+        <view class="tc-by">— {{work.teacherName || '任课教师'}}</view>
+      </view>
+    </view>
+
+    <view class="authorize-note">本作品已取得家长授权并经过教务审核，仅用于机构展示。未经许可请勿转载。</view>
+
+    <view class="interact-row">
+      <view class="interact {{liked ? 'on' : ''}}" bindtap="like">
+        <text class="ii">{{liked ? '♥' : '♡'}}</text>
+        <text>{{work.likeCount || 0}}</text>
+      </view>
+      <button class="interact" open-type="share">
+        <text class="ii">↗</text><text>分享</text>
+      </button>
+      <view class="interact" bindtap="preview" wx:if="{{work.hasImage}}">
+        <text class="ii">◎</text><text>查看大图</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="title">留言</view>
+    <view class="more">{{comments.length}} 条</view>
+  </view>
+  <view class="pad">
+    <view class="card padc">
+      <view wx:for="{{comments}}" wx:key="id" class="comment">
+        <view class="comment-head">
+          <view class="avatar sm" style="background:#7C5B6B">{{item.avatarChar}}</view>
+          <view class="flex1">
+            <view class="c-name">{{item.userName}}</view>
+            <view class="c-time">{{item.timeText}}</view>
+          </view>
+        </view>
+        <view class="c-text">{{item.content}}</view>
+      </view>
+      <view wx:if="{{!comments.length}}" class="empty" style="padding:40rpx 0">还没有留言，说说你的鼓励吧</view>
+      <view wx:if="{{!isParent}}" class="comment-login">
+        <text class="muted small">{{isTeacher ? '教师账号不支持家长留言' : '登录家长账号后可留言'}}</text>
+        <text wx:if="{{guest}}" class="textlink" bindtap="goLogin">去登录 ›</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{isParent}}" class="comment-bar">
+    <input value="{{commentText}}" placeholder="写下鼓励的话，审核后展示" maxlength="300" bindinput="onCommentInput" />
+    <button class="btn sm primary" loading="{{submitting}}" bindtap="submitComment">发送</button>
+  </view>
+</view>
+
+<view wx:else class="page">
+  <view class="empty" style="padding-top:200rpx"><view class="seal">作</view>{{loading ? '正在加载作品…' : '作品不存在或未展示'}}</view>
+</view>

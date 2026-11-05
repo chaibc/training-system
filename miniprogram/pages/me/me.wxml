@@ -1,0 +1,107 @@
+<view class="page">
+  <view wx:if="{{guest}}" class="me-guest">
+    <view class="mg-seal">翰</view>
+    <view class="mg-title serif">还未登录</view>
+    <view class="mg-sub">登录后可查看孩子的课表、课时账户、报名与请假记录。
+游客仍可浏览课程、师资与作品。</view>
+    <button class="btn primary block" style="margin-top:36rpx" bindtap="goLogin">微信一键登录</button>
+    <button class="btn ghost block" style="margin-top:16rpx" bindtap="nav" data-url="/pages/about/about">先看看机构</button>
+  </view>
+
+  <block wx:elif="{{isTeacher}}">
+    <view class="me-hero teacher-hero">
+      <view class="row gap12">
+        <view class="avatar lg" style="background:#4C6455">{{userAvatar}}</view>
+        <view class="flex1">
+          <view class="mh-name serif">{{user.name}}</view>
+          <view class="mh-meta">教师账号 · {{user.roleName}}</view>
+        </view>
+        <text class="tag gold">教师</text>
+      </view>
+      <view class="mh-quote">教师账号由后台创建，家长与教师身份互斥，不能在同一账号切换。</view>
+      <button class="btn gold sm" style="margin-top:18rpx;align-self:flex-start" bindtap="goWorkbench">进入教师工作台</button>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="me-hero">
+      <view class="row gap12">
+        <view class="avatar lg" style="background:{{child ? child.avatarColor : '#8A6A49'}}">{{child ? child.avatarChar : userAvatar}}</view>
+        <view class="flex1">
+          <view class="mh-name serif">{{user.name}}</view>
+          <view class="mh-meta">家长账号 · {{user.roleName}} · {{user.userType === 'PARENT' ? '微信登录' : ''}}</view>
+        </view>
+        <text wx:if="{{pendingBindings}}" class="tag gold">{{pendingBindings}} 待审核</text>
+      </view>
+      <view wx:if="{{children.length}}" class="child-switch">
+        <view wx:for="{{children}}" wx:key="id" class="cs-item {{child && child.id === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="selectChild">
+          <text>{{item.name}}</text>
+          <text class="cs-hours">{{item.remainingHours}} 课时</text>
+        </view>
+      </view>
+      <view wx:else class="child-switch">
+        <view class="cs-item on" bindtap="nav" data-url="/pages/account/account">＋ 添加学员</view>
+      </view>
+    </view>
+
+    <view wx:if="{{child}}" class="pad" style="margin-top:22rpx">
+      <view class="stat-grid">
+        <view class="stat"><view class="v">{{stats.remainingHours}}<small>课时</small></view><view class="k">剩余课时</view></view>
+        <view class="stat"><view class="v">{{stats.attendanceCount}}<small>次</small></view><view class="k">累计上课</view></view>
+        <view class="stat"><view class="v">{{stats.pendingLeaves}}<small>条</small></view><view class="k">待审批请假</view></view>
+      </view>
+    </view>
+
+    <view wx:if="{{child}}" class="pad" style="margin-top:22rpx">
+      <view class="me-service card">
+        <view class="ms-item" bindtap="nav" data-url="/pages/child-profile/child-profile"><view class="msi">档</view><text>学员档案</text></view>
+        <view class="ms-item" bindtap="nav" data-url="/pages/hours/hours"><view class="msi">时</view><text>课时账户</text></view>
+        <view class="ms-item" bindtap="nav" data-url="/pages/attendance/attendance"><view class="msi">课</view><text>上课记录</text></view>
+        <view class="ms-item" bindtap="goEnrollments"><view class="msi">报</view><text>报名记录</text></view>
+        <view class="ms-item" bindtap="goLeaveRecords"><view class="msi">假</view><text>请假记录</text></view>
+        <view class="ms-item" bindtap="nav" data-url="/pages/growth/growth"><view class="msi">长</view><text>成长相册</text></view>
+      </view>
+    </view>
+
+    <view wx:else class="pad" style="margin-top:24rpx">
+      <view class="card padc bind-card">
+        <view class="serif" style="font-size:29rpx">还没有绑定孩子</view>
+        <view class="muted small" style="margin-top:8rpx;line-height:1.7">绑定后即可查看课表与课时，绑定申请需教务审核。</view>
+        <button class="btn primary sm" style="margin-top:20rpx" bindtap="nav" data-url="/pages/account/account">去添加学员</button>
+      </view>
+    </view>
+
+    <view class="section"><view class="title">账号与服务</view></view>
+    <view class="pad">
+      <view class="card me-list">
+        <view class="list-item" bindtap="nav" data-url="/pages/account/account">
+          <view class="li-icon">账</view>
+          <view class="li-body"><view class="li-title">账号与绑定</view><view class="li-sub">微信账号、手机号、子女绑定与解绑</view></view>
+          <text class="arrow">›</text>
+        </view>
+        <view class="list-item" bindtap="nav" data-url="/pages/about/about">
+          <view class="li-icon">机</view>
+          <view class="li-body"><view class="li-title">机构介绍</view><view class="li-sub">地址、电话、资质与教学环境</view></view>
+          <text class="arrow">›</text>
+        </view>
+        <view class="list-item" bindtap="nav" data-url="/pages/teachers/teachers">
+          <view class="li-icon">师</view>
+          <view class="li-body"><view class="li-title">师资团队</view><view class="li-sub">教师履历、擅长书体与课程</view></view>
+          <text class="arrow">›</text>
+        </view>
+        <view class="list-item" bindtap="contact">
+          <view class="li-icon">话</view>
+          <view class="li-body"><view class="li-title">联系教务</view><view class="li-sub">报名、缴费、调课与请假咨询</view></view>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <view wx:if="{{!guest}}" class="pad" style="margin-top:32rpx">
+    <button class="btn ghost block" bindtap="logout">退出登录</button>
+  </view>
+
+  <view class="foot-note">翰墨学堂 · 一笔一画，写好中国字
+当前版本不含线上缴费与消息推送</view>
+</view>

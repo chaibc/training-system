@@ -1,0 +1,165 @@
+<view class="page">
+  <view wx:if="{{guest}}" class="guest-bar">
+    <text>游客模式：可浏览公开内容，登录后查看课表与课时</text>
+    <text class="link" bindtap="goLogin">去登录 ›</text>
+  </view>
+
+  <view class="home-top">
+    <view class="seal">翰</view>
+    <view class="flex1">
+      <view class="name">{{institution.brand || '翰墨学堂'}}</view>
+      <view class="slogan">{{institution.slogan || '一笔一画，写好中国字'}}</view>
+    </view>
+    <view wx:if="{{user && !isTeacher}}" class="tag gold">{{child ? child.name : user.name}}</view>
+  </view>
+
+  <view class="hero">
+    <view class="stamp">翰墨
+学堂</view>
+    <view class="eyebrow">CALLIGRAPHY EDUCATION</view>
+    <view class="h2">一笔一画，
+写好<text class="em">中国字</text></view>
+    <view class="desc">{{institution.heroIntro || '专注 5–12 岁书法启蒙，以软笔与硬笔课程，陪孩子养成受用一生的书写习惯。'}}</view>
+    <view class="hero-actions">
+      <button class="btn gold" bindtap="goTrial">预约试听</button>
+      <button class="btn ghost" style="color:#EDE5D6;border-color:rgba(246,241,231,.3)" bindtap="goCourses">查看课程</button>
+    </view>
+    <view class="watermark">墨</view>
+  </view>
+
+  <view class="quick-grid">
+    <view class="q" bindtap="goCourses"><view class="qi">课</view><text>课程体系</text></view>
+    <view class="q" bindtap="goTrial"><view class="qi">听</view><text>试听预约</text></view>
+    <view class="q" bindtap="goTeachers"><view class="qi">师</view><text>师资团队</text></view>
+    <view class="q" bindtap="openMap"><view class="qi">址</view><text>到店导航</text></view>
+  </view>
+
+  <view wx:if="{{notices.length}}" class="notice-bar" bindtap="showNotice" data-index="0">
+    <text class="tag gold">公告</text>
+    <text class="n">{{notices[0].title}}</text>
+    <text>›</text>
+  </view>
+
+  <view wx:if="{{isTeacher}}" class="teacher-entry card padc" bindtap="goWorkbench">
+    <view class="row gap8">
+      <view class="avatar" style="background:#4C6455">师</view>
+      <view class="flex1">
+        <view class="bold">教师工作台</view>
+        <view class="muted small">今日课程、点名消课、请假审批与作品上传</view>
+      </view>
+      <text class="textlink">进入 ›</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="title">推荐课程</view>
+    <view class="more" bindtap="goCourses">全部课程 ›</view>
+  </view>
+  <view class="stack pad">
+    <view wx:for="{{courses}}" wx:key="id" class="card course-mini" bindtap="goCourse" data-id="{{item.id}}">
+      <view class="course-cover" style="{{item.coverStyle}}">{{item.coverChar || '课'}}</view>
+      <view class="course-body">
+        <view class="name">{{item.name}}</view>
+        <view class="meta">{{item.metaText}}</view>
+        <view class="row gap8" style="margin-top:10rpx">
+          <text class="tag">{{item.categoryName}}</text>
+          <text wx:for="{{item.tagsList}}" wx:for-item="tag" wx:key="*this" class="tag line">{{tag}}</text>
+        </view>
+        <view class="price">{{item.priceText}} <text class="unit">/ {{item.priceUnit}}</text></view>
+      </view>
+    </view>
+    <view wx:if="{{!courses.length && !loading}}" class="empty"><view class="seal">课</view>课程正在整理中</view>
+  </view>
+
+  <view class="section">
+    <view class="title">师资团队</view>
+    <view class="more" bindtap="goTeachers">全部教师 ›</view>
+  </view>
+  <scroll-view scroll-x class="teacher-scroll" enhanced show-scrollbar="{{false}}">
+    <view class="teacher-horizontal">
+      <view wx:for="{{teachers}}" wx:key="id" class="teacher-mini card" bindtap="goTeacher" data-id="{{item.id}}">
+        <view class="avatar" style="background:#6B503A">{{item.avatarChar}}</view>
+        <view class="tm-body">
+          <view class="tm-name">{{item.name}}</view>
+          <view class="tm-meta">{{item.title}} · {{item.years}} 年教龄</view>
+          <view class="tm-style">{{item.styleText}}</view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="section">
+    <view class="title">教学环境</view>
+    <view class="more" bindtap="goAbout">机构介绍 ›</view>
+  </view>
+  <view class="env-grid">
+    <view wx:for="{{images}}" wx:key="id" class="env-card" bindtap="goAbout">
+      <view class="env-art" style="background:linear-gradient(145deg,{{item.color}},#2E291F)">
+        <text class="env-char">{{item.char}}</text>
+        <text class="env-title">{{item.title}}</text>
+      </view>
+    </view>
+    <view wx:if="{{!images.length}}" class="env-card">
+      <view class="env-art" style="background:linear-gradient(145deg,#6B503A,#2E291F)">
+        <text class="env-char">室</text><text class="env-title">书法教室</text>
+      </view>
+    </view>
+    <view wx:if="{{!images.length}}" class="env-card">
+      <view class="env-art" style="background:linear-gradient(145deg,#4C5544,#2E291F)">
+        <text class="env-char">帖</text><text class="env-title">临帖区</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="title">学员作品</view>
+    <view class="more" bindtap="goWorks">作品墙 ›</view>
+  </view>
+  <scroll-view scroll-x class="works-scroll" enhanced show-scrollbar="{{false}}">
+    <view class="works-horizontal">
+      <view wx:for="{{works}}" wx:key="id" class="work-mini card" bindtap="goWork" data-id="{{item.id}}">
+        <view class="work-art" style="height:230rpx">
+          <image wx:if="{{item.hasImage}}" src="{{item.image}}" mode="aspectFill" />
+          <text wx:else class="ch" style="font-size:90rpx">{{item.displayChar}}</text>
+        </view>
+        <view class="work-info">
+          <view class="t" style="font-size:22rpx">{{item.title}}</view>
+          <view class="m">{{item.studentName}} · {{item.typeText}}</view>
+        </view>
+      </view>
+      <view wx:if="{{!works.length}}" class="empty" style="width:400rpx">作品即将上新</view>
+    </view>
+  </scroll-view>
+
+  <view class="section">
+    <view class="title">到店与联系</view>
+  </view>
+  <view class="pad">
+    <view class="card padc org-card">
+      <view class="org-name serif">{{institution.name || '翰墨学堂书法培训中心'}}</view>
+      <view class="org-line">{{institution.address || '地址待维护'}}</view>
+      <view class="org-line">{{institution.hours || '营业时间待维护'}}</view>
+      <view class="org-traffic">{{institution.traffic || ''}}</view>
+      <view class="org-actions">
+        <button class="org-btn" bindtap="call"><text class="gold">☎</text> 一键拨号</button>
+        <button class="org-btn" bindtap="openMap"><text class="gold">⌖</text> 地图导航</button>
+        <button class="org-btn" bindtap="goAbout"><text class="gold">册</text> 机构介绍</button>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{user && !isTeacher}}" class="section">
+    <view class="title">家长服务</view>
+  </view>
+  <view wx:if="{{user && !isTeacher}}" class="pad">
+    <view class="card service-grid">
+      <view class="service-item" bindtap="goSchedule"><view class="si">表</view><text>我的课表</text></view>
+      <view class="service-item" bindtap="goHours"><view class="si">时</view><text>课时账户</text></view>
+      <view class="service-item" bindtap="goEnrollments"><view class="si">报</view><text>报名记录</text></view>
+      <view class="service-item" bindtap="goLeaveRecords"><view class="si">假</view><text>请假记录</text></view>
+    </view>
+  </view>
+
+  <view class="foot-note">{{institution.slogan || '一笔一画，写好中国字'}}
+课程与价格均由管理后台统一维护</view>
+</view>

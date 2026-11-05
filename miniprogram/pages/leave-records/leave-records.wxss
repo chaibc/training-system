@@ -1,0 +1,29 @@
+.leave-card { padding: 26rpx; }
+.lv-no { font-size: 25rpx; font-weight: 600; }
+.lv-time { color: var(--muted); font-size: 18rpx; margin-top: 4rpx; }
+.lv-lesson {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 16rpx;
+  background: #F9F5EC;
+  margin-bottom: 10rpx;
+}
+.reject-box {
+  margin-top: 12rpx;
+  padding: 16rpx 18rpx;
+  border-radius: 14rpx;
+  background: rgba(180, 71, 60, .06);
+  color: var(--red2);
+  font-size: 20rpx;
+  line-height: 1.7;
+}
+.makeup-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid var(--line2);
+}

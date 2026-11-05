@@ -1,0 +1,25 @@
+<view class="result-page">
+  <view class="result-seal">假</view>
+  <view class="result-title">请假已提交</view>
+  <view class="result-sub">申请已进入待审批状态
+审批结果请在「请假记录」中主动查看</view>
+
+  <view class="card result-card">
+    <view class="result-row"><text class="k">请假单号</text><text class="v num">{{result.leaveNo}}</text></view>
+    <view class="result-row" wx:if="{{result.childName}}"><text class="k">学员</text><text class="v">{{result.childName}}</text></view>
+    <view class="result-row" wx:if="{{lesson}}"><text class="k">请假课次</text><text class="v">{{lesson.className}} · {{lesson.dateText}} {{lesson.timeText}}</text></view>
+    <view class="result-row"><text class="k">课时判定</text><text class="v {{result.deductHours ? 'red' : 'green'}}">{{result.deductText}}</text></view>
+    <view class="result-row"><text class="k">当前状态</text><text class="v"><text class="tag gold">待审批</text></text></view>
+  </view>
+
+  <view class="result-flow">
+    <view class="step on"><view class="dot"></view>提交申请</view>
+    <view class="step"><view class="dot"></view>教师审批</view>
+    <view class="step"><view class="dot"></view>结果留痕</view>
+  </view>
+
+  <view class="result-actions">
+    <button class="btn primary block" bindtap="goRecords">查看请假记录</button>
+    <button class="btn ghost block" bindtap="goSchedule">返回课表</button>
+  </view>
+</view>

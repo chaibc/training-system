@@ -1,0 +1,88 @@
+<view wx:if="{{course}}" class="page has-bottom-bar">
+  <view class="cd-hero" style="{{course.coverStyle}}">
+    <view class="cd-stamp">翰墨
+课程</view>
+    <view class="cd-eyebrow">{{course.categoryName}} · {{course.stageName}}</view>
+    <view class="cd-char">{{course.coverChar || '书'}}</view>
+    <view class="cd-watermark">习</view>
+  </view>
+
+  <view class="pad cd-head">
+    <view class="cd-name serif">{{course.name}}</view>
+    <view class="cd-sub">{{course.description}}</view>
+    <view class="cd-tags">
+      <text class="tag red">{{course.ageRange}}</text>
+      <text class="tag">{{course.lessons}} 课时</text>
+      <text class="tag">{{course.frequency}}</text>
+      <text wx:for="{{course.tagsList}}" wx:key="*this" class="tag line">{{item}}</text>
+    </view>
+  </view>
+
+  <view class="pad">
+    <view class="card metric-card">
+      <view class="metric"><view class="mv">{{course.lessons}}</view><view class="mk">总课时</view></view>
+      <view class="metric"><view class="mv">{{course.durationMinutes}}</view><view class="mk">分钟 / 次</view></view>
+      <view class="metric"><view class="mv">{{course.stageName}}</view><view class="mk">当前阶段</view></view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="title">教学目标</view>
+  </view>
+  <view class="pad">
+    <view class="card padc goal-card">
+      <view class="goal-mark">“</view>
+      <view class="goal-text">{{course.goal}}</view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="title">分阶段内容</view>
+    <view class="more">共 {{outlines.length}} 个阶段</view>
+  </view>
+  <view class="pad">
+    <view class="card padc">
+      <view class="timeline">
+        <view wx:for="{{outlines}}" wx:key="title" class="tl-item">
+          <view class="between">
+            <view class="serif bold" style="font-size:27rpx">{{item.title}}</view>
+            <text class="tag gold">{{item.lessonRange}}</text>
+          </view>
+          <view class="small muted" style="margin-top:8rpx;line-height:1.7">{{item.description}}</view>
+        </view>
+      </view>
+      <view wx:if="{{!outlines.length}}" class="empty">内容大纲整理中</view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="title">班型与价格</view>
+    <view class="more">到店缴费</view>
+  </view>
+  <view class="pad">
+    <view class="card price-list">
+      <view wx:for="{{prices}}" wx:key="id" class="price-row">
+        <view class="flex1">
+          <view class="pr-name">{{item.lessons}} 课时 · {{item.unitText}}</view>
+          <view class="pr-note">价格由管理后台维护，以到店确认版本为准</view>
+        </view>
+        <view class="pr-amount">{{item.priceText}}<text> 元</text></view>
+      </view>
+      <view wx:if="{{!prices.length}}" class="empty">价格待维护，请联系教务</view>
+    </view>
+    <view class="form-tip" style="margin-top:20rpx">本期不支持线上缴费。提交报名后由教务电话确认，到店完成缴费并计入课时账户。</view>
+  </view>
+
+  <view class="foot-note">试听与报名均不收取线上费用
+如有疑问请联系教务 0755-8888-6666</view>
+
+  <view class="bottom-bar">
+    <button class="btn ghost" bindtap="call">联系教务</button>
+    <button class="btn primary" bindtap="goTrial">预约试听</button>
+    <button wx:if="{{!isTeacher}}" class="btn dark" bindtap="goEnroll">报名登记</button>
+  </view>
+</view>
+
+<view wx:else class="page">
+  <view class="empty" style="padding-top:200rpx"><view class="seal">课</view>{{loading ? '正在加载课程…' : '课程不存在或已下架'}}</view>
+</view>

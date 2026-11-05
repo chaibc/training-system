@@ -1,0 +1,22 @@
+.binding-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  padding: 22rpx 24rpx;
+  border-bottom: 1rpx solid var(--line2);
+}
+.binding-item:last-child { border-bottom: none; }
+.bind-actions { margin-top: 10rpx; }
+.account-note { padding: 22rpx 24rpx; }
+.an-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 10rpx;
+  color: var(--ink2);
+  font-size: 20rpx;
+  line-height: 1.75;
+  margin-bottom: 8rpx;
+}
+.an-line:last-child { margin-bottom: 0; }
+.an-dot { width: 7rpx; height: 7rpx; border-radius: 50%; background: var(--gold); margin-top: 13rpx; flex: none; }
+.picker { display: flex; align-items: center; }

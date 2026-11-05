@@ -1,0 +1,75 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/courses/courses",
+    "pages/works/works",
+    "pages/me/me",
+    "pages/login/login",
+    "pages/course-detail/course-detail",
+    "pages/trial/trial",
+    "pages/trial-done/trial-done",
+    "pages/enroll/enroll",
+    "pages/enroll-done/enroll-done",
+    "pages/enrollments/enrollments",
+    "pages/schedule/schedule",
+    "pages/lesson-detail/lesson-detail",
+    "pages/leave/leave",
+    "pages/leave-done/leave-done",
+    "pages/leave-records/leave-records",
+    "pages/work-detail/work-detail",
+    "pages/child-profile/child-profile",
+    "pages/hours/hours",
+    "pages/attendance/attendance",
+    "pages/growth/growth",
+    "pages/about/about",
+    "pages/teachers/teachers",
+    "pages/teacher-detail/teacher-detail",
+    "pages/teacher-home/teacher-home",
+    "pages/rollcall/rollcall",
+    "pages/teacher-leave/teacher-leave",
+    "pages/upload-work/upload-work",
+    "pages/account/account"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#F6F1E7",
+    "navigationBarTitleText": "翰墨学堂",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F6F1E7"
+  },
+  "tabBar": {
+    "color": "#A19A8B",
+    "selectedColor": "#B4473C",
+    "backgroundColor": "#FFFDF8",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页",
+        "iconPath": "assets/tab/home.png",
+        "selectedIconPath": "assets/tab/home-on.png"
+      },
+      {
+        "pagePath": "pages/courses/courses",
+        "text": "课程",
+        "iconPath": "assets/tab/book.png",
+        "selectedIconPath": "assets/tab/book-on.png"
+      },
+      {
+        "pagePath": "pages/works/works",
+        "text": "作品",
+        "iconPath": "assets/tab/gallery.png",
+        "selectedIconPath": "assets/tab/gallery-on.png"
+      },
+      {
+        "pagePath": "pages/me/me",
+        "text": "我的",
+        "iconPath": "assets/tab/me.png",
+        "selectedIconPath": "assets/tab/me-on.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

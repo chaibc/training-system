@@ -1,0 +1,77 @@
+<view wx:if="{{institution}}" class="page">
+  <view class="about-hero">
+    <view class="t">{{institution.brand || '翰墨学堂'}}</view>
+    <view class="s">{{institution.slogan || '一笔一画，写好中国字'}}</view>
+  </view>
+
+  <view class="pad" style="margin-top:26rpx">
+    <view class="card padc">
+      <view class="about-label">机构简介</view>
+      <view class="about-text">{{institution.intro}}</view>
+      <view class="hr"></view>
+      <view class="about-label">办学理念</view>
+      <view class="about-text">{{institution.philosophy || '以传统书法教育，陪孩子养成专注与耐心；让书写成为一生的修养。'}}</view>
+      <view class="about-since" wx:if="{{institution.sinceYear}}">创办于 {{institution.sinceYear}} 年</view>
+    </view>
+  </view>
+
+  <view class="section"><view class="title">教学环境</view></view>
+  <view class="env-list">
+    <view wx:for="{{images}}" wx:key="id" class="env-item" bindtap="previewImage" data-index="{{index}}">
+      <image wx:if="{{item.url}}" src="{{item.url}}" mode="aspectFill" />
+      <view wx:else class="env-placeholder" style="background:linear-gradient(145deg,{{item.color}},#2E291F)">
+        <text class="ep-char">{{item.char}}</text>
+        <text class="ep-title">{{item.title}}</text>
+      </view>
+    </view>
+    <view wx:if="{{!images.length}}" class="env-item">
+      <view class="env-placeholder" style="background:linear-gradient(145deg,#6B503A,#2E291F)">
+        <text class="ep-char">室</text><text class="ep-title">书法教室</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section"><view class="title">资质公示</view><view class="more">真实可核验</view></view>
+  <view class="pad">
+    <view class="card">
+      <view wx:for="{{qualifications}}" wx:key="id" class="qual-item">
+        <view class="qi-icon">证</view>
+        <view class="flex1">
+          <view class="bold" style="font-size:24rpx">{{item.name}}</view>
+          <view class="muted small" style="margin-top:3rpx">编号 {{item.code}} · 有效期 {{item.validUntil}}</view>
+        </view>
+        <text class="tag green">已核验</text>
+      </view>
+      <view wx:if="{{!qualifications.length}}" class="empty" style="padding:40rpx 0">资质信息整理中</view>
+    </view>
+  </view>
+
+  <view class="section"><view class="title">联系我们</view></view>
+  <view class="pad">
+    <view class="card padc">
+      <view class="kv"><text class="k">地址</text><text class="v">{{institution.address}}</text></view>
+      <view class="kv"><text class="k">营业时间</text><text class="v">{{institution.hours}}</text></view>
+      <view class="kv"><text class="k">电话</text><text class="v">{{institution.phone}}</text></view>
+      <view class="kv" wx:if="{{institution.wechat}}"><text class="k">微信</text><text class="v">{{institution.wechat}}</text></view>
+      <view class="kv" wx:if="{{institution.traffic}}"><text class="k">交通</text><text class="v">{{institution.traffic}}</text></view>
+      <view class="btn-row" style="margin-top:22rpx">
+        <button class="btn primary" bindtap="call">一键拨号</button>
+        <button class="btn dark" bindtap="openMap">地图导航</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="pad" style="margin-top:22rpx">
+    <view class="btn-row">
+      <button class="btn ghost" bindtap="goTeachers">查看师资</button>
+      <button class="btn soft" bindtap="goWorks">学员作品</button>
+    </view>
+  </view>
+
+  <view class="foot-note">机构信息、资质与环境图片均由管理后台维护
+到店前建议先电话确认接待时间</view>
+</view>
+
+<view wx:else class="page">
+  <view class="empty" style="padding-top:200rpx"><view class="seal">机</view>{{loading ? '正在加载机构信息…' : '机构信息暂未维护'}}</view>
+</view>

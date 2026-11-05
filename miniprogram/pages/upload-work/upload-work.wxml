@@ -1,0 +1,95 @@
+<view class="page">
+  <view class="page-head">
+    <view class="eyebrow">UPLOAD WORK</view>
+    <view class="h1">上传学员作品</view>
+    <view class="sub">作品须取得家长授权，提交后由教务审核。审核通过后展示在作品墙与成长相册。</view>
+  </view>
+
+  <view wx:if="{{blocked}}" class="empty" style="padding-top:160rpx"><view class="seal">师</view>请使用教师账号登录</view>
+
+  <block wx:else>
+    <view class="pad" style="margin-top:20rpx">
+      <view class="card padc">
+        <view class="field">
+          <view class="label">作品图片 <text class="req">*</text></view>
+          <view class="uploader" bindtap="chooseImage">
+            <image wx:if="{{imagePath}}" src="{{imagePath}}" mode="aspectFill" />
+            <view wx:else class="upload-placeholder">
+              <text class="up-plus">＋</text>
+              <text class="up-text">{{uploading ? '上传中…' : '拍照或从相册选择'}}</text>
+              <text class="up-tip">支持 JPG / PNG / WEBP，不超过 10MB</text>
+            </view>
+            <view wx:if="{{imagePath}}" class="reupload">重新选择</view>
+          </view>
+        </view>
+
+        <view class="field">
+          <view class="label">选择学员 <text class="req">*</text></view>
+          <picker wx:if="{{students.length}}" range="{{studentLabels}}" value="{{studentIndex}}" bindchange="selectStudent">
+            <view class="picker">
+              <text wx:if="{{studentIndex >= 0}}">{{studentLabels[studentIndex]}}</text>
+              <text wx:else class="placeholder">请选择学员</text>
+              <text class="muted" style="margin-left:auto">›</text>
+            </view>
+          </picker>
+          <view wx:else class="no-auth">您所带班级暂无学员，无法上传作品</view>
+        </view>
+
+        <view wx:if="{{selectedStudent && !selectedStudent.authorized}}" class="auth-warning">
+          <text class="aw-icon">!</text>
+          <text>该学员尚未登记有效家长作品授权。请先联系教务在后台「作品授权」中登记，再进行上传。</text>
+        </view>
+
+        <view class="field">
+          <view class="label">作品标题 <text class="req">*</text></view>
+          <input value="{{title}}" placeholder="如《永字八法》" maxlength="50" data-field="title" bindinput="onInput" />
+        </view>
+
+        <view class="field">
+          <view class="label">作品书体</view>
+          <view class="seg" style="margin:0">
+            <view class="s {{workType === 'HARD' ? 'on' : ''}}" data-type="HARD" bindtap="selectType">硬笔</view>
+            <view class="s {{workType === 'SOFT' ? 'on' : ''}}" data-type="SOFT" bindtap="selectType">软笔</view>
+          </view>
+        </view>
+
+        <view class="field">
+          <view class="label">作品内容 / 单字</view>
+          <input value="{{contentChar}}" placeholder="如 静、上善若水（选填）" maxlength="50" data-field="contentChar" bindinput="onInput" />
+        </view>
+
+        <view class="field">
+          <view class="label">教师点评</view>
+          <textarea value="{{comment}}" placeholder="从结构、用笔、章法等角度给予点评（选填）" maxlength="300" data-field="comment" bindinput="onInput" />
+        </view>
+
+        <view class="check" bindtap="toggleAuthorized">
+          <view class="box {{authorized ? 'on' : ''}}">{{authorized ? '✓' : ''}}</view>
+          <view>我确认已取得家长对作品展示的授权，作品内容真实，不包含其他学员隐私信息。</view>
+        </view>
+
+        <button class="btn primary block" loading="{{submitting}}" bindtap="submit">提交审核</button>
+      </view>
+    </view>
+
+    <view class="section"><view class="title">我上传的作品</view><view class="more">{{myWorks.length}} 幅</view></view>
+    <view class="pad">
+      <view class="card">
+        <view wx:for="{{myWorks}}" wx:key="id" class="my-work">
+          <view class="avatar sm" style="background:#6B503A">{{item.avatarChar}}</view>
+          <view class="flex1">
+            <view class="between">
+              <text class="bold" style="font-size:24rpx">{{item.title}}</text>
+              <text class="tag {{item.status === 'DISPLAYED' ? 'green' : item.status === 'PENDING' ? 'gold' : 'line'}}">{{item.statusText}}</text>
+            </view>
+            <view class="muted tiny" style="margin-top:4rpx">{{item.studentName}} · {{item.className}} · {{item.workType === 'SOFT' ? '软笔' : '硬笔'}}</view>
+          </view>
+        </view>
+        <view wx:if="{{!myWorks.length && !loading}}" class="empty" style="padding:40rpx 0">还没有上传作品</view>
+      </view>
+    </view>
+
+    <view class="foot-note">作品须经家长授权与教务审核后展示
+教师不得上传未经授权的学员作品</view>
+  </block>
+</view>

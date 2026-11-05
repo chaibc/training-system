@@ -1,0 +1,25 @@
+[Unit]
+Description=Hanmo Calligraphy Server
+Documentation=file:///data/hanmo/docs/04-部署手册.md
+After=network-online.target mysql.service mysqld.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=hanmo
+Group=hanmo
+WorkingDirectory=/data/hanmo
+EnvironmentFile=/etc/hanmo/hanmo.env
+ExecStart=/usr/bin/java -Xms256m -Xmx512m -XX:+UseG1GC -Duser.timezone=Asia/Shanghai -jar /data/hanmo/app/hanmo-server.jar --spring.profiles.active=prod
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+LimitNOFILE=65535
+NoNewPrivileges=true
+PrivateTmp=true
+UMask=0027
+
+
+[Install]
+WantedBy=multi-user.target

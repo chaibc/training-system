@@ -1,0 +1,94 @@
+.me-guest {
+  padding: 110rpx 48rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.mg-seal {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 18rpx;
+  background: var(--red);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Songti SC", serif;
+  font-size: 52rpx;
+  box-shadow: 0 16rpx 34rpx rgba(180, 71, 60, .24);
+  transform: rotate(-3deg);
+}
+.mg-title { font-size: 46rpx; letter-spacing: 3rpx; margin-top: 34rpx; }
+.mg-sub { color: var(--ink2); font-size: 23rpx; line-height: 1.9; margin-top: 14rpx; }
+.me-hero {
+  margin: 20rpx 28rpx 0;
+  border-radius: 30rpx;
+  padding: 30rpx 28rpx;
+  background: linear-gradient(118deg, #26221B 0%, #3A342A 58%, #4B3B2F 100%);
+  color: #F8F2E6;
+  position: relative;
+  overflow: hidden;
+}
+.me-hero::after {
+  content: "翰墨";
+  position: absolute;
+  right: -30rpx;
+  bottom: -70rpx;
+  font-family: "Songti SC", serif;
+  font-size: 190rpx;
+  color: rgba(246, 241, 231, .055);
+  line-height: 1;
+}
+.teacher-hero { background: linear-gradient(118deg, #242B24 0%, #33402F 58%, #435240 100%); }
+.mh-name { font-size: 38rpx; letter-spacing: 2rpx; }
+.mh-meta { color: #BFB6A5; font-size: 19rpx; margin-top: 6rpx; }
+.mh-quote { color: #BFB6A5; font-size: 20rpx; line-height: 1.75; margin-top: 20rpx; position: relative; }
+.child-switch {
+  display: flex;
+  gap: 12rpx;
+  margin-top: 24rpx;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+.cs-item {
+  padding: 12rpx 20rpx;
+  border-radius: 14rpx;
+  background: rgba(246, 241, 231, .08);
+  color: #CFC6B5;
+  font-size: 21rpx;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+.cs-item.on { background: rgba(232, 201, 142, .18); color: #E8C98E; }
+.cs-hours { font-size: 17rpx; opacity: .8; }
+.me-service {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 26rpx 8rpx;
+  row-gap: 28rpx;
+}
+.ms-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10rpx;
+  font-size: 20rpx;
+  color: var(--ink2);
+}
+.ms-item .msi {
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 20rpx;
+  background: var(--paper2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Songti SC", serif;
+  font-size: 27rpx;
+  color: var(--red);
+}
+.me-list { overflow: hidden; }
+.bind-card { background: linear-gradient(110deg, rgba(180, 71, 60, .05), rgba(255, 253, 248, .95)); }
+.mg-sub { white-space: pre-line; }

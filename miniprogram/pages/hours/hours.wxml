@@ -1,0 +1,69 @@
+<view class="page">
+  <view class="page-head">
+    <view class="eyebrow">HOUR ACCOUNT</view>
+    <view class="h1">课时账户</view>
+    <view class="sub">课时余额、有效期与流水口径与教务后台一致。剩余课时不足时，请联系教务到店续费。</view>
+  </view>
+
+  <view wx:if="{{blocked}}" class="empty" style="padding-top:160rpx"><view class="seal">登</view>请先使用家长账号登录</view>
+
+  <view wx:elif="{{!hasChildren}}" class="empty" style="padding-top:130rpx"><view class="seal">学</view>暂未绑定学员</view>
+
+  <block wx:else>
+    <scroll-view scroll-x class="chips" enhanced show-scrollbar="{{false}}" style="margin-top:10rpx">
+      <view wx:for="{{children}}" wx:key="id" class="chip {{studentId === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="selectChild">{{item.name}}</view>
+    </scroll-view>
+
+    <view class="pad" style="margin-top:24rpx">
+      <view class="hours-hero">
+        <view class="hh-label">{{child.name}} · 当前剩余</view>
+        <view class="hh-value"><text class="n">{{account.remainingHours || 0}}</text><text class="u">课时</text></view>
+        <view class="hh-grid">
+          <view><text class="v">{{account.totalHours || 0}}</text><text class="k">累计购买</text></view>
+          <view><text class="v">{{account.usedHours || 0}}</text><text class="k">累计消耗</text></view>
+          <view><text class="v">{{account.validUntil || '—'}}</text><text class="k">有效期至</text></view>
+        </view>
+        <view class="hh-watermark">时</view>
+      </view>
+    </view>
+
+    <view wx:if="{{account.renewalWarning}}" class="pad" style="margin-top:18rpx">
+      <view class="renew-warning">
+        <text class="rw-icon">!</text>
+        <view class="flex1">
+          <view class="bold small">课时余额偏低</view>
+          <view class="tiny" style="margin-top:3rpx">剩余课时不超过 {{renewalHint}} 节，建议提前联系教务续费，避免影响上课。</view>
+        </view>
+        <button class="btn sm primary" bindtap="contact">续费咨询</button>
+      </view>
+    </view>
+
+    <view class="section"><view class="title">课时流水</view><view class="more">{{ledger.length}} 条记录</view></view>
+    <view class="pad">
+      <view class="card">
+        <view wx:for="{{ledger}}" wx:key="id" class="ledger-item">
+          <view class="li-icon {{item.positive ? 'in' : 'out'}}">{{item.typeText === '充值' ? '充' : item.typeText === '消课' ? '消' : '正'}}</view>
+          <view class="flex1">
+            <view class="between">
+              <text class="li-title">{{item.reason || item.typeText}}</text>
+              <text class="li-change {{item.positive ? 'positive' : 'negative'}}">{{item.changeText}}</text>
+            </view>
+            <view class="between" style="margin-top:4rpx">
+              <text class="li-time">{{item.timeText}} · {{item.typeText}}</text>
+              <text class="li-balance">余额 {{item.balanceAfter}}</text>
+            </view>
+          </view>
+        </view>
+        <view wx:if="{{!ledger.length}}" class="empty" style="padding:46rpx 0">暂无课时流水</view>
+      </view>
+    </view>
+
+    <view class="btn-row pad" style="margin-top:26rpx">
+      <button class="btn ghost" bindtap="goSchedule">查看课表</button>
+      <button class="btn primary" bindtap="contact">联系教务续费</button>
+    </view>
+
+    <view class="foot-note">本版本不支持线上缴费
+续费与实际到账以教务线下登记为准</view>
+  </block>
+</view>

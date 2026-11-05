@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>翰墨学堂 · 用户管理逻辑原型评审</title>
+<style>
+  :root{
+    --ink:#232019; --ink-2:#5F594E; --muted:#948C7C; --paper:#F6F1E7;
+    --card:#FFFDF8; --line:#E7DFD0; --line-2:#F0E9DC;
+    --red:#B4473C; --gold:#C2A05E; --gold-2:#A9782A; --jade:#5C7A63; --blue:#2E6A9E;
+    --serif:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:var(--paper);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+  .hero{background:
+    radial-gradient(800px 460px at 85% 10%,rgba(194,160,94,.18),transparent 65%),
+    radial-gradient(600px 400px at 5% 100%,rgba(180,71,60,.15),transparent 60%),
+    linear-gradient(135deg,#1B1812,#29251D 60%,#3B3125);
+    color:#F6EFE2;padding:64px 0 56px;position:relative;overflow:hidden;}
+  .hero::before{content:"权限";position:absolute;right:-20px;top:50%;transform:translateY(-50%);font-family:var(--serif);font-size:240px;line-height:1;color:rgba(246,239,226,.035);letter-spacing:-8px;}
+  .hero .tag{display:inline-flex;align-items:center;gap:8px;font-size:9.5px;letter-spacing:2.4px;color:var(--gold);border:1px solid rgba(194,160,94,.35);border-radius:999px;padding:5px 14px;margin-bottom:22px;}
+  .hero .tag i{width:4px;height:4px;border-radius:50%;background:var(--gold);}
+  .hero h1{font-family:var(--serif);font-size:44px;letter-spacing:3px;line-height:1.3;font-weight:600;}
+  .hero h1 em{font-style:normal;color:#E4C48B;}
+  .hero p{font-size:12.5px;line-height:2;color:#BDB4A3;max-width:760px;margin-top:16px;}
+  .hero .links{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;}
+  .hero .links a{font-size:10.5px;border:1px solid rgba(194,160,94,.35);border-radius:8px;padding:8px 14px;color:#EBDAB7;}
+  .hero .links a.solid{background:var(--red);border-color:var(--red);color:#fff;}
+  .section{padding:48px 0 0;}
+  .section-head{display:flex;align-items:flex-end;gap:14px;margin-bottom:8px;}
+  .section-head .num{font-family:Georgia,serif;font-size:11px;color:var(--red);letter-spacing:2px;margin-bottom:3px;}
+  .section-head h2{font-family:var(--serif);font-size:25px;letter-spacing:2px;font-weight:600;}
+  .section-head h2::before{content:"";display:inline-block;width:5px;height:20px;background:var(--red);border-radius:3px;margin-right:11px;vertical-align:-2px;}
+  .section-sub{font-size:11.5px;color:var(--ink-2);line-height:1.8;margin:0 0 18px 16px;}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;}
+  .card h3{font-family:var(--serif);font-size:15px;letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:7px;}
+  .card h3::before{content:"";width:3px;height:13px;background:var(--red);border-radius:2px;}
+  .card p{font-size:10.5px;color:var(--ink-2);line-height:1.85;}
+  .acct{padding:16px 18px;}
+  .acct .k{font-size:8.5px;letter-spacing:1.4px;color:var(--red);font-weight:600;}
+  .acct h3{font-family:var(--serif);font-size:17px;margin:5px 0 6px;border:none;padding:0;}
+  .acct h3::before{display:none;}
+  .acct .meta{font-size:9.5px;color:var(--muted);line-height:1.9;}
+  .acct .scope{margin-top:10px;padding-top:9px;border-top:1px dashed var(--line);font-size:9.5px;color:var(--ink-2);line-height:1.8;}
+  .acct .scope b{color:var(--ink);}
+  .badge{display:inline-block;font-size:8px;padding:2px 7px;border-radius:8px;font-weight:600;margin-right:4px;}
+  .red{background:rgba(180,71,60,.09);color:var(--red);}
+  .gold{background:rgba(194,160,94,.16);color:#7C5A20;}
+  .jade{background:rgba(92,122,99,.11);color:#45644D;}
+  .blue{background:rgba(46,106,158,.1);color:#2E6A9E;}
+  .table{width:100%;border-collapse:collapse;font-size:10.5px;background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:hidden;}
+  th{text-align:left;padding:10px 12px;background:#F9F5EC;color:var(--ink-2);font-size:9px;letter-spacing:.3px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  td{padding:9px 12px;border-bottom:1px solid var(--line-2);color:var(--ink-2);line-height:1.65;vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  td b{color:var(--ink);}
+  .check{color:var(--jade);font-weight:700;}
+  .no{color:#C9C0B0;}
+  .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:4px;}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 13px;position:relative;}
+  .step .n{width:22px;height:22px;border-radius:50%;background:rgba(180,71,60,.08);color:var(--red);font-family:Georgia,serif;font-size:9px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+  .step b{font-size:11px;display:block;margin-bottom:4px;}
+  .step span{font-size:9px;color:var(--ink-2);line-height:1.7;display:block;}
+  .step::after{content:"›";position:absolute;right:-8px;top:50%;transform:translateY(-50%);color:#C9C0B0;font-size:16px;z-index:2;}
+  .step:last-child::after{display:none;}
+  .flow-note{font-size:9.5px;color:var(--muted);line-height:1.8;margin-top:9px;}
+  .rule-list{list-style:none;display:flex;flex-direction:column;gap:0;}
+  .rule-list li{font-size:10.5px;color:var(--ink-2);line-height:1.8;padding:9px 0;border-bottom:1px dashed var(--line);display:flex;gap:8px;}
+  .rule-list li:last-child{border:none;padding-bottom:0;}
+  .rule-list .dot{flex:none;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-top:7px;}
+  .entries{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .entry{display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;transition:.2s;}
+  .entry:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 12px 28px rgba(35,32,25,.08);}
+  .entry .kicker{font-size:8.5px;letter-spacing:2px;color:var(--red);font-weight:600;}
+  .entry h3{font-family:var(--serif);font-size:19px;margin:6px 0 6px;border:none;padding:0;}
+  .entry h3::before{display:none;}
+  .entry p{font-size:10.5px;color:var(--ink-2);line-height:1.8;}
+  .entry .go{font-size:10px;color:var(--red);margin-top:12px;font-weight:600;}
+  .question{background:#FBF5E7;border:1px solid #EBD9B4;border-radius:12px;padding:14px 16px;font-size:10.5px;color:#6E5727;line-height:1.9;margin-top:12px;}
+  .question b{color:#57431C;}
+  .footer{margin-top:50px;background:#1B1812;color:#9C9382;padding:26px 0;font-size:9.5px;line-height:1.8;}
+  .footer b{font-family:var(--serif);color:#E9DFCC;font-size:13px;letter-spacing:1px;}
+  @media(max-width:900px){.grid4{grid-template-columns:1fr 1fr;}.grid2,.entries{grid-template-columns:1fr;}.flow{grid-template-columns:1fr 1fr;}.step::after{display:none;}.hero h1{font-size:32px;}}
+  @media(max-width:600px){.wrap{padding:0 18px;}.grid4{grid-template-columns:1fr;}.hero{padding:48px 0 40px;}.table{display:block;overflow-x:auto;white-space:nowrap;}}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="tag"><i></i>USER MANAGEMENT · LOGIC REVIEW · V1.0 · 2026.10</div>
+    <h1>一套清晰的<em>用户与权限</em><br>管理逻辑</h1>
+    <p>在进入正式开发前，先确认真实系统里的账号类型、角色权限、数据范围和绑定审核规则。本页是逻辑评审稿，配套可点击的后台「用户与权限」与小程序「账号与绑定」原型。</p>
+    <div class="links">
+      <a class="solid" href="admin.html#users">打开后台用户管理原型 →</a>
+      <a href="miniprogram.html#account">打开小程序账号与绑定 →</a>
+      <a href="index.html">返回设计总览</a>
+    </div>
+  </div>
+</section>
+
+<main class="wrap">
+  <section class="section">
+    <div class="section-head"><div class="num">01 / MODEL</div><h2>先说结论：四类对象，三种账号，四种角色</h2></div>
+    <div class="section-sub">后台账号、教师账号、家长账号相互独立；一个账号只能拥有一种身份。学员只建档，不是登录账号。</div>
+    <div class="grid4">
+      <div class="card acct">
+        <div class="k">WEB ADMIN</div><h3>后台账号</h3>
+        <div class="meta">用户名 + 密码登录</div>
+        <div class="scope"><b>角色：</b>管理者 / 教务<br><b>数据范围：</b>全部业务数据<br><b>创建：</b>管理者创建；管理者账号唯一</div>
+      </div>
+      <div class="card acct">
+        <div class="k">MINI PROGRAM</div><h3>教师账号</h3>
+        <div class="meta">微信授权 + 手机号匹配</div>
+        <div class="scope"><b>角色：</b>教师<br><b>数据范围：</b>所带班级与学员<br><b>开通：</b>后台创建，微信登录自动匹配</div>
+      </div>
+      <div class="card acct">
+        <div class="k">MINI PROGRAM</div><h3>家长账号</h3>
+        <div class="meta">微信授权自动创建</div>
+        <div class="scope"><b>角色：</b>家长<br><b>数据范围：</b>已绑定子女<br><b>绑定：</b>提交申请，教务审核</div>
+      </div>
+      <div class="card acct">
+        <div class="k">PROFILE ONLY</div><h3>学员档案</h3>
+        <div class="meta">不是登录账号</div>
+        <div class="scope"><b>归属：</b>由家长账号绑定<br><b>数据：</b>档案 / 课时 / 课表 / 请假 / 作品<br><b>权限：</b>随绑定家长可见</div>
+      </div>
+    </div>
+    <div class="question"><b>关键口径：</b>一个账号只能拥有一种身份，教师账号与家长账号互斥，不提供身份切换。教师账号由后台创建，教师微信登录后按手机号匹配；小程序不提供「申请教师身份」。学员不单独登录，避免未成年人账号与重复建档。</div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div class="num">02 / ROLES</div><h2>内置角色与权限边界</h2></div>
+    <div class="section-sub">首期不做自定义角色，避免权限碎片化；角色固定，权限可按模块微调，后续确有需要再开放自定义。</div>
+    <table class="table">
+      <thead><tr><th style="width:110px">角色</th><th>适用账号</th><th>可访问模块</th><th>数据范围</th><th>关键限制</th></tr></thead>
+      <tbody>
+        <tr><td><b>管理者</b></td><td>后台账号</td><td>全部模块，含用户与权限</td><td>全机构</td><td>账号唯一；仅管理者可修改用户与权限；不可新增/停用/删除</td></tr>
+        <tr><td><b>教务</b></td><td>后台账号</td><td>学员、报名、班级排课、点名消课、请假、作品；课程/价格只读</td><td>全机构</td><td>不可见机构内容、基础数据、业务规则、用户与权限</td></tr>
+        <tr><td><b>教师</b></td><td>小程序教师身份</td><td>教师工作台、点名消课、请假审批、上传作品</td><td>所带班级与学员</td><td>不能查看其他班级；不能修改价格与账号</td></tr>
+        <tr><td><b>家长</b></td><td>小程序家长身份</td><td>首页、课程、报名、课表、请假、作品、档案</td><td>已绑定子女</td><td>只能查看/操作本人子女；关键信息修改需教务审核</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div class="num">03 / MATRIX</div><h2>权限矩阵：后台模块级</h2></div>
+    <div class="section-sub">「查看」是最低权限；新增、编辑、删除、审批等动作单独控制。小程序端按身份与数据范围控制，不套用后台矩阵。</div>
+    <table class="table">
+      <thead><tr><th>模块</th><th>管理者</th><th>教务</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><b>数据看板 / 统计报表</b></td><td><span class="check">全部</span></td><td><span class="check">查看</span></td><td>报表导出属于查看权限内的动作</td></tr>
+        <tr><td><b>学员管理</b></td><td><span class="check">全部</span></td><td><span class="check">全部</span></td><td>课时调整需填写原因并留痕</td></tr>
+        <tr><td><b>报名与缴费</b></td><td><span class="check">全部</span></td><td><span class="check">全部</span></td><td>线下缴费登记；无线上支付</td></tr>
+        <tr><td><b>课程与定价</b></td><td><span class="check">全部</span></td><td><span class="no">仅查看</span></td><td>教务可查看课程与价格，不修改</td></tr>
+        <tr><td><b>班级与排课</b></td><td><span class="check">全部</span></td><td><span class="check">全部</span></td><td>调课、停课、代课均留痕</td></tr>
+        <tr><td><b>点名与消课</b></td><td><span class="check">全部</span></td><td><span class="check">全部</span></td><td>消课修正需原因</td></tr>
+        <tr><td><b>请假审批</b></td><td><span class="check">全部</span></td><td><span class="check">全部</span></td><td>补课安排由教务执行</td></tr>
+        <tr><td><b>作品管理</b></td><td><span class="check">全部</span></td><td><span class="check">全部</span></td><td>授权与审核是发布前置条件</td></tr>
+        <tr><td><b>机构内容</b></td><td><span class="check">全部</span></td><td><span class="no">不可见</span></td><td>机构资料、师资、资质、公告</td></tr>
+        <tr><td><b>基础数据</b></td><td><span class="check">全部</span></td><td><span class="no">不可见</span></td><td>分类、阶段、班型、教室等</td></tr>
+        <tr><td><b>业务规则</b></td><td><span class="check">全部</span></td><td><span class="no">不可见</span></td><td>规则变更影响全机构</td></tr>
+        <tr><td><b>用户与权限</b></td><td><span class="check">全部</span></td><td><span class="no">不可见</span></td><td>仅管理者可修改；管理者账号唯一</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div class="num">04 / LIFECYCLE</div><h2>账号生命周期</h2></div>
+    <div class="section-sub">账号从创建到停用、解绑与归档，所有关键动作留痕；停用不删除历史数据。</div>
+    <div class="flow">
+      <div class="step"><div class="n">1</div><b>创建 / 首次登录</b><span>后台账号由管理者创建（管理者唯一）；教师由后台师资档案创建；家长首次微信登录自动创建。</span></div>
+      <div class="step"><div class="n">2</div><b>账号匹配 / 绑定</b><span>教师微信登录按手机号匹配后台账号；家长提交子女绑定，教务审核后生效。</span></div>
+      <div class="step"><div class="n">3</div><b>授权使用</b><span>按角色进入后台或小程序，数据范围随角色与绑定关系计算。</span></div>
+      <div class="step"><div class="n">4</div><b>变更 / 停用</b><span>角色、手机号、状态可变更；仅管理者可修改用户与权限；停用立即失效，历史记录保留。</span></div>
+      <div class="step"><div class="n">5</div><b>解绑 / 归档</b><span>解绑需审核；学员结课或离校后账号只读，不删除业务数据。</span></div>
+    </div>
+    <div class="flow-note">安全口径：后台密码使用 BCrypt 存储；连续输错 5 次锁定 5 分钟；不做二次验证；JWT 有效期 8 小时；停用或改密后旧 Token 失效。</div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div class="num">05 / BINDING</div><h2>家长绑定与教师账号开通</h2></div>
+    <div class="section-sub">家长绑定子女需教务审核；教师账号由后台创建，微信登录后按手机号自动匹配，小程序不提供教师身份申请入口。</div>
+    <div class="grid2">
+      <div class="card">
+        <h3>家长绑定子女</h3>
+        <ul class="rule-list">
+          <li><span class="dot"></span><div><b>① 家长提交：</b>绑定已有学员（姓名 + 学员编号 + 监护人手机号后四位）或新建学员。</div></li>
+          <li><span class="dot"></span><div><b>② 教务审核：</b>核对学员档案与监护人信息；通过后家长才能看到课表、课时与请假记录。</div></li>
+          <li><span class="dot"></span><div><b>③ 多子女：</b>一个家长账号可绑定多个子女，切换查看。</div></li>
+          <li><span class="dot"></span><div><b>④ 多监护人：</b>一个学员最多 2 个有效监护人，其中 1 个主联系人；第二个需教务审核。</div></li>
+          <li><span class="dot"></span><div><b>⑤ 解绑：</b>家长发起申请，教务审核后生效；教务也可强制解绑并留痕。</div></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>教师账号开通</h3>
+        <ul class="rule-list">
+          <li><span class="dot"></span><div><b>① 后台建档：</b>管理者在「机构内容 → 师资团队」新增教师，登记姓名与手机号，系统同步创建教师账号。</div></li>
+          <li><span class="dot"></span><div><b>② 微信登录：</b>教师用微信打开小程序并授权手机号；无需短信验证，也无需提交教师身份申请。</div></li>
+          <li><span class="dot"></span><div><b>③ 自动匹配：</b>手机号与后台教师账号一致 → 直接进入教师工作台；不一致 → 提示联系教务，不提供自助申请。</div></li>
+          <li><span class="dot"></span><div><b>④ 身份互斥：</b>教师账号与家长账号互斥；同一微信不能同时拥有两种身份，也不提供身份切换。</div></li>
+          <li><span class="dot"></span><div><b>⑤ 变更 / 解绑：</b>管理者修改手机号或解绑后，教师重新登录匹配；历史点名与审批记录保留。</div></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div class="num">06 / SECURITY</div><h2>数据范围与安全规则</h2></div>
+    <div class="section-sub">小机构不需要复杂权限引擎，但必须有清晰的数据边界与可追溯的账号变更。</div>
+    <div class="grid2">
+      <div class="card">
+        <h3>数据范围</h3>
+        <ul class="rule-list">
+          <li><span class="dot"></span><div><b>全机构：</b>管理者、教务；教务不可见配置类模块与用户管理。</div></li>
+          <li><span class="dot"></span><div><b>所带班级：</b>教师只能查看自己所带班级、学员、点课与请假。</div></li>
+          <li><span class="dot"></span><div><b>本人子女：</b>家长只能访问已绑定且状态有效的学员数据。</div></li>
+          <li><span class="dot"></span><div><b>只读历史：</b>学员结课/停课后，家长仍可查看历史课时与作品，但不能发起新业务。</div></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>安全与审计</h3>
+        <ul class="rule-list">
+          <li><span class="dot"></span><div><b>最小必要：</b>手机号、身份证等敏感信息脱敏展示；家长只看本子女。</div></li>
+          <li><span class="dot"></span><div><b>登录保护：</b>密码 BCrypt；连续输错 5 次锁定 5 分钟；首登强制改密；暂不启用二次验证。</div></li>
+          <li><span class="dot"></span><div><b>账号变更：</b>创建、角色变更、停用、重置密码、绑定/解绑均记录操作人、时间、IP。</div></li>
+          <li><span class="dot"></span><div><b>不可删除：</b>账号只停用不物理删除；管理者账号唯一且不可停用；保证课次、缴费、作品历史可追溯。</div></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div class="num">07 / PROTOTYPE</div><h2>可点击原型入口</h2></div>
+    <div class="section-sub">逻辑评审稿配套三个可交互页面，建议按顺序体验。</div>
+    <div class="entries">
+      <a class="entry" href="admin.html#users">
+        <div class="kicker">WEB ADMIN · 系统管理</div>
+        <h3>后台「用户与权限」</h3>
+        <p>用户账号筛选、角色权限矩阵、家长绑定审核、登录与变更记录。可新建后台账号、重置密码、停用账号、审核绑定。</p>
+        <div class="go">打开后台原型 →</div>
+      </a>
+      <a class="entry" href="miniprogram.html#account">
+        <div class="kicker">MINI PROGRAM · 我的</div>
+        <h3>小程序「账号与绑定」</h3>
+        <p>家长微信账号、子女绑定列表、添加学员、解绑申请。教师账号与家长账号互斥，本页不提供教师身份申请或切换。</p>
+        <div class="go">打开小程序原型 →</div>
+      </a>
+      <a class="entry" href="miniprogram.html#login">
+        <div class="kicker">MINI PROGRAM · 未登录</div>
+        <h3>小程序「登录 / 授权」</h3>
+        <p>未登录状态的品牌页、微信一键登录、游客浏览、协议勾选与教师账号说明。游客可浏览公开内容，课表与我的需登录。</p>
+        <div class="go">打开登录页 →</div>
+      </a>
+    </div>
+    <div class="question">
+      <b>已确认口径（定稿）：</b><br>
+      1. 后台账号唯一管理者 + 教务；不做二次验证，连续输错 5 次锁定 5 分钟；仅管理者可修改用户与权限；管理者账号唯一且不可停用。<br>
+      2. 家长账号与教师账号互斥，一个账号只能拥有一种身份，不提供身份切换。<br>
+      3. 教师账号由后台创建；教师微信登录按手机号自动匹配，无需短信验证，小程序不提供教师身份申请。<br>
+      4. 老师本人也是家长时，使用另一个微信账号注册家长账号。<br>
+      5. 家长绑定需教务审核，一个学员最多 2 个有效监护人、1 个主联系人；学员结课后家长可查看历史但不能发起新业务。<br>
+      6. 未登录游客可浏览机构介绍 / 课程 / 师资 / 作品 / 试听预约；报名、课表、课时、请假、我的需登录。
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <b>翰墨学堂 · 用户管理逻辑评审稿</b><br>
+    配套原型：design/admin.html#users · design/miniprogram.html#account · design/miniprogram.html#login · 2026-10-30<br>
+    本页为逻辑评审稿，正式开发以确认后的字段、角色与数据范围为准。
+  </div>
+</footer>
+
+</body>
+</html>

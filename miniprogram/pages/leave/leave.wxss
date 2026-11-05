@@ -1,0 +1,46 @@
+.picker { display: flex; align-items: center; }
+.no-lesson {
+  padding: 24rpx;
+  border-radius: 16rpx;
+  background: #F9F5EC;
+  color: var(--ink2);
+  font-size: 22rpx;
+  line-height: 1.8;
+}
+.hint-line {
+  margin-top: 12rpx;
+  color: var(--gold2);
+  font-size: 20rpx;
+  line-height: 1.7;
+}
+.reason-grid { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.reason-chip {
+  padding: 14rpx 30rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid var(--line);
+  background: #F9F5EC;
+  color: var(--ink2);
+  font-size: 22rpx;
+}
+.reason-chip.on {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+.rule-card {
+  padding: 26rpx;
+  border-radius: 22rpx;
+  background: rgba(255, 253, 248, .65);
+  border: 1rpx dashed var(--line);
+}
+.rule-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  color: var(--ink2);
+  font-size: 21rpx;
+  line-height: 1.75;
+  margin-bottom: 10rpx;
+}
+.rule-line:last-child { margin-bottom: 0; }
+.rule-dot { width: 8rpx; height: 8rpx; border-radius: 50%; background: var(--gold); margin-top: 13rpx; flex: none; }

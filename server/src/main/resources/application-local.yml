@@ -1,0 +1,37 @@
+# ============================================================
+# 本地 MySQL 配置（独立实例，端口 3307）
+# 启动：java -jar target/hanmo-server.jar --spring.profiles.active=local
+# 数据库：scripts\mysql-hanmo-start.bat 启动；scripts\mysql-hanmo-stop.bat 停止
+# 与 application-dev.yml（H2 文件库）二选一，互不干扰
+# ============================================================
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3307/hanmo_calligraphy?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USER:hanmo}
+    password: ${DB_PASSWORD:Hanmo@2026}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+  sql:
+    init:
+      mode: never
+  h2:
+    console:
+      enabled: false
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  file:
+    name: ./logs/hanmo-server.log
+  level:
+    root: info
+    com.hanmo.calligraphy: debug
+    org.springframework.security: info
+
+app:
+  wx:
+    dev-mode: true

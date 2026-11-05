@@ -1,0 +1,67 @@
+<view class="page">
+  <view class="form-hero">
+    <view class="fh-eyebrow">TRIAL BOOKING</view>
+    <view class="fh-title serif">来写第一笔</view>
+    <view class="fh-sub">留下联系方式，教务将在 1 个工作日内电话确认试听时间。不收取任何线上费用。</view>
+    <view class="fh-stamp">试
+听</view>
+  </view>
+
+  <view class="pad" style="margin-top:26rpx">
+    <view class="card padc">
+      <view class="field">
+        <view class="label">学员姓名 <text class="req">*</text></view>
+        <input value="{{form.studentName}}" placeholder="请输入孩子姓名" data-field="studentName" bindinput="onInput" />
+      </view>
+      <view class="field-row">
+        <view class="field">
+          <view class="label">学员年龄</view>
+          <input value="{{form.age}}" placeholder="如 6 岁" data-field="age" bindinput="onInput" />
+        </view>
+        <view class="field">
+          <view class="label">家长称呼</view>
+          <input value="{{form.parentName}}" placeholder="如 王女士" data-field="parentName" bindinput="onInput" />
+        </view>
+      </view>
+      <view class="field">
+        <view class="label">家长手机号 <text class="req">*</text></view>
+        <input type="number" maxlength="11" value="{{form.phone}}" placeholder="用于教务电话确认" data-field="phone" bindinput="onInput" />
+      </view>
+      <view class="field">
+        <view class="label">意向课程</view>
+        <picker range="{{courseNames}}" value="{{courseIndex}}" bindchange="onCourseChange">
+          <view class="picker">
+            <text wx:if="{{courseIndex >= 0}}">{{courseNames[courseIndex]}}</text>
+            <text wx:else class="placeholder">请选择课程（可不选）</text>
+            <text class="muted" style="margin-left:auto">›</text>
+          </view>
+        </picker>
+      </view>
+      <view class="field">
+        <view class="label">期望时段</view>
+        <picker range="{{slotNames}}" value="{{slotIndex}}" bindchange="onSlotChange">
+          <view class="picker">
+            <text wx:if="{{slotIndex >= 0}}">{{slotNames[slotIndex]}}</text>
+            <text wx:else class="placeholder">请选择期望时段（可不选）</text>
+            <text class="muted" style="margin-left:auto">›</text>
+          </view>
+        </picker>
+      </view>
+      <view class="field">
+        <view class="label">备注</view>
+        <textarea value="{{form.note}}" placeholder="孩子的书写基础、希望改善的问题等" data-field="note" bindinput="onInput" maxlength="200" />
+      </view>
+
+      <view class="check" bindtap="toggleAgree">
+        <view class="box {{agreed ? 'on' : ''}}">{{agreed ? '✓' : ''}}</view>
+        <view>我已阅读并同意机构收集以上信息，仅用于试听预约与教务联系；不使用短信或模板消息推送。</view>
+      </view>
+
+      <button class="btn primary block" loading="{{submitting}}" bindtap="submit">提交试听预约</button>
+      <view class="login-note">提交后可在预约成功页查看预约编号</view>
+    </view>
+  </view>
+
+  <view class="foot-note">如需改期或取消，请直接联系教务
+咨询电话以机构主页维护为准</view>
+</view>

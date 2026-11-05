@@ -1,0 +1,24 @@
+.t-tags { display: flex; flex-wrap: wrap; gap: 6rpx; margin-top: 10rpx; }
+.teach-note {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  margin: 30rpx 32rpx 20rpx;
+  padding: 22rpx;
+  border-radius: 20rpx;
+  background: rgba(194, 160, 94, .09);
+  border: 1rpx solid rgba(194, 160, 94, .17);
+}
+.tn-art {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 18rpx;
+  background: rgba(255, 253, 248, .8);
+  color: var(--gold2);
+  font-family: "Songti SC", serif;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}

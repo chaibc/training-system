@@ -1,0 +1,84 @@
+<view class="page">
+  <view class="page-head" style="padding-bottom:4rpx">
+    <view class="eyebrow">MY SCHEDULE</view>
+    <view class="h1">我的课表</view>
+  </view>
+
+  <view wx:if="{{blocked}}" class="empty" style="padding-top:160rpx"><view class="seal">登</view>请先使用家长账号登录</view>
+
+  <view wx:elif="{{!hasChildren}}" class="empty" style="padding-top:130rpx">
+    <view class="seal">学</view>
+    暂未绑定学员
+    <button class="btn primary sm" style="margin-top:24rpx" bindtap="goAccount">去绑定学员</button>
+  </view>
+
+  <block wx:else>
+    <scroll-view scroll-x class="chips" enhanced show-scrollbar="{{false}}" style="margin-top:20rpx">
+      <view wx:for="{{children}}" wx:key="id" class="chip {{childId === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="selectChild">{{item.name}}</view>
+    </scroll-view>
+
+    <view class="pad" style="margin-top:24rpx">
+      <view class="card hours-strip" bindtap="goHours">
+        <view class="hs-left">
+          <view class="hs-name serif">{{child.name}} <text class="tag gold">{{child.classText}}</text></view>
+          <view class="hs-meta">课时有效期至 {{hours.validUntil || '—'}}</view>
+        </view>
+        <view class="hs-right">
+          <view class="big-hours"><text class="n">{{hours.remainingHours || 0}}</text><text class="u">剩余</text></view>
+          <view class="hs-link">课时明细 ›</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="week-head pad">
+      <view class="week-arrow" data-delta="-1" bindtap="changeWeek">‹</view>
+      <view class="week-label">{{weekLabel}}</view>
+      <view class="week-arrow" data-delta="1" bindtap="changeWeek">›</view>
+    </view>
+
+    <view class="week-strip">
+      <view wx:for="{{weekDates}}" wx:key="date" class="week-day {{selectedDate === item.date ? 'on' : ''}} {{item.today ? 'today' : ''}}" data-date="{{item.date}}" bindtap="selectDay">
+        <view class="w">{{item.week}}</view>
+        <view class="d">{{item.day}}</view>
+        <view class="dot-count" wx:if="{{item.count}}">{{item.count}}</view>
+      </view>
+    </view>
+
+    <view class="pad day-title">
+      <text class="serif">{{selectedDate}} · {{dayLessons.length}} 节课</text>
+      <text class="muted small">课表以教务排课为准</text>
+    </view>
+
+    <view class="stack pad" style="margin-top:16rpx">
+      <view wx:for="{{dayLessons}}" wx:key="id" class="card lesson-card" bindtap="goLesson" data-id="{{item.id}}">
+        <view class="lesson-time">
+          <view class="t">{{item.startText}}</view>
+          <view class="d">{{item.weekdayText}}</view>
+        </view>
+        <view class="lesson-info">
+          <view class="between">
+            <view class="n">{{item.className}}</view>
+            <text class="tag {{item.statusClass}}">{{item.statusText}}</text>
+          </view>
+          <view class="m">第 {{item.lessonNo}} 课 · {{item.teacherRoom}}</view>
+          <view class="row gap8" style="margin-top:10rpx">
+            <text wx:if="{{item.attendanceText}}" class="tag {{item.attendanceClass}}">{{item.attendanceText}}</text>
+            <text wx:if="{{item.leaveStatusText}}" class="tag gold">{{item.leaveStatusText}}</text>
+            <text class="muted tiny">本次 {{item.consumedHours}} 课时</text>
+          </view>
+        </view>
+        <view class="lesson-side">
+          <text class="muted">›</text>
+          <text wx:if="{{item.canLeave}}" class="textlink" catchtap="goLeave" data-id="{{item.id}}">请假</text>
+        </view>
+      </view>
+      <view wx:if="{{!dayLessons.length && !loading}}" class="empty">
+        <view class="seal">闲</view>当天没有课程安排
+      </view>
+    </view>
+
+    <view class="form-tip" style="margin:30rpx 32rpx">
+      请假规则：课前 4 小时以上请假不扣课时；不足 4 小时或未到课按消课处理。课次开始后不能在本小程序发起请假。
+    </view>
+  </block>
+</view>

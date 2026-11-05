@@ -1,0 +1,57 @@
+<view class="page">
+  <view class="page-head">
+    <view class="eyebrow">ENROLLMENT RECORDS</view>
+    <view class="h1">报名记录</view>
+    <view class="sub">新报名与续费记录统一查询。缴费为线下登记结果，状态更新后在此同步。</view>
+  </view>
+
+  <view wx:if="{{blocked}}" class="empty" style="padding-top:160rpx"><view class="seal">登</view>请先使用家长账号登录</view>
+
+  <view wx:elif="{{!hasChildren}}" class="empty" style="padding-top:120rpx">
+    <view class="seal">学</view>
+    暂未绑定学员，绑定后可查看报名记录
+  </view>
+
+  <block wx:else>
+    <scroll-view scroll-x class="chips" enhanced show-scrollbar="{{false}}" style="margin-top:8rpx">
+      <view wx:for="{{children}}" wx:key="id" class="chip {{childId === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="selectChild">{{item.name}}</view>
+    </scroll-view>
+
+    <view class="pad" style="margin-top:24rpx">
+      <view class="seg">
+        <view class="s {{filter === 'ALL' ? 'on' : ''}}" data-status="ALL" bindtap="setFilter">全部</view>
+        <view class="s {{filter === 'PENDING_CONFIRM' ? 'on' : ''}}" data-status="PENDING_CONFIRM" bindtap="setFilter">待确认</view>
+        <view class="s {{filter === 'PENDING_PAYMENT' ? 'on' : ''}}" data-status="PENDING_PAYMENT" bindtap="setFilter">待缴费</view>
+        <view class="s {{filter === 'ENROLLED' ? 'on' : ''}}" data-status="ENROLLED" bindtap="setFilter">已入班</view>
+      </view>
+    </view>
+
+    <view class="stack pad" style="margin-top:24rpx">
+      <view wx:for="{{records}}" wx:key="id" class="card enroll-card">
+        <view class="between">
+          <view class="flex1">
+            <view class="en-name serif">{{item.courseName}}</view>
+            <view class="en-no">申请编号 {{item.enrollmentNo}}</view>
+          </view>
+          <text class="tag {{item.statusClass}}">{{item.statusText}}</text>
+        </view>
+        <view class="hr"></view>
+        <view class="kv"><text class="k">学员 / 班级</text><text class="v">{{childName}} · {{item.className || '待分配'}}</text></view>
+        <view class="kv"><text class="k">提交时间</text><text class="v">{{item.timeText}}</text></view>
+        <view class="kv"><text class="k">应缴金额</text><text class="v red bold">{{item.amountText}}</text></view>
+        <view class="en-actions">
+          <button class="btn sm ghost" bindtap="contact">联系教务</button>
+          <button class="btn sm soft" bindtap="goCourse" data-id="{{item.courseId}}">查看课程</button>
+          <button wx:if="{{item.canCancel}}" class="btn sm ghost" style="color:var(--red)" bindtap="cancel" data-id="{{item.id}}">取消申请</button>
+        </view>
+      </view>
+      <view wx:if="{{!records.length && !loading}}" class="empty">
+        <view class="seal">报</view>还没有报名记录
+        <button class="btn primary sm" style="margin-top:24rpx" bindtap="goEnroll">去报名</button>
+      </view>
+    </view>
+  </block>
+
+  <view class="foot-note">报名状态：待确认 → 待缴费 → 已入班
+如状态长时间未更新，请联系教务核对</view>
+</view>

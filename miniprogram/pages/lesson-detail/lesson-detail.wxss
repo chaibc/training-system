@@ -1,0 +1,54 @@
+.lesson-hero {
+  min-height: 280rpx;
+  padding: 38rpx 32rpx;
+  background: linear-gradient(118deg, #26221B 0%, #3A342A 58%, #4B3B2F 100%);
+  color: #F8F2E6;
+  position: relative;
+  overflow: hidden;
+}
+.lh-date { color: var(--gold); font-size: 19rpx; letter-spacing: 3rpx; }
+.lh-time { font-family: Georgia, serif; font-size: 54rpx; margin-top: 10rpx; letter-spacing: 1rpx; }
+.lh-name { font-size: 38rpx; margin-top: 8rpx; letter-spacing: 2rpx; }
+.lh-tags { display: flex; gap: 10rpx; margin-top: 20rpx; }
+.lh-watermark {
+  position: absolute;
+  right: -20rpx;
+  bottom: -70rpx;
+  font-family: "Songti SC", serif;
+  font-size: 240rpx;
+  color: rgba(246, 241, 231, .06);
+  line-height: 1;
+}
+.attend-box { display: flex; align-items: center; gap: 20rpx; }
+.attend-char {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 22rpx;
+  background: var(--paper2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Songti SC", serif;
+  font-size: 36rpx;
+  flex: none;
+}
+.attend-char.green { background: rgba(92, 122, 99, .12); color: #45644D; }
+.attend-char.gold { background: rgba(194, 160, 94, .18); color: #7C5A20; }
+.attend-char.red { background: rgba(180, 71, 60, .1); color: var(--red); }
+.rule-card {
+  padding: 26rpx;
+  border-radius: 22rpx;
+  background: rgba(255, 253, 248, .65);
+  border: 1rpx dashed var(--line);
+}
+.rule-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  color: var(--ink2);
+  font-size: 21rpx;
+  line-height: 1.75;
+  margin-bottom: 10rpx;
+}
+.rule-line:last-child { margin-bottom: 0; }
+.rule-dot { width: 8rpx; height: 8rpx; border-radius: 50%; background: var(--gold); margin-top: 13rpx; flex: none; }

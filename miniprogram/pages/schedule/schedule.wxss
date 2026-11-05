@@ -1,0 +1,59 @@
+.hours-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 26rpx;
+  background: linear-gradient(110deg, rgba(180, 71, 60, .07), rgba(255, 253, 248, .95));
+}
+.hs-name { font-size: 30rpx; font-weight: 600; }
+.hs-meta { color: var(--muted); font-size: 19rpx; margin-top: 8rpx; }
+.hs-right { text-align: right; }
+.hs-link { color: var(--muted); font-size: 18rpx; text-align: right; margin-top: 2rpx; }
+.week-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30rpx;
+  margin-top: 28rpx;
+  margin-bottom: 12rpx;
+}
+.week-arrow {
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 50%;
+  background: rgba(255, 253, 248, .8);
+  border: 1rpx solid var(--line2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink2);
+  font-size: 34rpx;
+}
+.week-label {
+  font-family: Georgia, serif;
+  font-size: 25rpx;
+  letter-spacing: 1rpx;
+}
+.week-day { position: relative; }
+.dot-count {
+  position: absolute;
+  bottom: 5rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 20rpx;
+  height: 20rpx;
+  border-radius: 10rpx;
+  background: var(--gold);
+  color: #fff;
+  font-size: 14rpx;
+  line-height: 20rpx;
+  text-align: center;
+}
+.week-day.on .dot-count { background: #E8C98E; color: #2E291F; }
+.day-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 26rpx;
+}
+.day-title .serif { font-size: 28rpx; font-weight: 600; }

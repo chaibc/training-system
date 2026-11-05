@@ -1,0 +1,28 @@
+.leave-card { padding: 24rpx; }
+.approve-actions {
+  display: flex;
+  gap: 12rpx;
+  margin-top: 18rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid var(--line2);
+}
+.approve-actions .btn { flex: 1; }
+.reject-box {
+  margin-top: 12rpx;
+  padding: 14rpx 16rpx;
+  border-radius: 12rpx;
+  background: rgba(180, 71, 60, .06);
+  color: var(--red2);
+  font-size: 20rpx;
+  line-height: 1.7;
+}
+.rule-tip {
+  margin: 28rpx 32rpx 0;
+  padding: 20rpx 24rpx;
+  border-radius: 18rpx;
+  background: rgba(255, 253, 248, .65);
+  border: 1rpx dashed var(--line);
+  color: var(--ink2);
+}
+.rt-title { font-size: 22rpx; font-weight: 600; margin-bottom: 8rpx; }
+.rt-line { font-size: 20rpx; line-height: 1.8; color: var(--muted); }

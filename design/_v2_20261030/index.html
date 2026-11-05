@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>翰墨学堂 · 小程序与管理后台交互原型</title>
+<style>
+  :root{
+    --ink:#232019; --ink-2:#5F594E; --muted:#948C7C; --paper:#F6F1E7; --paper-2:#EFE8DA;
+    --card:#FFFDF8; --line:#E7DFD0; --line-2:#F0E9DC;
+    --red:#B4473C; --red-2:#93352C; --gold:#C2A05E; --gold-2:#A9782A;
+    --jade:#5C7A63; --blue:#2E6A9E;
+    --serif:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:14px;}
+  a{color:inherit;text-decoration:none;}
+  button{font:inherit;color:inherit;border:none;background:none;cursor:pointer;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+
+  /* Hero */
+  .hero{position:relative;background:
+    radial-gradient(800px 460px at 85% 10%, rgba(194,160,94,.18), transparent 65%),
+    radial-gradient(600px 400px at 5% 100%, rgba(180,71,60,.15), transparent 60%),
+    linear-gradient(135deg,#1B1812,#29251D 60%,#3B3125);
+    color:#F6EFE2;padding:72px 0 64px;overflow:hidden;}
+  .hero::before{content:"翰墨";position:absolute;right:-30px;top:50%;transform:translateY(-50%);font-family:var(--serif);font-size:290px;line-height:1;color:rgba(246,239,226,.035);letter-spacing:-10px;pointer-events:none;}
+  .hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(194,160,94,.4),transparent);}
+  .hero .tag{display:inline-flex;align-items:center;gap:8px;font-size:9.5px;letter-spacing:2.6px;color:var(--gold);border:1px solid rgba(194,160,94,.35);border-radius:999px;padding:5px 14px;margin-bottom:24px;}
+  .hero .tag i{width:4px;height:4px;border-radius:50%;background:var(--gold);}
+  .hero h1{font-family:var(--serif);font-size:48px;line-height:1.28;letter-spacing:3px;font-weight:600;max-width:780px;}
+  .hero h1 em{font-style:normal;color:#E4C48B;}
+  .hero p{font-size:13px;line-height:2;color:#BDB4A3;max-width:660px;margin-top:18px;}
+  .hero .meta{display:flex;gap:28px;margin-top:32px;flex-wrap:wrap;}
+  .hero .meta div{border-left:1px solid rgba(194,160,94,.3);padding-left:14px;}
+  .hero .meta b{display:block;font-family:var(--serif);font-size:21px;color:#F1E5CF;letter-spacing:1px;}
+  .hero .meta span{display:block;font-size:9.5px;color:#9D9483;margin-top:4px;letter-spacing:.5px;}
+  .seal{position:absolute;right:8%;top:80px;width:62px;height:62px;border:2px solid rgba(180,71,60,.7);background:rgba(180,71,60,.08);color:#D68B80;font-family:var(--serif);font-size:19px;line-height:1.15;display:flex;align-items:center;justify-content:center;text-align:center;letter-spacing:2px;transform:rotate(3deg);}
+  .seal::after{content:"";position:absolute;inset:5px;border:1px solid rgba(180,71,60,.4);}
+
+  /* Sections */
+  .section{padding:52px 0 0;}
+  .section-head{display:flex;align-items:flex-end;gap:16px;margin-bottom:8px;}
+  .section-head .num{font-family:Georgia,serif;font-size:11px;color:var(--red);letter-spacing:2px;margin-bottom:3px;}
+  .section-head h2{font-family:var(--serif);font-size:26px;letter-spacing:2px;font-weight:600;}
+  .section-head h2::before{content:"";display:inline-block;width:5px;height:20px;background:var(--red);border-radius:3px;margin-right:11px;vertical-align:-2px;}
+  .section-sub{font-size:11.5px;color:var(--ink-2);line-height:1.8;margin:0 0 20px 16px;}
+  .scope{display:flex;gap:10px;background:#FBF5E7;border:1px solid #EBD9B4;border-radius:11px;padding:13px 16px;font-size:11px;line-height:1.8;color:#6E5727;margin:0 0 24px;align-items:flex-start;}
+  .scope b{color:#57431C;}
+  .scope .mk{flex:none;width:18px;height:18px;border-radius:50%;background:rgba(194,160,94,.25);color:#7C5A20;display:flex;align-items:center;justify-content:center;font-size:10px;margin-top:1px;}
+
+  /* Entries */
+  .entries{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .entry{display:block;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;transition:.24s;box-shadow:0 4px 16px rgba(35,32,25,.04);}
+  .entry:hover{transform:translateY(-5px);box-shadow:0 22px 46px rgba(35,32,25,.12);border-color:var(--gold);}
+  .entry .visual{height:188px;position:relative;overflow:hidden;background:linear-gradient(135deg,#2A251F,#4A3C2E);display:flex;align-items:center;justify-content:center;}
+  .entry .visual::after{content:"";position:absolute;inset:0;background:radial-gradient(300px 160px at 75% 20%,rgba(194,160,94,.2),transparent 60%);}
+  .entry .copy{padding:22px 24px 24px;}
+  .entry .kicker{font-size:8.5px;letter-spacing:2.2px;color:var(--red);font-weight:600;}
+  .entry h3{font-family:var(--serif);font-size:21px;letter-spacing:1.2px;margin:7px 0 8px;}
+  .entry p{font-size:11px;line-height:1.9;color:var(--ink-2);}
+  .entry .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:13px;}
+  .entry .chips span{font-size:8.5px;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:3px 8px;background:#FBF7EF;}
+  .entry .go{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:13px;border-top:1px solid var(--line-2);font-size:10.5px;color:var(--red);}
+  .entry .go b{font-weight:600;}
+  .entry .go .arrow{transition:.2s;}
+  .entry:hover .go .arrow{transform:translateX(4px);}
+  /* mini phone */
+  .mini-phone{width:104px;height:158px;border-radius:15px;background:#0B0A08;padding:4px;position:relative;z-index:1;transform:rotate(-4deg) translateY(6px);box-shadow:0 18px 35px rgba(0,0,0,.3);}
+  .mini-screen{width:100%;height:100%;border-radius:11px;background:var(--paper);overflow:hidden;position:relative;}
+  .mini-screen .mh{background:#2B261F;height:40px;padding:6px;color:#F1E5CF;font-family:var(--serif);font-size:6px;letter-spacing:.5px;}
+  .mini-screen .mh b{font-size:7px;display:block;color:#E4C48B;}
+  .mini-screen .mc{margin:5px;background:#fff;border-radius:4px;height:28px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+  .mini-screen .mg{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin:5px;}
+  .mini-screen .mg div{height:37px;border-radius:3px;background:linear-gradient(135deg,#8A6A49,#5C4333);}
+  .mini-screen .mg div:nth-child(2){background:linear-gradient(135deg,#465D51,#2E3F37);}
+  .mini-screen .mb{position:absolute;left:0;right:0;bottom:0;height:15px;background:#fff;border-top:1px solid #eee;display:flex;justify-content:space-around;align-items:center;}
+  .mini-screen .mb i{width:4px;height:4px;border-radius:50%;background:#bbb;}
+  .mini-screen .mb i:first-child{background:var(--red);}
+  /* mini browser */
+  .mini-browser{width:78%;height:152px;border-radius:9px;background:#F8F4EC;position:relative;z-index:1;overflow:hidden;transform:rotate(1.5deg) translateY(6px);box-shadow:0 18px 35px rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.15);}
+  .mini-browser .bar{height:15px;background:#E9E2D4;display:flex;align-items:center;gap:3px;padding:0 6px;}
+  .mini-browser .bar i{width:4px;height:4px;border-radius:50%;background:#C9C0B0;}
+  .mini-browser .lay{display:flex;height:calc(100% - 15px);}
+  .mini-browser .sd{width:38px;background:#1B1812;padding:5px 4px;}
+  .mini-browser .sd div{height:5px;border-radius:2px;background:rgba(255,255,255,.13);margin-bottom:4px;}
+  .mini-browser .sd div:nth-child(2){background:rgba(180,71,60,.6);}
+  .mini-browser .ct{flex:1;padding:7px;}
+  .mini-browser .kpis{display:flex;gap:3px;}
+  .mini-browser .kpis div{flex:1;height:24px;background:#fff;border-radius:3px;border:1px solid #eee;}
+  .mini-browser .chart{margin-top:5px;height:58px;background:#fff;border-radius:3px;border:1px solid #eee;display:flex;align-items:flex-end;gap:4px;padding:6px;}
+  .mini-browser .chart i{flex:1;background:#B4473C;border-radius:2px 2px 0 0;}
+
+  /* Notes / flows */
+  .grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;}
+  .panel h3{font-family:var(--serif);font-size:16px;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .panel h3::before{content:"";width:3px;height:14px;background:var(--red);border-radius:2px;}
+  .panel p{font-size:11px;color:var(--ink-2);line-height:1.9;}
+  .flow{list-style:none;display:flex;flex-direction:column;gap:0;}
+  .flow li{display:flex;gap:11px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:11px;line-height:1.7;color:var(--ink-2);}
+  .flow li:last-child{border:none;padding-bottom:0;}
+  .flow .n{flex:none;width:20px;height:20px;border-radius:50%;background:rgba(180,71,60,.08);color:var(--red);font-family:Georgia,serif;font-size:9px;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .flow b{color:var(--ink);font-weight:600;display:block;margin-bottom:2px;}
+  .flow code{font-family:"PingFang SC",monospace;font-size:9.5px;background:#F6F1E7;border-radius:3px;padding:1px 4px;color:#7B5B2B;}
+
+  /* Coverage table */
+  .coverage{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  table{width:100%;border-collapse:collapse;font-size:11px;}
+  th{text-align:left;padding:11px 14px;background:#F9F5EC;color:var(--ink-2);font-weight:600;font-size:9.5px;letter-spacing:.3px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  td{padding:10px 14px;border-bottom:1px solid var(--line-2);color:var(--ink-2);line-height:1.6;vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  td b{color:var(--ink);font-weight:600;}
+  .dot{display:inline-flex;align-items:center;gap:4px;font-size:8.5px;white-space:nowrap;}
+  .dot::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--jade);}
+  .dot.off::before{background:#B9B1A2;}
+  .dot.off{color:var(--muted);}
+  .p0,.p1,.p2{display:inline-block;font-size:8px;padding:2px 7px;border-radius:8px;font-weight:600;}
+  .p0{background:rgba(180,71,60,.09);color:var(--red);}
+  .p1{background:rgba(194,160,94,.16);color:#7C5A20;}
+  .p2{background:rgba(92,122,99,.11);color:#45644D;}
+
+  /* Palette */
+  .palette{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+  .sw{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .sw .c{height:52px;}
+  .sw .t{padding:8px 9px;font-size:9px;line-height:1.5;}
+  .sw .t b{display:block;font-size:9.5px;margin-bottom:1px;}
+  .sw .t span{color:var(--muted);}
+  .type-row{display:flex;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--line-2);}
+  .type-row:last-child{border:none;}
+  .type-row .lab{width:82px;flex:none;font-size:9px;color:var(--muted);letter-spacing:.5px;}
+  .type-row .demo-serif{font-family:var(--serif);font-size:24px;letter-spacing:2px;}
+  .type-row .demo-sans{font-size:15px;}
+  .type-row .demo-mono{font-family:Georgia,serif;font-size:20px;letter-spacing:.5px;}
+
+  /* Checklist */
+  .checks{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;}
+  .checks div{font-size:10.5px;color:var(--ink-2);line-height:1.7;padding-left:18px;position:relative;}
+  .checks div::before{content:"✓";position:absolute;left:0;top:0;color:var(--jade);font-weight:700;font-size:10px;}
+  .checks div.no::before{content:"—";color:var(--muted);}
+
+  /* Footer */
+  .footer{margin-top:56px;background:#1B1812;color:#9C9382;padding:30px 0;}
+  .footer .wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+  .footer b{font-family:var(--serif);color:#E9DFCC;font-size:14px;letter-spacing:1px;}
+  .footer span{font-size:9.5px;line-height:1.8;}
+  .footer .sp{flex:1;}
+  .footer a{font-size:10px;color:var(--gold);}
+
+  @media (max-width:900px){
+    .entries,.grid2{grid-template-columns:1fr;}
+    .hero h1{font-size:34px;}
+    .palette{grid-template-columns:repeat(3,1fr);}
+    .seal{display:none;}
+    .checks{grid-template-columns:1fr;}
+  }
+  @media (max-width:600px){
+    .wrap{padding:0 18px;}
+    .hero{padding:54px 0 44px;}
+    .hero h1{font-size:29px;}
+    .hero .meta{gap:16px;}
+    .palette{grid-template-columns:repeat(2,1fr);}
+    .coverage{overflow-x:auto;}
+    table{min-width:760px;}
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="wrap" style="position:relative">
+    <div class="seal">翰墨<br>学堂</div>
+    <div class="tag"><i></i>UI / UX PROTOTYPE · V2.0 · 2026.10</div>
+    <h1>书法培训微信小程序<br>与<em>管理后台</em>交互原型</h1>
+    <p>依据《书法培训机构微信小程序需求说明书 V1.0》制作，覆盖机构介绍、培训内容、报名、学员档案、排课课表、请假、统计与作品展示。两套端均可点击操作，按钮、表单、筛选、审批与状态流转均有反馈。</p>
+    <div class="meta">
+      <div><b>24 + 3</b><span>小程序功能页 / 结果页</span></div>
+      <div><b>11</b><span>管理后台功能页</span></div>
+      <div><b>2</b><span>本期明确不做：通知 / 线上缴费</span></div>
+      <div><b>100%</b><span>按钮与表单可交互</span></div>
+    </div>
+  </div>
+</section>
+
+<main class="wrap">
+  <section class="section">
+    <div class="section-head"><div class="num">01 / ENTRY</div><h2>两套端，一套业务口径</h2></div>
+    <div class="section-sub">建议先打开小程序端体验家长路径，再打开管理后台体验教务处理。</div>
+    <div class="entries">
+      <a class="entry" href="miniprogram.html">
+        <div class="visual">
+          <div class="mini-phone"><div class="mini-screen">
+            <div class="mh"><b>翰墨学堂</b>幼小衔接 · 软硬笔</div>
+            <div class="mc"></div>
+            <div class="mg"><div>永</div><div>和</div></div>
+            <div class="mc" style="height:20px"></div>
+            <div class="mb"><i></i><i></i><i></i><i></i></div>
+          </div></div>
+        </div>
+        <div class="copy">
+          <div class="kicker">WECHAT MINI PROGRAM · C 端</div>
+          <h3>小程序交互原型</h3>
+          <p>家长 / 学生端 + 教师端合并在同一小程序。覆盖机构门户、课程详情、试听预约、报名登记（无线支付）、我的课表、课次详情、请假、作品墙、学员档案、课时账户、成长档案、教师点名消课与作品上传。</p>
+          <div class="chips"><span>首页</span><span>课程体系</span><span>报名登记</span><span>我的课表</span><span>请假</span><span>作品墙</span><span>学员档案</span><span>教师端</span></div>
+          <div class="go"><b>打开小程序原型 →</b><span class="arrow">↗</span></div>
+        </div>
+      </a>
+      <a class="entry" href="admin.html">
+        <div class="visual" style="background:linear-gradient(135deg,#2A251F,#3E362A)">
+          <div class="mini-browser">
+            <div class="bar"><i></i><i></i><i></i></div>
+            <div class="lay">
+              <div class="sd"><div></div><div></div><div></div><div></div><div></div></div>
+              <div class="ct">
+                <div class="kpis"><div></div><div></div><div></div><div></div></div>
+                <div class="chart"><i style="height:40%"></i><i style="height:62%"></i><i style="height:50%"></i><i style="height:78%"></i><i style="height:88%"></i><i style="height:96%"></i></div>
+                <div class="kpis" style="margin-top:5px"><div></div><div></div><div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="copy">
+          <div class="kicker">WEB ADMIN CONSOLE · B 端</div>
+          <h3>管理后台交互原型</h3>
+          <p>面向教务、教师与管理者。覆盖学员档案与课时账户、报名确认与线下缴费登记、课程与班型价格、周课表排课与冲突校验、点名消课与修正、请假审批与补课、作品授权审核、统计报表与业务设置。</p>
+          <div class="chips"><span>数据看板</span><span>学员管理</span><span>报名与缴费</span><span>班级排课</span><span>点名消课</span><span>请假审批</span><span>作品管理</span><span>统计报表</span></div>
+          <div class="go"><b>打开管理后台原型 →</b><span class="arrow">↗</span></div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div class="num">02 / SCOPE</div><h2>本期范围与明确排除项</h2></div>
+    <div class="section-sub">依据本次任务要求，以下两项不进入原型与后续开发范围。</div>
+    <div class="scope"><span class="mk">!</span><div><b>不做消息通知：</b>不实现微信订阅消息、站内消息中心、上课提醒、续费提醒推送。家长通过「课表」「请假记录」「报名记录」主动查看状态；机构通过电话 / 到店沟通。<br><b>不做线上缴费：</b>不接入微信支付。报名、续费、补费等均由教务在后台登记线下收款，并写入课时账户与缴费流水。小程序端仅展示应缴费用与线下缴费状态。</div></div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>原型已覆盖的交互</h3>
+        <div class="checks">
+          <div>课程分类筛选、课程对比、试听 / 报名表单提交</div>
+          <div>多子女切换、周课表按天筛选、课次详情联动</div>
+          <div>请假申请、原因选择、提交成功与规则校验</div>
+          <div>作品筛选、点赞、分享面板、留言审核提示</div>
+          <div>学员档案编辑、课时流水、上课记录筛选</div>
+          <div>教师点名三态切换、提交消课、请假审批</div>
+          <div>后台学员新建、档案抽屉、课时调整、线下缴费</div>
+          <div>报名确认 / 缴费后状态流转、课程新建与上下架</div>
+          <div>周课表冲突提示、调课确认、新建班级</div>
+          <div>点名汇总联动、批量消课、消课修正</div>
+          <div>请假批量审批、补课安排、作品授权补录</div>
+          <div>统计报表筛选、图表悬停、数据表展开</div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>不在本次范围</h3>
+        <div class="checks" style="grid-template-columns:1fr">
+          <div class="no">消息通知 / 订阅消息 / 站内消息中心</div>
+          <div class="no">线上支付 / 微信支付 / 订单支付状态</div>
+          <div class="no">优惠券、优秀作品投票、招生海报投放（P2 营销能力）</div>
+          <div class="no">多校区切换（P2，当前为单校区）</div>
+          <div class="no">真实后端接口、登录鉴权、数据持久化</div>
+        </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);font-size:9.5px;color:var(--muted);line-height:1.8">以上排除项在页面中以「范围说明」标注；不影响其余功能的完整演示。</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div class="num">03 / COVERAGE</div><h2>需求模块覆盖清单</h2></div>
+    <div class="section-sub">对应需求说明书第四章九大模块；标注承载端与优先级。</div>
+    <div class="coverage">
+      <table>
+        <thead><tr><th style="width:150px">需求模块</th><th>小程序端承载</th><th>管理后台承载</th><th style="width:78px">优先级</th><th style="width:86px">状态</th></tr></thead>
+        <tbody>
+          <tr><td><b>一、机构介绍</b></td><td>首页、机构介绍、师资团队、教师详情、地址导航 / 拨号</td><td>机构与师资 → 机构资料 / 师资团队 / 校区与资质</td><td><span class="p0">P0</span></td><td><span class="dot">已覆盖</span></td></tr>
+          <tr><td><b>二、培训内容</b></td><td>课程体系、课程详情、五阶段大纲、班型价格、试听预约</td><td>课程管理、内容大纲、班型与价格维护</td><td><span class="p0">P0</span></td><td><span class="dot">已覆盖</span></td></tr>
+          <tr><td><b>三、报名功能</b></td><td>报名登记（多子女、选班、表单提交）、报名记录</td><td>报名申请、试听线索、线下缴费登记、退费留痕</td><td><span class="p0">P0</span></td><td><span class="dot">已覆盖 · 无线支付</span></td></tr>
+          <tr><td><b>四、学生信息</b></td><td>学员档案、多子女切换、课时账户、上课记录、成长档案</td><td>学员管理、学员档案抽屉、课时调整、课时流水</td><td><span class="p0">P0</span></td><td><span class="dot">已覆盖</span></td></tr>
+          <tr><td><b>五、排课与课表</b></td><td>我的课表、按天筛选、课次详情、调课状态同步</td><td>班级管理、周模板排课、冲突校验、调课 / 停课 / 代课</td><td><span class="p0">P0</span></td><td><span class="dot">已覆盖</span></td></tr>
+          <tr><td><b>六、消息通知</b></td><td>—</td><td>—</td><td><span class="p0">P0</span></td><td><span class="dot off">本期不做</span></td></tr>
+          <tr><td><b>七、请假申请</b></td><td>请假申请、规则公示、提交结果、请假记录、补课申请</td><td>请假审批、扣课时判定、补课安排</td><td><span class="p0">P0</span></td><td><span class="dot">已覆盖</span></td></tr>
+          <tr><td><b>八、统计查询</b></td><td>课时账户、上课记录、个人统计</td><td>数据看板、统计报表、课时 / 出勤 / 教师 / 续费分析</td><td><span class="p0">P0</span></td><td><span class="dot">已覆盖</span></td></tr>
+          <tr><td><b>九、作品展示</b></td><td>作品墙、作品详情、点赞分享、成长档案</td><td>作品审核、家长授权、评论审核、作品上传</td><td><span class="p0">P0</span></td><td><span class="dot">已覆盖</span></td></tr>
+          <tr><td><b>P1 / P2 增强</b></td><td>课程对比、成长档案、班级动态</td><td>报表导出、来源分析、退款记录、运营查看</td><td><span class="p1">P1</span> <span class="p2">P2</span></td><td><span class="dot">部分覆盖</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div class="num">04 / DEMO</div><h2>建议演示路径</h2></div>
+    <div class="section-sub">按真实业务顺序操作，能看到状态在两端之间同步的口径设计。</div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>家长端：从了解课程到请假</h3>
+        <ul class="flow">
+          <li><span class="n">1</span><div><b>首页 → 课程体系 → 课程详情</b>切换硬笔 / 软笔 / 幼小衔接筛选，打开课程对比，查看五阶段大纲。</div></li>
+          <li><span class="n">2</span><div><b>预约试听 / 报名登记</b>填写表单并提交，进入成功页；报名记录中查看「待确认 → 待缴费 → 已入班」状态与线下缴费说明。</div></li>
+          <li><span class="n">3</span><div><b>我的课表 → 课次详情 → 请假申请</b>切换子女、按天筛选；提交请假后进入结果页，在请假记录中查看审批状态与补课入口。</div></li>
+          <li><span class="n">4</span><div><b>作品墙 → 作品详情</b>筛选作品、点赞、打开分享面板、提交留言（审核后展示）。</div></li>
+          <li><span class="n">5</span><div><b>我的 → 学员档案 / 课时账户</b>查看档案、课时流水、上课记录与成长档案。</div></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>管理端：从报名到消课</h3>
+        <ul class="flow">
+          <li><span class="n">1</span><div><b>报名与缴费</b>确认报名 → 状态变「待缴费」→ 登记线下缴费 → 状态变「已入班」，演示线下收款与课时写入。</div></li>
+          <li><span class="n">2</span><div><b>班级与排课</b>查看冲突提示，点击课次查看详情，发起调课并确认；切换周次查看课表。</div></li>
+          <li><span class="n">3</span><div><b>点名与消课</b>切换出勤 / 请假 / 缺勤，观察汇总与预计消课变化；提交后生成消课结果；在消课记录中修正。</div></li>
+          <li><span class="n">4</span><div><b>请假审批</b>同意后计数联动，切换「已通过」查看；已有请假可安排补课。</div></li>
+          <li><span class="n">5</span><div><b>作品管理</b>尝试通过未授权作品（会被拦截），补录授权后再通过；体验评论审核。统计报表中查看图表数据表。</div></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div class="num">05 / DESIGN</div><h2>设计规范</h2></div>
+    <div class="section-sub">以「宣纸 · 墨 · 朱印 · 鎏金」为视觉意象，兼顾书法品牌气质与教务后台的信息密度。</div>
+    <div class="palette">
+      <div class="sw"><div class="c" style="background:#232019"></div><div class="t"><b>墨色 #232019</b><span>主文字 / 深色头部</span></div></div>
+      <div class="sw"><div class="c" style="background:#F6F1E7"></div><div class="t"><b>宣纸 #F6F1E7</b><span>背景 / 纸面</span></div></div>
+      <div class="sw"><div class="c" style="background:#B4473C"></div><div class="t"><b>朱印 #B4473C</b><span>主色 / CTA / 警示</span></div></div>
+      <div class="sw"><div class="c" style="background:#C2A05E"></div><div class="t"><b>鎏金 #C2A05E</b><span>点缀 / 边框 / 等级</span></div></div>
+      <div class="sw"><div class="c" style="background:#5C7A63"></div><div class="t"><b>竹绿 #5C7A63</b><span>成功 / 已完成 / 出勤</span></div></div>
+      <div class="sw"><div class="c" style="background:#2E6A9E"></div><div class="t"><b>黛蓝 #2E6A9E</b><span>图表系列 / 待处理</span></div></div>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <h3>字体与数字</h3>
+      <div class="type-row"><div class="lab">标题 / 衬线</div><div class="demo-serif">翰墨学堂 · 一笔一画</div></div>
+      <div class="type-row"><div class="lab">正文 / 无衬线</div><div class="demo-sans">课程、课表、课时与报名记录均使用高可读性的系统无衬线字体。</div></div>
+      <div class="type-row"><div class="lab">数据 / 数字</div><div class="demo-mono">168 · 1,286 · ¥86,400</div></div>
+      <div style="font-size:9.5px;color:var(--muted);line-height:1.8;margin-top:10px">图表使用单色系列 + 直接标注；表格数字使用等宽数字；状态色始终配有文字标签，不单独依赖颜色传达信息。</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div class="num">06 / FILE</div><h2>文件与说明</h2></div>
+    <div class="section-sub">所有原型均为纯 HTML / CSS / JavaScript，无外部依赖，双击即可在浏览器打开。</div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>文件结构</h3>
+        <ul class="flow">
+          <li><span class="n">A</span><div><b>index.html</b>设计总览与范围说明（当前页）</div></li>
+          <li><span class="n">B</span><div><b>miniprogram.html</b>小程序端 24 个功能页 + 3 个流程结果页，左侧目录可直达任意页面</div></li>
+          <li><span class="n">C</span><div><b>admin.html</b>管理后台 11 个功能页，侧边栏切换，含学员抽屉、弹窗、图表与审批交互</div></li>
+          <li><span class="n">D</span><div><b>_v1/</b>旧版静态设计稿备份（含已排除的通知与线上缴费内容，请勿作为交付依据）</div></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>原型约定</h3>
+        <p>· 所有数据为演示样例，不代表真实机构经营数据；<br>
+        · 手机号、身份证等敏感信息均按脱敏展示；<br>
+        · 报名、续费、补费等金额仅用于流程演示；<br>
+        · 未接入后端、微信登录、支付接口与地图接口，相关按钮以弹层 / 提示说明真实调用；<br>
+        · 通知与线上缴费为本次明确排除项，页面中仅保留说明性文字，不提供入口。</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="seal" style="position:relative;top:auto;right:auto;left:auto;bottom:auto;width:38px;height:38px;font-size:12px;transform:none;flex:none">翰墨<br>学堂</div>
+    <div><b>翰墨学堂 · 书法培训小程序与管理后台</b><br><span>依据需求说明书 V1.0 · 交互原型 V2.0 · 2026-10-29</span></div>
+    <div class="sp"></div>
+    <span>本期不含消息通知与线上缴费</span>
+    <a href="miniprogram.html">小程序原型</a>
+    <a href="admin.html">管理后台</a>
+  </div>
+</footer>
+
+</body>
+</html>

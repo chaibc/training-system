@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>书法培训机构小程序 · 设计总览</title>
+<style>
+  :root{
+    --ink:#2b2a28; --ink-2:#55524d; --paper:#f7f4ed; --card:#ffffff;
+    --red:#b8433a; --gold:#c9a86a; --green:#6b8e6f; --line:#e6e0d4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--paper);color:var(--ink);font-family:"PingFang SC","Microsoft YaHei",sans-serif;}
+  .hero{background:linear-gradient(135deg,#2b2a28 0%,#3d3a36 100%);color:#f7f4ed;padding:64px 8% 56px;position:relative;overflow:hidden;}
+  .hero::after{content:"墨";position:absolute;right:6%;top:50%;transform:translateY(-50%);font-size:220px;font-family:"STKaiti","KaiTi",serif;color:rgba(201,168,106,.12);}
+  .hero .tag{display:inline-block;border:1px solid var(--gold);color:var(--gold);font-size:12px;padding:4px 14px;border-radius:20px;letter-spacing:4px;margin-bottom:20px;}
+  .hero h1{font-family:"STKaiti","KaiTi",serif;font-size:40px;letter-spacing:6px;font-weight:600;}
+  .hero h1 span{color:var(--gold);}
+  .hero p{margin-top:14px;color:#b8b3a8;font-size:14px;line-height:1.8;max-width:640px;}
+  .hero .seal{position:absolute;right:9%;bottom:40px;width:64px;height:64px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:"STKaiti","KaiTi",serif;font-size:24px;line-height:1.1;color:#fff;text-align:center;box-shadow:0 6px 18px rgba(184,67,58,.4);}
+  .wrap{max-width:1200px;margin:0 auto;padding:48px 6% 80px;}
+  h2.sec{font-family:"STKaiti","KaiTi",serif;font-size:24px;letter-spacing:3px;margin:40px 0 8px;display:flex;align-items:center;gap:12px;}
+  h2.sec::before{content:"";width:6px;height:24px;background:var(--red);border-radius:3px;}
+  .sub{color:var(--ink-2);font-size:13px;margin-bottom:20px;}
+  .entries{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  a.entry{display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:32px;text-decoration:none;color:var(--ink);transition:.2s;box-shadow:0 2px 10px rgba(43,42,40,.04);}
+  a.entry:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(43,42,40,.12);border-color:var(--gold);}
+  .entry .ic{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:18px;}
+  .entry.c .ic{background:#eef3ee;color:var(--green);}
+  .entry.m .ic{background:#fdeeea;color:var(--red);}
+  .entry h3{font-size:20px;margin-bottom:8px;letter-spacing:1px;}
+  .entry p{font-size:13px;color:var(--ink-2);line-height:1.7;}
+  .entry .go{margin-top:16px;font-size:13px;color:var(--red);}
+  .palette{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;}
+  .sw{border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--card);}
+  .sw .c{height:64px;}
+  .sw .t{padding:10px 12px;font-size:12px;line-height:1.5;}
+  .sw .t b{display:block;font-size:12px;}
+  .sw .t span{color:var(--ink-2);}
+  .mods{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{background:#faf8f2;text-align:left;padding:12px 16px;font-weight:600;border-bottom:1px solid var(--line);letter-spacing:1px;}
+  td{padding:11px 16px;border-bottom:1px solid #f1ede3;color:var(--ink-2);}
+  tr:last-child td{border-bottom:none;}
+  .p0,.p1,.p2{display:inline-block;font-size:11px;padding:2px 10px;border-radius:10px;font-weight:600;}
+  .p0{background:#fdeeea;color:var(--red);}
+  .p1{background:#fdf6e8;color:#a3822f;}
+  .p2{background:#eef3ee;color:var(--green);}
+  .note{margin-top:36px;background:#fdf6e8;border:1px solid #ecd9a8;border-radius:12px;padding:18px 22px;font-size:13px;color:#6d5a25;line-height:1.9;}
+</style>
+</head>
+<body>
+  <div class="hero">
+    <span class="tag">UI / UX 设计稿 · V1.0</span>
+    <h1>书法培训中心 <span>小程序 + 管理后台</span></h1>
+    <p>幼小衔接 · 软笔与硬笔书法培训 —— 依据《书法培训机构微信小程序需求说明书》输出的 HTML 高保真设计页面，覆盖机构介绍、培训内容、报名、学生信息、排课课表、消息通知、请假、统计、作品展示九大模块。</p>
+    <div class="seal">翰墨<br>传承</div>
+  </div>
+
+  <div class="wrap">
+    <h2 class="sec">设计入口</h2>
+    <p class="sub">两部分设计均为独立 HTML 页面，可直接在浏览器打开预览</p>
+    <div class="entries">
+      <a class="entry m" href="miniprogram.html">
+        <div class="ic">📱</div>
+        <h3>小程序端（家长 / 学生 / 教师）</h3>
+        <p>四 Tab 结构：首页 · 课表 · 作品 · 我的。含首页门户、课程详情与试听预约、报名支付流程、我的课表、请假申请、消息中心、作品墙、课时续费与教师端点名消课，共 11 屏高保真设计稿。</p>
+        <div class="go">查看小程序设计稿 →</div>
+      </a>
+      <a class="entry c" href="admin.html">
+        <div class="ic">🖥️</div>
+        <h3>管理后台客户端（Web 端）</h3>
+        <p>面向教务、教师与管理者：数据看板、学员档案、班级与排课（冲突校验）、点名消课、请假审批、课程维护、订单与缴费、作品审核、消息下发、统计报表，共 10 个功能页。</p>
+        <div class="go">查看管理后台设计稿 →</div>
+      </a>
+    </div>
+
+    <h2 class="sec">设计规范 · 色彩体系</h2>
+    <p class="sub">以「宣纸 · 墨 · 朱印」为视觉意象，呼应书法培训的品牌调性</p>
+    <div class="palette">
+      <div class="sw"><div class="c" style="background:#2b2a28"></div><div class="t"><b>墨色 #2B2A28</b><span>主文字 / 标题</span></div></div>
+      <div class="sw"><div class="c" style="background:#f7f4ed"></div><div class="t"><b>宣纸 #F7F4ED</b><span>页面底色</span></div></div>
+      <div class="sw"><div class="c" style="background:#b8433a"></div><div class="t"><b>朱印 #B8433A</b><span>主色 / 强调 / CTA</span></div></div>
+      <div class="sw"><div class="c" style="background:#c9a86a"></div><div class="t"><b>鎏金 #C9A86A</b><span>点缀 / 边框 / 等级</span></div></div>
+      <div class="sw"><div class="c" style="background:#6b8e6f"></div><div class="t"><b>竹绿 #6B8E6F</b><span>成功 / 已完成</span></div></div>
+      <div class="sw"><div class="c" style="background:#d9a441"></div><div class="t"><b>暖橙 #D9A441</b><span>预警 / 待办</span></div></div>
+    </div>
+
+    <h2 class="sec">模块覆盖清单</h2>
+    <p class="sub">对应需求说明书第四章九大模块，标注优先级与承载端</p>
+    <div class="mods">
+      <table>
+        <tr><th>需求模块</th><th>核心设计内容</th><th>小程序端</th><th>管理后台</th><th>优先级</th></tr>
+        <tr><td>一、机构介绍</td><td>首页门户、师资列表、地址导航、资质公示</td><td>✅ 屏 1</td><td>✅ 机构资料维护</td><td><span class="p0">P0</span></td></tr>
+        <tr><td>二、培训内容</td><td>课程分类、课程详情、试听预约、班型价格</td><td>✅ 屏 1-2</td><td>✅ 课程管理页</td><td><span class="p0">P0</span></td></tr>
+        <tr><td>三、报名功能</td><td>报名表单、微信支付、订单记录、试听报名</td><td>✅ 屏 3</td><td>✅ 订单与缴费页</td><td><span class="p0">P0</span></td></tr>
+        <tr><td>四、学生信息</td><td>学员档案、多子女切换、课时账户、上课记录</td><td>✅ 屏 4、9</td><td>✅ 学员管理页</td><td><span class="p0">P0</span></td></tr>
+        <tr><td>五、排课与课表</td><td>周课表、课次状态、点名消课、调课冲突校验</td><td>✅ 屏 4-5、10</td><td>✅ 排课 / 消课页</td><td><span class="p0">P0</span></td></tr>
+        <tr><td>六、消息通知</td><td>消课/调课/续费通知、站内消息中心、订阅引导</td><td>✅ 屏 7</td><td>✅ 消息通知页</td><td><span class="p0">P0</span></td></tr>
+        <tr><td>七、请假申请</td><td>请假提交、规则校验（4小时）、审批流转</td><td>✅ 屏 6</td><td>✅ 请假审批页</td><td><span class="p0">P0</span></td></tr>
+        <tr><td>八、统计查询</td><td>课时/消课/收入统计、数据看板、报表导出</td><td>✅ 屏 9（个人）</td><td>✅ 看板 / 报表页</td><td><span class="p0">P0</span></td></tr>
+        <tr><td>九、作品展示</td><td>作品墙、作品详情、上传审核、分享传播</td><td>✅ 屏 8</td><td>✅ 作品管理页</td><td><span class="p0">P0</span></td></tr>
+      </table>
+    </div>
+
+    <div class="note">
+      <b>设计说明：</b>① 课时口径统一为「1 课时 = 1 次课」，所有页面展示的剩余课时均以课时账户为唯一口径；② 订阅消息授权入口嵌入「报名成功 / 查看课表」等真实操作节点，站内消息中心作为兜底通道；③ 展示价格与下单价格一致，手机号等敏感信息脱敏显示；④ 小程序教师端与家长端按身份区分，合并于同一小程序（一期建议）。
+    </div>
+  </div>
+</body>
+</html>

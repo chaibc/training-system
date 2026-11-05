@@ -1,0 +1,80 @@
+<view class="page has-bottom-bar">
+  <view class="page-head">
+    <view class="eyebrow">ENROLLMENT</view>
+    <view class="h1">报名登记</view>
+    <view class="sub">选择学员与班级，提交后由教务电话确认，到店完成缴费并正式入班。本期不支持线上支付。</view>
+  </view>
+
+  <view wx:if="{{blocked}}" class="empty" style="padding-top:160rpx">
+    <view class="seal">登</view>请先使用家长账号登录
+  </view>
+
+  <view wx:elif="{{!hasChildren}}" class="pad" style="margin-top:24rpx">
+    <view class="card padc center" style="padding:60rpx 32rpx">
+      <view class="serif" style="font-size:32rpx">还没有绑定学员</view>
+      <view class="muted small" style="margin-top:12rpx;line-height:1.8">报名前请先在「账号与绑定」中添加孩子，或联系教务完成绑定审核。</view>
+      <button class="btn primary" style="margin-top:28rpx" bindtap="goAccount">去绑定学员</button>
+    </view>
+  </view>
+
+  <block wx:else>
+    <view class="section"><view class="title">选择学员</view></view>
+    <scroll-view scroll-x class="chips" enhanced show-scrollbar="{{false}}">
+      <view wx:for="{{children}}" wx:key="id" class="child-chip {{childId === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="selectChild">
+        <view class="avatar sm" style="background:{{item.avatarColor}}">{{item.avatarChar}}</view>
+        <view>
+          <view class="cc-name">{{item.name}}</view>
+          <view class="cc-meta">剩余 {{item.remainingHours}} 课时</view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="section"><view class="title">选择课程</view><view class="more">共 {{courses.length}} 门</view></view>
+    <view class="stack pad">
+      <view wx:for="{{courses}}" wx:key="id" class="course-option card {{courseId === item.id ? 'sel' : ''}}" data-id="{{item.id}}" bindtap="selectCourse">
+        <view class="course-cover small" style="{{item.coverStyle}}">{{item.coverChar}}</view>
+        <view class="flex1">
+          <view class="co-name">{{item.name}}</view>
+          <view class="co-meta">{{item.metaText}}</view>
+          <view class="co-price">{{item.priceText}} <text class="muted tiny">/ {{item.priceUnit}}</text></view>
+        </view>
+        <view class="radio {{courseId === item.id ? 'on' : ''}}">{{courseId === item.id ? '✓' : ''}}</view>
+      </view>
+    </view>
+
+    <view class="section"><view class="title">选择班级</view><view class="more">{{classOptions.length}} 个可选</view></view>
+    <view class="pad">
+      <view wx:if="{{classOptions.length}}" class="stack">
+        <view wx:for="{{classOptions}}" wx:key="id" class="card class-option {{classId === item.id ? 'sel' : ''}}" data-id="{{item.id}}" bindtap="selectClass">
+          <view class="between">
+            <view class="co-name">{{item.name}}</view>
+            <text class="tag {{item.remainingLow ? 'red' : 'green'}}">剩余 {{item.remaining}} 名</text>
+          </view>
+          <view class="co-meta">{{item.teacherName}} · {{item.weekdayText}} {{item.timeText}}</view>
+          <view class="between" style="margin-top:12rpx">
+            <text class="muted tiny">名额 {{item.enrolled}} / {{item.capacity}}</text>
+            <text class="red bold" wx:if="{{item.price !== null}}">¥{{item.price}}</text>
+          </view>
+        </view>
+      </view>
+      <view wx:elif="{{!loading}}" class="empty">该课程暂无可选班级，可先提交报名由教务分班</view>
+    </view>
+
+    <view class="section"><view class="title">报名确认</view></view>
+    <view class="pad">
+      <view class="card padc summary-card">
+        <view class="kv"><text class="k">学员</text><text class="v">{{childName}}</text></view>
+        <view class="kv"><text class="k">课程</text><text class="v">{{course ? course.name : '未选择'}}</text></view>
+        <view class="kv"><text class="k">班级</text><text class="v">{{selectedClass ? selectedClass.name : '由教务分配'}}</text></view>
+        <view class="kv"><text class="k">应缴金额</text><text class="v red bold"><text wx:if="{{amount === '—'}}">以教务确认为准</text><text wx:else>¥{{amount}}</text></text></view>
+        <view class="hr"></view>
+        <view class="form-tip" style="margin:0">提交后状态为「待确认」，教务确认后才能到店缴费。缴费完成即计入课时账户并入班。</view>
+      </view>
+    </view>
+  </block>
+
+  <view wx:if="{{!blocked && hasChildren}}" class="bottom-bar">
+    <button class="btn ghost" bindtap="goAccount">管理学员</button>
+    <button class="btn primary" loading="{{submitting}}" bindtap="submit">提交报名</button>
+  </view>
+</view>

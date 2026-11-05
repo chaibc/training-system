@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    # 本地文件库：数据落在 server/data/hanmo.mv.db，重启不丢，可用 DBeaver 直接连
+    # AUTO_SERVER=TRUE：允许后端运行期间 DBeaver 同时连接（H2 内置 TCP 转发）
+    # 首次使用前执行 scripts\h2-db.bat 初始化；重建数据用 scripts\h2-db.bat -Reset
+    url: jdbc:h2:file:${HANMO_DB_PATH:./data/hanmo};MODE=MySQL;DATABASE_TO_LOWER=TRUE;AUTO_SERVER=TRUE;NON_KEYWORDS=VALUE,USER
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  sql:
+    init:
+      # 建库建表由 scripts\h2-db.bat 负责（文件库不能每次启动重复执行 INSERT）
+      mode: never
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  level:
+    com.hanmo.calligraphy: debug
+    org.springframework.security: info
+
+app:
+  wx:
+    dev-mode: true

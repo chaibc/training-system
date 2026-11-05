@@ -1,0 +1,67 @@
+<view class="page">
+  <view wx:if="{{guest}}" class="guest-bar">
+    <text>游客可浏览全部课程，登录后可报名与试听</text>
+    <text class="link" bindtap="goLogin">去登录 ›</text>
+  </view>
+
+  <view class="page-head">
+    <view class="eyebrow">COURSE SYSTEM</view>
+    <view class="h1">课程体系</view>
+    <view class="sub">硬笔、软笔与幼小衔接三类课程，按阶段循序渐进。课程与价格由管理后台统一维护，不以虚构原价促销。</view>
+  </view>
+
+  <view class="search-row pad">
+    <view class="search-box">
+      <text class="search-icon">⌕</text>
+      <input value="{{keyword}}" placeholder="搜索课程名称" confirm-type="search" bindinput="onKeyword" bindconfirm="search" />
+      <text wx:if="{{keyword}}" class="clear" bindtap="clearSearch">×</text>
+    </view>
+    <button class="btn sm dark" bindtap="search">搜索</button>
+  </view>
+
+  <scroll-view scroll-x class="chips" enhanced show-scrollbar="{{false}}" style="margin-top:22rpx">
+    <view class="chip {{categoryId === null ? 'on' : ''}}" data-id="all" bindtap="selectCategory">全部课程</view>
+    <view wx:for="{{categories}}" wx:key="id" class="chip {{categoryId === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="selectCategory">{{item.name}}</view>
+  </scroll-view>
+
+  <view class="count-row pad">
+    <text class="muted small">共 {{total}} 门课程</text>
+    <text class="small red" bindtap="goTrial">不确定选什么？先试听 ›</text>
+  </view>
+
+  <view class="stack pad">
+    <view wx:for="{{courses}}" wx:key="id" class="card course-card" bindtap="goCourse" data-id="{{item.id}}">
+      <view class="course-cover" style="{{item.coverStyle}}">
+        <text>{{item.coverChar || '课'}}</text>
+        <view class="cover-tags">
+          <text class="tag dark">{{item.categoryName}}</text>
+        </view>
+      </view>
+      <view class="course-content">
+        <view class="between">
+          <view class="course-name serif">{{item.name}}</view>
+          <text class="textlink">详情 ›</text>
+        </view>
+        <view class="course-meta">{{item.metaText}}</view>
+        <view class="course-desc">{{item.description}}</view>
+        <view class="course-tags">
+          <text wx:for="{{item.tagsList}}" wx:for-item="tag" wx:key="*this" class="tag">{{tag}}</text>
+        </view>
+        <view class="course-foot">
+          <view>
+            <text class="price">{{item.priceText}}</text>
+            <text class="unit"> / {{item.priceUnit}}</text>
+          </view>
+          <text class="muted tiny">到店缴费 · 教务确认</text>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{!courses.length && !loading}}" class="empty">
+      <view class="seal">课</view>
+      没有找到匹配课程，换个分类试试
+    </view>
+  </view>
+
+  <view class="foot-note">课程适龄段、课时、频率与价格均由后台维护
+试听与报名由教务电话确认，不收取线上费用</view>
+</view>

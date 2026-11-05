@@ -1,0 +1,73 @@
+<view class="page">
+  <view class="page-head">
+    <view class="eyebrow">LEAVE APPROVAL</view>
+    <view class="h1">请假审批</view>
+    <view class="sub">仅显示您所带班级的请假申请。审批结果会写入家长端请假记录，不发送消息推送。</view>
+  </view>
+
+  <view wx:if="{{blocked}}" class="empty" style="padding-top:160rpx"><view class="seal">师</view>请使用教师账号登录</view>
+
+  <block wx:else>
+    <view class="pad" style="margin-top:20rpx">
+      <view class="seg">
+        <view class="s {{tab === 'PENDING' ? 'on' : ''}}" data-tab="PENDING" bindtap="setTab">待审批 {{pending.length}}</view>
+        <view class="s {{tab === 'HISTORY' ? 'on' : ''}}" data-tab="HISTORY" bindtap="setTab">已处理 {{history.length}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{tab === 'PENDING'}}" class="stack pad" style="margin-top:24rpx">
+      <view wx:for="{{pending}}" wx:key="id" class="card leave-card">
+        <view class="between">
+          <view class="row gap8">
+            <view class="avatar sm" style="background:#7C5B6B">{{item.avatarChar}}</view>
+            <view>
+              <view class="bold" style="font-size:26rpx">{{item.studentName}}</view>
+              <view class="muted tiny">{{item.className}} · 第 {{item.lessonNo}} 课</view>
+            </view>
+          </view>
+          <text class="tag gold">待审批</text>
+        </view>
+        <view class="hr"></view>
+        <view class="kv"><text class="k">课次时间</text><text class="v">{{item.lessonDate}} {{item.startTime}}–{{item.endTime}}</text></view>
+        <view class="kv"><text class="k">请假原因</text><text class="v">{{item.reasonText || item.reasonName}}</text></view>
+        <view class="kv"><text class="k">课时判定</text><text class="v {{item.deductHours ? 'red' : 'green'}}">{{item.deductText}}</text></view>
+        <view class="kv"><text class="k">提交时间</text><text class="v muted">{{item.submitText}}</text></view>
+        <view class="approve-actions">
+          <button class="btn sm ghost" style="color:var(--red)" loading="{{processingId === item.id}}" data-id="{{item.id}}" bindtap="reject">驳回</button>
+          <button class="btn sm primary" loading="{{processingId === item.id}}" data-id="{{item.id}}" bindtap="approve">通过</button>
+        </view>
+      </view>
+      <view wx:if="{{!pending.length && !loading}}" class="empty">
+        <view class="seal">清</view>没有待审批的请假
+      </view>
+    </view>
+
+    <view wx:if="{{tab === 'HISTORY'}}" class="stack pad" style="margin-top:24rpx">
+      <view wx:for="{{history}}" wx:key="id" class="card leave-card">
+        <view class="between">
+          <view class="row gap8">
+            <view class="avatar sm" style="background:#7C5B6B">{{item.avatarChar}}</view>
+            <view>
+              <view class="bold" style="font-size:25rpx">{{item.studentName}}</view>
+              <view class="muted tiny">{{item.className}} · 第 {{item.lessonNo}} 课 · {{item.lessonDate}}</view>
+            </view>
+          </view>
+          <text class="tag {{item.statusClass}}">{{item.statusText}}</text>
+        </view>
+        <view class="hr"></view>
+        <view class="kv"><text class="k">原因</text><text class="v">{{item.reasonText}}</text></view>
+        <view class="kv"><text class="k">课时</text><text class="v">{{item.deductText}}</text></view>
+        <view class="kv"><text class="k">审批时间</text><text class="v muted">{{item.approvedAt || '—'}}</text></view>
+        <view wx:if="{{item.rejectReason}}" class="reject-box">驳回原因：{{item.rejectReason}}</view>
+      </view>
+      <view wx:if="{{!history.length && !loading}}" class="empty"><view class="seal">史</view>还没有已处理记录</view>
+    </view>
+
+    <view class="rule-tip">
+      <view class="rt-title">审批规则</view>
+      <view class="rt-line">· 课前 4 小时以上请假，通过后不扣课时</view>
+      <view class="rt-line">· 不足 4 小时或未到课，按消课处理</view>
+      <view class="rt-line">· 审批结果留痕，家长可在请假记录中查看</view>
+    </view>
+  </block>
+</view>

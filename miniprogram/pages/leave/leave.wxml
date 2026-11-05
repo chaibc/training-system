@@ -1,0 +1,66 @@
+<view class="page has-bottom-bar">
+  <view class="page-head">
+    <view class="eyebrow">LEAVE REQUEST</view>
+    <view class="h1">请假申请</view>
+    <view class="sub">选择课次与原因提交，教务或任课教师审批。审批结果需在请假记录中主动查看，不发送消息推送。</view>
+  </view>
+
+  <view wx:if="{{blocked}}" class="empty" style="padding-top:160rpx"><view class="seal">登</view>请先使用家长账号登录</view>
+
+  <block wx:else>
+    <scroll-view scroll-x class="chips" enhanced show-scrollbar="{{false}}" style="margin-top:10rpx">
+      <view wx:for="{{children}}" wx:key="id" class="chip {{childId === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="selectChild">{{item.name}}</view>
+    </scroll-view>
+
+    <view class="pad" style="margin-top:24rpx">
+      <view class="card padc">
+        <view class="field">
+          <view class="label">请假课次 <text class="req">*</text></view>
+          <picker wx:if="{{lessons.length}}" range="{{lessonLabels}}" value="{{lessonIndex}}" bindchange="selectLesson">
+            <view class="picker">
+              <text wx:if="{{lessonIndex >= 0}}">{{lessonLabels[lessonIndex]}}</text>
+              <text wx:else class="placeholder">请选择要请假的课次</text>
+              <text class="muted" style="margin-left:auto">›</text>
+            </view>
+          </picker>
+          <view wx:else class="no-lesson">
+            <view>暂无可请假的课次</view>
+            <view class="tiny">仅可对尚未开始、未请假的待上课次提交申请</view>
+          </view>
+          <view wx:if="{{deductHint}}" class="hint-line">{{deductHint}}</view>
+        </view>
+
+        <view class="field">
+          <view class="label">请假原因 <text class="req">*</text></view>
+          <view class="reason-grid">
+            <view wx:for="{{reasons}}" wx:key="id" class="reason-chip {{reasonId === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="selectReason">{{item.name}}</view>
+          </view>
+        </view>
+
+        <view class="field" style="margin-bottom:0">
+          <view class="label">补充说明</view>
+          <textarea value="{{reasonText}}" placeholder="可补充具体情况，便于教师了解（选填）" bindinput="onReasonText" maxlength="120" />
+        </view>
+      </view>
+    </view>
+
+    <view class="section"><view class="title">请假规则</view></view>
+    <view class="pad">
+      <view class="rule-card">
+        <view class="rule-line"><text class="rule-dot"></text>{{ruleText}}</view>
+        <view class="rule-line"><text class="rule-dot"></text>课次开始后不允许请假，系统会按未到课处理</view>
+        <view class="rule-line"><text class="rule-dot"></text>请假通过后可申请补课，不重复计费</view>
+      </view>
+    </view>
+
+    <view wx:if="{{!childId}}" class="empty">
+      <view class="seal">学</view>暂未绑定学员
+      <button class="btn primary sm" style="margin-top:24rpx" bindtap="goAccount">去绑定学员</button>
+    </view>
+  </block>
+
+  <view wx:if="{{!blocked && childId}}" class="bottom-bar">
+    <button class="btn ghost" bindtap="goAccount">切换学员</button>
+    <button class="btn primary" loading="{{submitting}}" bindtap="submit">提交请假</button>
+  </view>
+</view>

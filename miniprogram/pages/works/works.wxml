@@ -1,0 +1,60 @@
+<view class="page">
+  <view wx:if="{{guest}}" class="guest-bar">
+    <text>登录后可点赞、留言，并查看孩子的成长相册</text>
+    <text class="link" bindtap="goLogin">去登录 ›</text>
+  </view>
+
+  <view class="page-head">
+    <view class="eyebrow">GALLERY</view>
+    <view class="h1">作品墙</view>
+    <view class="sub">每一幅作品都已取得家长授权并通过教务审核。点赞与分享，是对孩子最好的鼓励。</view>
+  </view>
+
+  <view class="seg" style="margin:24rpx 32rpx 20rpx">
+    <view class="s {{filter === 'ALL' ? 'on' : ''}}" data-filter="ALL" bindtap="setFilter">全部</view>
+    <view class="s {{filter === 'HARD' ? 'on' : ''}}" data-filter="HARD" bindtap="setFilter">硬笔</view>
+    <view class="s {{filter === 'SOFT' ? 'on' : ''}}" data-filter="SOFT" bindtap="setFilter">软笔</view>
+    <view class="s {{filter === 'MONTH' ? 'on' : ''}}" data-filter="MONTH" bindtap="setFilter">本月新作</view>
+  </view>
+
+  <view wx:if="{{notices.length}}" class="notice-list">
+    <view wx:for="{{notices}}" wx:key="id" class="notice-item" bindtap="showNotice" data-index="{{index}}">
+      <text class="tag gold">公告</text>
+      <text class="notice-title">{{item.title}}</text>
+      <text class="notice-date">{{item.publishDate}}</text>
+      <text class="muted">›</text>
+    </view>
+  </view>
+
+  <view class="pad between" style="margin-bottom:18rpx">
+    <text class="muted small">共 {{total}} 幅作品</text>
+    <text class="muted tiny">已获家长授权 · 教务审核</text>
+  </view>
+
+  <view class="works-grid">
+    <view wx:for="{{works}}" wx:key="id" class="work-card" bindtap="goWork" data-id="{{item.id}}">
+      <view class="work-art">
+        <image wx:if="{{item.hasImage}}" src="{{item.image}}" mode="aspectFill" />
+        <text wx:else class="ch">{{item.displayChar}}</text>
+        <view class="stamp">翰墨</view>
+        <text class="work-type">{{item.typeText}}</text>
+      </view>
+      <view class="work-info">
+        <view class="t">{{item.title}}</view>
+        <view class="m">{{item.studentName}} · {{item.dateText}}</view>
+        <view class="b">
+          <text>♡ {{item.likeCount || 0}}</text>
+          <text>{{item.className || '学员作品'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{!works.length && !loading}}" class="empty">
+    <view class="seal">作</view>
+    该分类暂时还没有展示作品
+  </view>
+
+  <view class="foot-note">作品展示已取得家长授权
+留言需经教务审核后展示</view>
+</view>

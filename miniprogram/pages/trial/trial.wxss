@@ -1,0 +1,41 @@
+.form-hero {
+  margin: 0 28rpx;
+  border-radius: 30rpx;
+  padding: 34rpx 30rpx 36rpx;
+  background: linear-gradient(118deg, #26221B 0%, #3A342A 58%, #4B3B2F 100%);
+  color: #F8F2E6;
+  position: relative;
+  overflow: hidden;
+}
+.form-hero::after {
+  content: "";
+  position: absolute;
+  right: -30rpx;
+  bottom: -70rpx;
+  width: 260rpx;
+  height: 260rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(194, 160, 94, .22), transparent 70%);
+}
+.fh-eyebrow { color: var(--gold); font-size: 17rpx; letter-spacing: 5rpx; }
+.fh-title { font-size: 46rpx; letter-spacing: 4rpx; margin-top: 14rpx; }
+.fh-sub { color: #BFB6A5; font-size: 21rpx; line-height: 1.8; margin-top: 14rpx; max-width: 480rpx; }
+.fh-stamp {
+  position: absolute;
+  right: 28rpx;
+  top: 30rpx;
+  width: 70rpx;
+  height: 70rpx;
+  border: 1rpx solid rgba(194, 160, 94, .45);
+  color: var(--gold);
+  font-family: "Songti SC", serif;
+  font-size: 20rpx;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transform: rotate(4deg);
+  white-space: pre-line;
+}
+.picker { display: flex; align-items: center; width: 100%; min-height: 42rpx; }

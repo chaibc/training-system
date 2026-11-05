@@ -1,0 +1,10 @@
+/data/hanmo/logs/*.log {
+    daily
+    rotate 30
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+    su hanmo hanmo
+}

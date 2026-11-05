@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小程序端设计稿 · 书法培训中心</title>
+<style>
+  :root{
+    --ink:#2b2a28; --ink2:#6b675f; --paper:#f7f4ed; --red:#b8433a;
+    --gold:#c9a86a; --green:#6b8e6f; --orange:#d9a441; --line:#eee9dd;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#efece4;font-family:"PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);}
+  .head{background:linear-gradient(135deg,#2b2a28,#3d3a36);color:#f7f4ed;padding:46px 7% 40px;position:relative;overflow:hidden;}
+  .head::after{content:"墨";position:absolute;right:5%;top:50%;transform:translateY(-50%);font-size:170px;font-family:"STKaiti","KaiTi",serif;color:rgba(201,168,106,.10);}
+  .head .tag{display:inline-block;border:1px solid var(--gold);color:var(--gold);font-size:11px;padding:3px 12px;border-radius:20px;letter-spacing:3px;margin-bottom:14px;}
+  .head h1{font-family:"STKaiti","KaiTi",serif;font-size:30px;letter-spacing:4px;}
+  .head p{margin-top:10px;font-size:13px;color:#b8b3a8;max-width:660px;line-height:1.8;}
+  .head .lnk{margin-top:16px;font-size:13px;}
+  .head .lnk a{color:var(--gold);text-decoration:none;}
+  .board{padding:36px 4% 80px;display:flex;flex-wrap:wrap;gap:34px;justify-content:center;}
+  .shot{width:300px;}
+  .shot .cap{margin-top:14px;padding:0 6px;}
+  .shot .cap b{font-size:15px;letter-spacing:1px;display:flex;align-items:center;gap:8px;}
+  .shot .cap b .n{width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;font-size:11px;display:inline-flex;align-items:center;justify-content:center;font-family:Georgia;}
+  .shot .cap p{font-size:12px;color:var(--ink2);line-height:1.7;margin-top:6px;}
+  .pl{display:inline-block;font-size:10px;padding:1px 8px;border-radius:8px;font-weight:600;}
+  .pl0{background:#fdeeea;color:var(--red);} .pl1{background:#fdf6e8;color:#a3822f;} .pl2{background:#eef3ee;color:var(--green);}
+
+  /* ===== 手机壳 ===== */
+  .phone{width:300px;height:640px;background:#111;border-radius:40px;padding:10px;box-shadow:0 22px 46px rgba(43,42,40,.28);}
+  .scr{position:relative;width:100%;height:100%;background:var(--paper);border-radius:32px;overflow:hidden;display:flex;flex-direction:column;}
+  .notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:110px;height:24px;background:#111;border-radius:14px;z-index:30;}
+  .stat{height:44px;flex:none;display:flex;justify-content:space-between;align-items:flex-end;padding:0 22px 4px;font-size:11px;font-weight:600;position:relative;z-index:20;}
+  .stat.light{color:#fff;} .stat.dark{color:var(--ink);}
+  .bd{flex:1;overflow-y:auto;scrollbar-width:none;position:relative;}
+  .bd::-webkit-scrollbar{display:none;}
+  .tabbar{flex:none;height:56px;background:#fff;border-top:1px solid var(--line);display:flex;}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;color:#a09a8c;}
+  .tab .i{font-size:19px;line-height:1;}
+  .tab.on{color:var(--red);font-weight:600;}
+
+  /* 通用组件 */
+  .navtop{display:flex;align-items:center;gap:8px;padding:10px 16px;font-size:14px;font-weight:600;position:relative;z-index:5;}
+  .navtop .bk{font-size:16px;color:var(--ink);}
+  .cta{margin:14px 16px;background:var(--red);color:#fff;text-align:center;padding:12px;border-radius:24px;font-size:14px;font-weight:600;letter-spacing:2px;box-shadow:0 6px 14px rgba(184,67,58,.3);}
+  .card{background:#fff;border-radius:14px;margin:0 14px 12px;padding:14px;box-shadow:0 1px 6px rgba(43,42,40,.05);}
+  .sec-t{display:flex;align-items:center;gap:8px;margin:14px 16px 10px;font-size:14px;font-weight:700;letter-spacing:1px;}
+  .sec-t::before{content:"";width:4px;height:15px;background:var(--red);border-radius:2px;}
+  .sec-t .more{margin-left:auto;font-size:11px;color:#a09a8c;font-weight:400;}
+  .chip{display:inline-block;font-size:10px;padding:2px 8px;border-radius:8px;}
+  .c-green{background:#eef3ee;color:var(--green);} .c-red{background:#fdeeea;color:var(--red);}
+  .c-orange{background:#fdf3e0;color:#a3822f;} .c-gray{background:#f0ece1;color:#8a8478;}
+  .c-gold{background:#faf3e3;color:#a3822f;}
+
+  /* 屏1 首页 */
+  .hero1{background:linear-gradient(135deg,#2b2a28 0%,#4a453d 100%);color:#f7f4ed;padding:18px 18px 56px;position:relative;}
+  .hero1 h2{font-family:"STKaiti","KaiTi",serif;font-size:21px;letter-spacing:2px;}
+  .hero1 h2 span{color:var(--gold);}
+  .hero1 p{font-size:10.5px;color:#b8b3a8;margin-top:5px;letter-spacing:1px;}
+  .hero1 .search{margin-top:12px;background:rgba(255,255,255,.14);border-radius:18px;padding:8px 14px;font-size:11px;color:#cfc9bc;display:flex;align-items:center;gap:6px;}
+  .gridmenu{background:#fff;border-radius:14px;margin:-40px 14px 12px;padding:16px 6px;display:grid;grid-template-columns:repeat(4,1fr);box-shadow:0 4px 14px rgba(43,42,40,.08);position:relative;}
+  .gm{text-align:center;font-size:10.5px;color:var(--ink2);}
+  .gm .ic{width:38px;height:38px;margin:0 auto 5px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+  .banner{margin:0 14px 12px;height:86px;border-radius:12px;background:linear-gradient(120deg,#b8433a,#8a2f27);color:#fff;padding:14px 16px;position:relative;overflow:hidden;}
+  .banner b{font-size:15px;letter-spacing:1px;}
+  .banner p{font-size:10px;opacity:.85;margin-top:4px;}
+  .banner .fu{position:absolute;right:10px;bottom:-8px;font-family:"STKaiti","KaiTi",serif;font-size:64px;opacity:.18;}
+  .bn2{background:linear-gradient(120deg,#3d3a36,#26241f);}
+  .cats{display:flex;gap:8px;margin:0 14px 4px;}
+  .cat{flex:1;background:#fff;border-radius:10px;padding:10px 8px;text-align:center;font-size:11px;}
+  .cat b{display:block;font-size:12.5px;}
+  .cat span{color:var(--ink2);font-size:10px;}
+  .tcr{display:flex;gap:10px;margin:0 14px;overflow:hidden;}
+  .tc{flex:none;width:76px;background:#fff;border-radius:10px;padding:10px 6px;text-align:center;}
+  .tc .av{width:44px;height:44px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-family:"STKaiti","KaiTi",serif;}
+  .tc b{font-size:11.5px;display:block;}
+  .tc span{font-size:9.5px;color:var(--ink2);}
+  .addr{display:flex;align-items:center;gap:10px;margin:0 14px;background:#fff;border-radius:12px;padding:12px 14px;font-size:11px;}
+  .addr .pin{width:34px;height:34px;border-radius:9px;background:#fdeeea;display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .addr b{display:block;font-size:12px;}
+  .addr span{color:var(--ink2);font-size:10.5px;}
+  .addr .nav{margin-left:auto;color:var(--red);font-size:10.5px;border:1px solid var(--red);border-radius:12px;padding:4px 10px;}
+
+  /* 屏2 课程详情 */
+  .cd-hero{height:120px;background:linear-gradient(135deg,#5d4a33,#8a6d4a);color:#fff;padding:16px;position:relative;}
+  .cd-hero b{font-size:17px;letter-spacing:1px;font-family:"STKaiti","KaiTi",serif;}
+  .cd-hero .price{position:absolute;bottom:14px;left:16px;font-size:22px;font-weight:700;color:#ffd9a0;}
+  .cd-hero .price s{font-size:11px;color:rgba(255,255,255,.6);margin-left:6px;font-weight:400;}
+  .cd-hero .tagr{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.2);font-size:10px;padding:3px 10px;border-radius:10px;}
+  .step{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--line);font-size:11px;}
+  .step:last-child{border:none;}
+  .step .no{flex:none;width:18px;height:18px;border-radius:50%;background:var(--gold);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .step b{display:block;font-size:12px;}
+  .step span{color:var(--ink2);}
+  .dualbtn{display:flex;gap:10px;margin:14px 16px;}
+  .dualbtn .b1{flex:1;text-align:center;padding:12px;border-radius:24px;font-size:13.5px;font-weight:600;}
+  .dualbtn .o{background:#fff;color:var(--red);border:1.5px solid var(--red);}
+  .dualbtn .f{flex:1.4;background:var(--red);color:#fff;text-align:center;padding:12px;border-radius:24px;font-size:13.5px;font-weight:600;letter-spacing:2px;box-shadow:0 6px 14px rgba(184,67,58,.3);}
+
+  /* 屏3 报名表单 */
+  .fi{display:flex;align-items:center;padding:11px 2px;border-bottom:1px solid #f4f0e6;font-size:12px;}
+  .fi .lb{flex:none;width:82px;color:var(--ink2);}
+  .fi .lb i{color:var(--red);font-style:normal;margin-right:2px;}
+  .fi .val{flex:1;color:var(--ink);}
+  .fi .ph{color:#b6b0a2;}
+  .fi .arr{color:#c8c2b2;}
+  .stu-sel{display:flex;gap:8px;margin:12px 0;}
+  .stu-sel .s{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:9px 6px;text-align:center;font-size:11px;background:#fff;}
+  .stu-sel .s.on{border-color:var(--red);background:#fdf0ee;color:var(--red);font-weight:600;}
+  .stu-sel .s.add{border-style:dashed;color:var(--ink2);}
+  .pay-row{display:flex;align-items:center;gap:8px;padding:10px 2px;font-size:12px;}
+  .pay-row .r{margin-left:auto;width:15px;height:15px;border-radius:50%;border:1.5px solid #c8c2b2;}
+  .pay-row .r.on{border:5px solid var(--green);}
+
+  /* 屏4 课表 */
+  .kidbar{display:flex;align-items:center;gap:8px;padding:10px 16px 4px;font-size:12px;}
+  .kidbar .kid{padding:4px 12px;border-radius:14px;background:#fff;font-size:11px;color:var(--ink2);border:1px solid var(--line);}
+  .kidbar .kid.on{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:600;}
+  .hour-card{margin:10px 14px;background:linear-gradient(120deg,#b8433a,#8a2f27);border-radius:14px;color:#fff;padding:14px 16px;display:flex;align-items:center;}
+  .hour-card .big{font-size:30px;font-weight:700;font-family:Georgia;}
+  .hour-card .lb{font-size:10.5px;opacity:.85;margin-top:2px;}
+  .hour-card .rt{margin-left:auto;text-align:right;font-size:10.5px;line-height:1.9;opacity:.92;}
+  .wkrow{display:flex;gap:5px;margin:4px 14px 10px;}
+  .wd{flex:1;text-align:center;padding:7px 0;border-radius:10px;font-size:10.5px;color:var(--ink2);background:#fff;}
+  .wd b{display:block;font-size:13px;}
+  .wd.on{background:var(--ink);color:#fff;}
+  .wd.on small{opacity:.7;}
+  .wd .dot{width:4px;height:4px;border-radius:50%;background:var(--red);margin:3px auto 0;}
+  .les{display:flex;gap:10px;margin:0 14px 10px;background:#fff;border-radius:12px;padding:12px 14px;align-items:flex-start;}
+  .les .tm{flex:none;text-align:center;width:44px;}
+  .les .tm b{font-size:14px;display:block;}
+  .les .tm span{font-size:9.5px;color:var(--ink2);}
+  .les .inf{flex:1;font-size:11.5px;line-height:1.8;}
+  .les .inf b{font-size:12.5px;}
+  .les .st{flex:none;}
+
+  /* 屏6 请假 */
+  .rule-box{margin:12px 14px;background:#fdf6e8;border:1px solid #ecd9a8;border-radius:10px;padding:10px 12px;font-size:10.5px;color:#6d5a25;line-height:1.8;}
+
+  /* 屏7 消息 */
+  .seg{display:flex;gap:8px;margin:8px 14px 12px;font-size:11px;}
+  .seg span{padding:5px 12px;border-radius:14px;background:#fff;color:var(--ink2);border:1px solid var(--line);}
+  .seg span.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .msgi{display:flex;gap:10px;margin:0 14px 10px;background:#fff;border-radius:12px;padding:12px;}
+  .msgi .ic{flex:none;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+  .msgi .tt{flex:1;font-size:11.5px;line-height:1.7;}
+  .msgi .tt b{font-size:12px;display:flex;align-items:center;gap:6px;}
+  .msgi .tt .dotn{width:6px;height:6px;border-radius:50%;background:var(--red);}
+  .msgi .tt span{color:var(--ink2);}
+
+  /* 屏8 作品墙 */
+  .wall{columns:2;column-gap:10px;padding:0 14px;}
+  .witem{break-inside:avoid;background:#fff;border-radius:12px;margin-bottom:10px;overflow:hidden;}
+  .witem .im{display:flex;align-items:center;justify-content:center;color:#fff;font-family:"STKaiti","KaiTi",serif;}
+  .witem .inf{padding:8px 10px;font-size:10.5px;line-height:1.7;}
+  .witem .inf b{font-size:11.5px;display:block;}
+  .witem .ops{display:flex;gap:10px;padding:0 10px 9px;font-size:10px;color:var(--ink2);}
+
+  /* 屏9 我的 */
+  .me-hero{background:linear-gradient(135deg,#2b2a28,#4a453d);color:#fff;padding:16px 16px 42px;}
+  .me-hero .row{display:flex;align-items:center;gap:12px;}
+  .me-hero .av{width:48px;height:48px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:18px;}
+  .me-hero b{font-size:15px;display:block;}
+  .me-hero span{font-size:10.5px;color:#b8b3a8;}
+  .me-hero .kids{margin-top:12px;display:flex;gap:8px;font-size:10.5px;}
+  .me-hero .kids span{background:rgba(255,255,255,.14);border-radius:12px;padding:4px 12px;}
+  .me-hero .kids span.on{background:var(--red);}
+  .menu{background:#fff;border-radius:14px;margin:0 14px 12px;overflow:hidden;}
+  .mi{display:flex;align-items:center;gap:10px;padding:13px 14px;font-size:12.5px;border-bottom:1px solid #f6f2e9;}
+  .mi:last-child{border:none;}
+  .mi .ic{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .mi .rt{margin-left:auto;color:#c0bab0;font-size:11px;}
+
+  /* 屏11 教师端 */
+  .role-band{background:linear-gradient(120deg,#3d3a36,#26241f);color:var(--gold);font-size:10.5px;text-align:center;padding:6px;letter-spacing:2px;}
+  .roll{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f4f0e6;font-size:12px;}
+  .roll:last-child{border:none;}
+  .roll .nm{flex:1;}
+  .roll .nm span{display:block;font-size:10px;color:var(--ink2);}
+  .bset{display:flex;gap:6px;}
+  .bset span{font-size:10.5px;padding:5px 10px;border-radius:8px;background:#f0ece1;color:var(--ink2);}
+  .bset span.on{background:var(--green);color:#fff;}
+  .bset span.lv{background:#fdeeea;color:var(--red);}
+
+  .lbl{font-size:12px;font-weight:600;margin:14px 16px 6px;display:flex;justify-content:space-between;}
+  .lbl span{font-size:10.5px;color:var(--orange);font-weight:400;}
+</style>
+</head>
+<body>
+<div class="head">
+  <span class="tag">小程序端 · C端（家长 / 学生 / 教师）设计稿</span>
+  <h1>书法培训中心 · 微信小程序</h1>
+  <p>幼小衔接 · 软笔与硬笔书法培训 —— 四 Tab 结构：首页 / 课表 / 作品 / 我的；教师端按身份合并于同一小程序。共 11 屏，覆盖九大需求模块。</p>
+  <div class="lnk"><a href="index.html">← 返回设计总览</a> · <a href="admin.html">查看管理后台设计稿 →</a></div>
+</div>
+
+<div class="board">
+
+  <!-- ========== 屏1 首页 ========== -->
+  <div class="shot">
+    <div class="phone"><div class="scr">
+      <div class="notch"></div>
+      <div class="stat light"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="bd">
+        <div class="hero1">
+          <h2>××书法培训中心 <span>·</span> 翰墨启蒙</h2>
+          <p>幼小衔接 · 软笔与硬笔书法 · 让孩子写好中国字</p>
+          <div class="search">🔍 搜索课程 / 教师</div>
+        </div>
+        <div class="gridmenu">
+          <div class="gm"><div class="ic" style="background:#fdeeea;">📚</div>课程报名</div>
+          <div class="gm"><div class="ic" style="background:#eaf1f6;">🗓️</div>我的课表</div>
+          <div class="gm"><div class="ic" style="background:#fdf3e0;">📝</div>请假申请</div>
+          <div class="gm"><div class="ic" style="background:#eef3ee;">🔔</div>消息中心</div>
+        </div>
+        <div class="banner">
+          <b>秋季招生 · 免费试听</b>
+          <p>幼小衔接硬笔启蒙班 · 每周2次 · 剩余 6 席</p>
+          <div class="fu">书</div>
+        </div>
+        <div class="cats">
+          <div class="cat"><b>硬笔书法</b><span>铅笔/钢笔</span></div>
+          <div class="cat"><b>软笔书法</b><span>毛笔启蒙</span></div>
+          <div class="cat"><b>幼小衔接</b><span>5-7岁</span></div>
+        </div>
+        <div class="sec-t">师资团队<span class="more">全部 ›</span></div>
+        <div class="tcr">
+          <div class="tc"><div class="av" style="background:#8a6d4a;">王</div><b>王砚秋</b><span>教龄12年 · 楷行</span></div>
+          <div class="tc"><div class="av" style="background:#3d525d;">刘</div><b>刘墨白</b><span>教龄8年 · 软笔</span></div>
+          <div class="tc"><div class="av" style="background:#7a3c20;">赵</div><b>赵清和</b><span>教龄6年 · 硬笔</span></div>
+          <div class="tc"><div class="av" style="background:#5d7a8a;">+</div><span>资质公示</span></div>
+        </div>
+        <div class="sec-t">到店体验<span class="more">资质公示 ›</span></div>
+        <div class="addr">
+          <div class="pin">📍</div>
+          <div><b>××市××区××路 88 号 2 层</b><span>周二至周日 9:00-19:00 · ☎ 0755-8888-****</span></div>
+          <div class="nav">导航</div>
+        </div>
+        <div style="height:70px;"></div>
+      </div>
+      <div class="tabbar">
+        <div class="tab on"><div class="i">🏠</div>首页</div>
+        <div class="tab"><div class="i">🗓️</div>课表</div>
+        <div class="tab"><div class="i">🖼️</div>作品</div>
+        <div class="tab"><div class="i">👤</div>我的</div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="n">1</span>首页 · 机构门户 <span class="pl pl0">P0</span></b>
+      <p>模块一/二：机构简介、一键拨号、地图导航（wx.openLocation）、师资列表、课程分类、试听预约活动位、资质公示入口。</p></div>
+  </div>
+
+  <!-- ========== 屏2 课程详情 ========== -->
+  <div class="shot">
+    <div class="phone"><div class="scr">
+      <div class="notch"></div>
+      <div class="stat dark"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="navtop"><span class="bk">‹</span>课程详情</div>
+      <div class="bd">
+        <div class="cd-hero">
+          <span class="tagr">幼小衔接 · 硬笔</span>
+          <b>幼小衔接硬笔启蒙班</b>
+          <p style="font-size:10px;opacity:.8;margin-top:4px;">适龄 5-7 岁 · 启蒙阶段 · 24 课时 · 每周 2 次 × 60 分钟</p>
+          <div class="price">¥2,880 <s>¥3,200</s></div>
+        </div>
+        <div class="sec-t">教学目标</div>
+        <div class="card" style="font-size:11.5px;line-height:1.9;color:var(--ink2);">掌握正确坐姿与握笔姿势，书写规范的基本笔画，养成良好书写习惯，为小学书写打下基础。</div>
+        <div class="sec-t">内容大纲（五阶段）<span class="more">P1</span></div>
+        <div class="card">
+          <div class="step"><div class="no">1</div><div><b>握笔坐姿</b><span>第 1-4 课时 · 正确执笔与坐姿养成</span></div></div>
+          <div class="step"><div class="no">2</div><div><b>基本笔画</b><span>第 5-10 课时 · 横竖撇捺点钩折</span></div></div>
+          <div class="step"><div class="no">3</div><div><b>间架结构</b><span>第 11-16 课时 · 独体字与合体字结构</span></div></div>
+          <div class="step"><div class="no">4</div><div><b>偏旁部首</b><span>第 17-20 课时 · 常用偏旁书写规律</span></div></div>
+          <div class="step"><div class="no">5</div><div><b>章法布局</b><span>第 21-24 课时 · 作品书写与卷面</span></div></div>
+        </div>
+        <div class="sec-t">班型与价格 <span class="more">P1</span></div>
+        <div class="card">
+          <div class="fi" style="border:none;padding:6px 2px;"><div class="lb">小班（6人）</div><div class="val" style="color:var(--red);font-weight:700;">¥2,880 <span class="chip c-red">活动价</span></div><div class="arr">›</div></div>
+          <div class="fi" style="border:none;padding:6px 2px;"><div class="lb">一对一</div><div class="val">¥8,800 起</div><div class="arr">›</div></div>
+        </div>
+        <div class="dualbtn">
+          <div class="b1 o">免费预约试听</div>
+          <div class="f">立即报名</div>
+        </div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="n">2</span>课程详情 <span class="pl pl0">P0</span></b>
+      <p>模块二：课程名称、适龄段、书体、阶段、教学目标、五阶段内容大纲、班型与课时价格；展示价与下单价一致，活动价真实有效。</p></div>
+  </div>
+
+  <!-- ========== 屏3 报名与支付 ========== -->
+  <div class="shot">
+    <div class="phone"><div class="scr">
+      <div class="notch"></div>
+      <div class="stat dark"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="navtop"><span class="bk">‹</span>确认报名</div>
+      <div class="bd">
+        <div class="sec-t">选择学员</div>
+        <div style="margin:0 14px;">
+          <div class="stu-sel">
+            <div class="s on">王小墨<br><span style="font-size:9px;">男 · 9岁</span></div>
+            <div class="s">王梓涵<br><span style="font-size:9px;">女 · 6岁</span></div>
+            <div class="s add">＋ 新建<br>学员档案</div>
+          </div>
+        </div>
+        <div class="sec-t">报名信息</div>
+        <div class="card">
+          <div class="fi"><div class="lb"><i>*</i>学员姓名</div><div class="val">王小墨</div></div>
+          <div class="fi"><div class="lb"><i>*</i>性别</div><div class="val">男</div></div>
+          <div class="fi"><div class="lb"><i>*</i>出生日期</div><div class="val">2017-05-12</div><div class="arr">›</div></div>
+          <div class="fi"><div class="lb">就读学校</div><div class="val">实验小学 / 三年级</div></div>
+          <div class="fi"><div class="lb"><i>*</i>家长姓名</div><div class="val">王女士</div></div>
+          <div class="fi"><div class="lb"><i>*</i>手机号</div><div class="val">138****2648</div></div>
+          <div class="fi" style="border:none;"><div class="lb">备注</div><div class="val ph">选填，如书写基础、期望班型</div></div>
+        </div>
+        <div class="sec-t">选择班级</div>
+        <div class="card">
+          <div class="fi" style="border:none;"><div class="lb">软笔基础A班</div><div class="val" style="font-size:11px;color:var(--ink2);">周六 14:00 · 刘墨白 · 余 3 席</div><div class="arr">›</div></div>
+        </div>
+        <div class="sec-t">支付方式</div>
+        <div class="card">
+          <div class="pay-row">🟢 微信支付<span style="font-size:10px;color:var(--ink2);">（推荐）</span><div class="r on"></div></div>
+          <div class="pay-row">🏪 到店缴费 · 教务登记<div class="r"></div></div>
+        </div>
+        <div style="margin:0 14px;background:#fff;border-radius:14px;padding:12px 14px;display:flex;align-items:center;">
+          <div style="font-size:11px;color:var(--ink2);">合计</div>
+          <div style="margin-left:auto;color:var(--red);"><span style="font-size:11px;">¥</span><b style="font-size:22px;">4,800</b><span style="font-size:10px;color:var(--ink2);"> / 48课时</span></div>
+        </div>
+        <div class="cta" style="margin-top:12px;">微信支付 ¥4,800</div>
+        <p style="text-align:center;font-size:9.5px;color:#a8a294;">支付成功后自动生成学员档案与课时账户 · 未支付订单 30 分钟后自动关闭</p>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="n">3</span>报名与支付 <span class="pl pl0">P0</span></b>
+      <p>模块三：多子女先选学员、报名表单（必填校验）、选班、微信支付 JSAPI；支持试听报名与线下缴费登记。订阅消息授权引导嵌入本页成功节点。</p></div>
+  </div>
+
+  <!-- ========== 屏4 我的课表 ========== -->
+  <div class="shot">
+    <div class="phone"><div class="scr">
+      <div class="notch"></div>
+      <div class="stat light"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="hero1" style="padding-bottom:14px;">
+        <div class="kidbar" style="padding:0;color:#fff;">
+          <span class="kid on" style="background:rgba(255,255,255,.18);border:none;color:#fff;">王小墨</span>
+          <span class="kid" style="background:rgba(255,255,255,.08);border:none;color:#cfc9bc;">王梓涵</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--gold);">切换子女 ›</span>
+        </div>
+      </div>
+      <div class="bd" style="margin-top:-6px;">
+        <div class="hour-card">
+          <div><div class="big">18</div><div class="lb">剩余课时</div></div>
+          <div style="margin-left:22px;"><div class="big" style="font-size:16px;">30</div><div class="lb">已消课时</div></div>
+          <div class="rt">有效期至 2027-01-02<br>课时包：软笔基础 48 课时</div>
+        </div>
+        <div class="wkrow">
+          <div class="wd"><small>一</small><b>27</b></div>
+          <div class="wd"><small>二</small><b>28</b></div>
+          <div class="wd on"><small>今</small><b>29</b><div class="dot"></div></div>
+          <div class="wd"><small>四</small><b>30</b></div>
+          <div class="wd"><small>五</small><b>31</b></div>
+          <div class="wd"><small>六</small><b>1</b><div class="dot"></div></div>
+          <div class="wd"><small>日</small><b>2</b></div>
+        </div>
+        <div class="sec-t">本周课程</div>
+        <div class="les">
+          <div class="tm"><b>14:00</b><span>15:30 结束</span></div>
+          <div class="inf"><b>软笔基础班 · 第12课</b><br>刘墨白 · 教室2 · 软笔书法</div>
+          <div class="st"><span class="chip c-gray">待上课</span></div>
+        </div>
+        <div class="les" style="border-left:3px solid var(--red);">
+          <div class="tm"><b>11-01</b><span>09:00</span></div>
+          <div class="inf"><b>软笔基础班 · 第13课</b><br><span style="color:var(--red);">原 10-31 已调课</span> · 教室2</div>
+          <div class="st"><span class="chip c-red">已调课</span></div>
+        </div>
+        <div class="les" style="border-left:3px solid var(--green);">
+          <div class="tm"><b>10-28</b><span>14:00</span></div>
+          <div class="inf"><b>软笔基础班 · 第11课</b><br>已消 1 课时 · 剩 18 课时</div>
+          <div class="st"><span class="chip c-green">已完成</span></div>
+        </div>
+        <div class="les">
+          <div class="tm"><b>11-02</b><span>09:00</span></div>
+          <div class="inf"><b>硬笔练习 · 加课</b><br>刘墨白 · 教室2 · 临时加课</div>
+          <div class="st"><span class="chip c-orange">加课</span></div>
+        </div>
+        <p style="text-align:center;font-size:9.5px;color:#a8a294;margin-top:6px;">💡 课次变更自动推送调课通知 · 点击课次可查看详情与上课提醒设置</p>
+      </div>
+      <div class="tabbar">
+        <div class="tab"><div class="i">🏠</div>首页</div>
+        <div class="tab on"><div class="i">🗓️</div>课表</div>
+        <div class="tab"><div class="i">🖼️</div>作品</div>
+        <div class="tab"><div class="i">👤</div>我的</div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="n">4</span>我的课表 <span class="pl pl0">P0</span></b>
+      <p>模块四/五：多子女切换、剩余课时卡（口径与课时账户一致）、周课表（待上课/已调课/已完成/加课状态）、消课结果同步展示。</p></div>
+  </div>
+
+  <!-- ========== 屏5 课次详情 & 请假入口 ========== -->
+  <div class="shot">
+    <div class="phone"><div class="scr">
+      <div class="notch"></div>
+      <div class="stat dark"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="navtop"><span class="bk">‹</span>课次详情</div>
+      <div class="bd">
+        <div class="card" style="margin-top:6px;">
+          <b style="font-size:15px;">软笔基础班 · 第 12 课</b>
+          <div style="font-size:11.5px;color:var(--ink2);line-height:2.1;margin-top:8px;">
+            上课时间：<b style="color:var(--ink)">10-29（周四）14:00 - 15:30</b><br>
+            任课教师：刘墨白（软笔书法）<br>
+            上课教室：本部校区 · 教室 2<br>
+            课次状态：<span class="chip c-gray">待上课</span> · 消课状态：<span class="chip c-gray">未消课</span><br>
+            本次消耗：1 课时 · 上课后剩余 18 课时
+          </div>
+        </div>
+        <div class="sec-t">上课提醒</div>
+        <div class="card">
+          <div class="fi"><div class="lb">课前 1 天</div><div class="val" style="text-align:right;color:var(--green);">已开启 ✓</div></div>
+          <div class="fi" style="border:none;"><div class="lb">课前 2 小时</div><div class="val" style="text-align:right;color:var(--ink2);">未开启 · 点击开启</div></div>
+        </div>
+        <div class="sec-t">本课同学</div>
+        <div class="card" style="font-size:11px;color:var(--ink2);">王小墨 · 陈一诺 · 张沐宸 等 8 人（仅展示与您相关的信息）</div>
+        <div style="height:8px;"></div>
+        <div class="rule-box">📖 温馨提示：如需请假，请在上课前 4 小时以上提交；课前 4 小时内请假或未到课，将按机构规则扣减课时。</div>
+        <div class="cta">申请请假</div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="n">5</span>课次详情 <span class="pl pl1">P1</span></b>
+      <p>模块五：单节课时间/教师/教室/消课状态、上课提醒设置（P1）、剩余课时预展示，请假入口与规则前置说明。</p></div>
+  </div>
+
+  <!-- ========== 屏6 请假申请 ========== -->
+  <div class="shot">
+    <div class="phone"><div class="scr">
+      <div class="notch"></div>
+      <div class="stat dark"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="navtop"><span class="bk">‹</span>请假申请</div>
+      <div class="bd">
+        <div class="sec-t">请假学员</div>
+        <div style="margin:0 14px;"><div class="stu-sel"><div class="s on">王小墨</div><div class="s">王梓涵</div></div></div>
+        <div class="sec-t">选择课次</div>
+        <div class="card">
+          <div class="fi"><div class="lb">课程</div><div class="val">软笔基础班</div><div class="arr">›</div></div>
+          <div class="fi" style="border:none;"><div class="lb">请假课次</div><div class="val">第 13 课 · 11-01（周日）09:00</div><div class="arr">›</div></div>
+        </div>
+        <div class="sec-t">请假原因 <span style="color:var(--red);">*</span></div>
+        <div class="card">
+          <div style="background:#faf8f2;border-radius:10px;padding:12px;font-size:11.5px;color:#b6b0a2;min-height:64px;">请填写请假原因，如：生病、家中有事…</div>
+          <div style="display:flex;gap:8px;margin-top:10px;font-size:10.5px;">
+            <span class="chip c-gray">生病</span><span class="chip c-gray">家中有事</span><span class="chip c-gray">外出</span><span class="chip c-gray">其他</span>
+          </div>
+        </div>
+        <div class="rule-box">
+          ⚖️ 请假规则（机构已公示）：<br>
+          · 距上课 <b>4 小时以上</b> 提交 → <b style="color:var(--green);">不扣课时</b><br>
+          · 4 小时以内或未到课 → <b style="color:var(--red);">按消课处理</b><br>
+          · 本月剩余可请假次数：1 次（上限 2 次）<br>
+          · 请假通过后可申请补课，补课不重复计费
+        </div>
+        <div class="cta">提交申请</div>
+        <p style="text-align:center;font-size:9.5px;color:#a8a294;">提交后由教师/教务审批 · 结果将推送通知</p>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="n">6</span>请假申请 <span class="pl pl0">P0</span></b>
+      <p>模块七：选学员、选课次、填原因、规则前置校验与公示；同一课次仅一条有效申请；补课入口（P1）。</p></div>
+  </div>
+
+  <!-- ========== 屏7 消息中心 ========== -->
+  <div class="shot">
+    <div class="phone"><div class="scr">
+      <div class="notch"></div>
+      <div class="stat dark"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="navtop"><span class="bk">‹</span>我的消息</div>
+      <div class="bd">
+        <div class="seg"><span class="on">全部</span><span>消课</span><span>调课</span><span>续费</span><span>请假</span></div>
+        <div class="msgi">
+          <div class="ic" style="background:#fdeeea;">🔄</div>
+          <div class="tt"><b>调课通知 <span class="dotn"></span><span class="chip c-red">P0</span></b>
+            <span>「软笔基础班」第13课 由 10-31(六)14:00 调整为 <b>11-01(日)14:00</b>，教师：刘墨白，原因：教师外出培训。请在课表页确认新安排。</span></div>
+        </div>
+        <div class="msgi">
+          <div class="ic" style="background:#eef3ee;">✅</div>
+          <div class="tt"><b>消课通知 <span class="dotn"></span><span class="chip c-red">P0</span></b>
+            <span>王小墨 已完成「软笔基础班」第11课（10-28 14:00），本次消耗 1 课时，剩余 18 课时。</span></div>
+        </div>
+        <div class="msgi">
+          <div class="ic" style="background:#fdf3e0;">💡</div>
+          <div class="tt"><b>续费提醒 <span class="chip c-red">P0</span></b>
+            <span>王梓涵的「幼小衔接硬笔」仅剩 <b>1 课时</b>，有效期至 2027-03-15，为避免影响上课，请及时续费。</span></div>
+        </div>
+        <div class="msgi" style="opacity:.65;">
+          <div class="ic" style="background:#f0ece1;">📝</div>
+          <div class="tt"><b>请假结果通知 <span class="chip c-orange">P1</span></b>
+            <span>您为王小墨提交的 10-26 请假申请已通过，该课次不扣课时。</span></div>
+        </div>
+        <div class="msgi" style="opacity:.65;">
+          <div class="ic" style="background:#eaf1f6;">💳</div>
+          <div class="tt"><b>支付成功通知 <span class="chip c-orange">P1</span></b>
+            <span>订单 DD20261029-0216 支付成功 ¥2,880，24 课时已到账王梓涵的课时账户。</span></div>
+        </div>
+        <div style="margin:10px 14px;background:#fff;border-radius:12px;padding:12px;font-size:10.5px;color:var(--ink2);line-height:1.8;display:flex;gap:8px;">
+          <span style="font-size:14px;">🔔</span><span>开启微信订阅消息，调课、消课、续费提醒将第一时间送达微信服务通知。<b style="color:var(--red);">去开启 ›</b></span>
+        </div>
+      </div>
+      <div class="tabbar">
+        <div class="tab"><div class="i">🏠</div>首页</div>
+        <div class="tab"><div class="i">🗓️</div>课表</div>
+        <div class="tab"><div class="i">🖼️</div>作品</div>
+        <div class="tab"><div class="i">👤</div>我的</div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="n">7</span>消息中心 <span class="pl pl0">P0</span></b>
+      <p>模块六：按类型/时间分类、已读未读标识、订阅消息兜底通道、订阅授权引导（由用户点击触发，不自动弹窗）。</p></div>
+  </div>
+
+  <!-- ========== 屏8 作品墙 ========== -->
+  <div class="shot">
+    <div class="phone"><div class="scr">
+      <div class="notch"></div>
+      <div class="stat light"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="hero1" style="padding:14px 16px 12px;">
+        <h2 style="font-size:17px;">学员作品墙 <span>·</span> 墨香成长</h2>
+        <p>每一幅作品，都是看得见的进步</p>
+      </div>
+      <div class="bd">
+        <div class="seg" style="margin-top:10px;"><span class="on">全部</span><span>硬笔</span><span>软笔</span><span>本月优秀</span></div>
+        <div class="wall">
+          <div class="witem">
+            <div class="im" style="height:120px;background:linear-gradient(135deg,#3d3a36,#26241f);font-size:26px;">静以修身</div>
+            <div class="inf"><b>《诫子书节选》</b>王小墨 · 软笔<br><span style="color:var(--ink2);">刘墨白 点评：结体沉稳，很有进步！</span></div>
+            <div class="ops"><span>❤ 32</span><span>💬 6</span><span style="margin-left:auto;">↗ 分享</span></div>
+          </div>
+          <div class="witem">
+            <div class="im" style="height:96px;background:linear-gradient(135deg,#8a6d4a,#5d4a33);font-size:24px;">永</div>
+            <div class="inf"><b>《永字八法》</b>王梓涵 · 硬笔</div>
+            <div class="ops"><span>❤ 21</span><span style="margin-left:auto;">↗ 分享</span></div>
+          </div>
+          <div class="witem">
+            <div class="im" style="height:104px;background:linear-gradient(135deg,#a0522d,#7a3c20);font-size:24px;">上善若水</div>
+            <div class="inf"><b>《上善若水》</b>李昊然 · 软笔</div>
+            <div class="ops"><span>❤ 45</span><span>💬 9</span><span style="margin-left:auto;">↗ 分享</span></div>
+          </div>
+          <div class="witem">
+            <div class="im" style="height:88px;background:linear-gradient(135deg,#5d7a8a,#3d525d);font-size:22px;">学</div>
+            <div class="inf"><b>《每日一练》</b>陈一诺 · 硬笔</div>
+            <div class="ops"><span>❤ 18</span><span style="margin-left:auto;">↗ 分享</span></div>
+          </div>
+        </div>
+        <div class="sec-t" style="margin-top:4px;">机构动态</div>
+        <div class="card" style="font-size:11px;color:var(--ink2);line-height:1.8;">
+          🎉 「秋季书法作品展」将于 11 月中旬举办，欢迎家长与学员到场观展… <span style="color:var(--red);">查看详情 ›</span>
+        </div>
+      </div>
+      <div class="tabbar">
+        <div class="tab"><div class="i">🏠</div>首页</div>
+        <div class="tab"><div class="i">🗓️</div>课表</div>
+        <div class="tab on"><div class="i">🖼️</div>作品</div>
+        <div class="tab"><div class="i">👤</div>我的</div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="n">8</span>作品墙 <span class="pl pl0">P0</span></b>
+      <p>模块九：按书体/学员/时间分类、作品详情（大图+教师点评）、点赞（P1）、转发好友与朋友圈分享（P1）、机构动态。展示内容均经审核与家长授权。</p></div>
+  </div>
+
+  <!-- ========== 屏9 我的 ========== -->
+  <div class="shot">
+    <div class="phone"><div class="scr">
+      <div class="notch"></div>
+      <div class="stat light"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="bd" style="margin-top:6px;">
+        <div class="me-hero">
+          <div class="row">
+            <div class="av">王</div>
+            <div><b>王女士</b><span>138****2648 · 微信已绑定</span></div>
+            <span style="margin-left:auto;font-size:10px;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:3px 10px;">⚙ 设置</span>
+          </div>
+          <div class="kids">
+            <span class="on">👦 王小墨 · 在读</span><span>👧 王梓涵 · 在读</span><span>＋ 添加学员</span>
+          </div>
+        </div>
+        <div class="card" style="margin-top:-28px;position:relative;display:flex;text-align:center;padding:16px 6px;">
+          <div style="flex:1;"><b style="font-size:19px;">18</b><div style="font-size:10px;color:var(--ink2);margin-top:2px;">剩余课时</div></div>
+          <div style="flex:1;border-left:1px solid var(--line);"><b style="font-size:19px;">30</b><div style="font-size:10px;color:var(--ink2);margin-top:2px;">累计上课</div></div>
+          <div style="flex:1;border-left:1px solid var(--line);"><b style="font-size:19px;">2</b><div style="font-size:10px;color:var(--ink2);margin-top:2px;">请假记录</div></div>
+          <div style="flex:1;border-left:1px solid var(--line);"><b style="font-size:19px;color:var(--red);">1</b><div style="font-size:10px;color:var(--ink2);margin-top:2px;">待续费</div></div>
+        </div>
+        <div class="menu">
+          <div class="mi"><div class="ic" style="background:#eaf1f6;">💰</div>订单与续费<span class="rt">3 笔订单 ›</span></div>
+          <div class="mi"><div class="ic" style="background:#eef3ee;">🕐</div>上课记录<span class="rt">30 条 ›</span></div>
+          <div class="mi"><div class="ic" style="background:#fdeeea;">📝</div>请假记录<span class="rt">2 条 ›</span></div>
+          <div class="mi"><div class="ic" style="background:#fdf3e0;">🔔</div>消息中心<span class="rt">2 条未读 ›</span></div>
+          <div class="mi"><div class="ic" style="background:#f0ece1;">🖼️</div>成长档案<span class="rt">阶段性作品与评语 P2 ›</span></div>
+          <div class="mi"><div class="ic" style="background:#eaf1f6;">📞</div>联系机构<span class="rt">一键拨号 / 客服 ›</span></div>
+        </div>
+        <p style="text-align:center;font-size:9.5px;color:#a8a294;margin-top:8px;">个人信息按最小必要原则收集 · 敏感信息已脱敏展示</p>
+      </div>
+      <div class="tabbar">
+        <div class="tab"><div class="i">🏠</div>首页</div>
+        <div class="tab"><div class="i">🗓️</div>课表</div>
+        <div class="tab"><div class="i">🖼️</div>作品</div>
+        <div class="tab on"><div class="i">👤</div>我的</div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="n">9</span>我的 · 个人中心 <span class="pl pl0">P0</span></b>
+      <p>模块四/八：多子女管理与切换、课时统计（剩余/已消/累计）、订单与续费、上课/请假记录、消息中心、联系机构、成长档案（P2）。</p></div>
+  </div>
+
+  <!-- ========== 屏10 续费 ========== -->
+  <div class="shot">
+    <div class="phone"><div class="scr">
+      <div class="notch"></div>
+      <div class="stat dark"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="navtop"><span class="bk">‹</span>课时与续费</div>
+      <div class="bd">
+        <div class="hour-card" style="margin-top:8px;">
+          <div><div class="big">1</div><div class="lb">剩余课时</div></div>
+          <div class="rt">王梓涵 · 幼小衔接硬笔<br>有效期至 2027-03-15</div>
+        </div>
+        <div class="rule-box" style="margin-top:0;">💡 剩余课时 ≤ 3 已触发续费提醒 · 课时自购买起 12 个月内有效</div>
+        <div class="sec-t">选择课时包</div>
+        <div class="card" style="border:1.5px solid var(--red);position:relative;">
+          <span class="chip c-red" style="position:absolute;top:-8px;right:12px;">续费享 9 折</span>
+          <div style="display:flex;align-items:center;">
+            <div><b style="font-size:14px;">24 课时包</b><div style="font-size:10.5px;color:var(--ink2);margin-top:4px;">幼小衔接硬笔 · 每周 2 次</div></div>
+            <div style="margin-left:auto;text-align:right;"><b style="color:var(--red);font-size:18px;">¥2,592</b><div style="font-size:10px;color:#b6b0a2;"><s>¥2,880</s></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="display:flex;align-items:center;">
+            <div><b style="font-size:14px;">48 课时包</b><div style="font-size:10.5px;color:var(--ink2);margin-top:4px;">幼小衔接硬笔 · 更划算</div></div>
+            <div style="margin-left:auto;"><b style="font-size:16px;">¥4,800</b></div>
+          </div>
+        </div>
+        <div class="sec-t">充值记录</div>
+        <div class="card" style="font-size:11px;color:var(--ink2);line-height:2;">
+          2026-03-15 · 购买 24 课时 · ¥2,880 · 微信支付<br>
+          2026-09-10 · 购买 24 课时 · ¥2,880 · 微信支付
+        </div>
+        <div class="cta">微信支付 ¥2,592</div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="n">10</span>课时与续费 <span class="pl pl0">P0</span></b>
+      <p>模块三/八：续费流程（阈值触发 → 课时包选择 → 在线支付 → 课时账户充值）、有效期与充值记录，家长端记录查询。</p></div>
+  </div>
+
+  <!-- ========== 屏11 教师端 ========== -->
+  <div class="shot">
+    <div class="phone"><div class="scr">
+      <div class="notch"></div>
+      <div class="stat light"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="role-band">教 师 端 · 按身份切换（与家长端同一小程序）</div>
+      <div class="bd">
+        <div class="hero1" style="padding:14px 16px 12px;">
+          <h2 style="font-size:16px;">王砚秋 老师 <span>·</span> 今日 3 节课</h2>
+          <p>10-29（周四）· 待点名 2 节</p>
+        </div>
+        <div class="sec-t">09:00 - 10:00 · 教室1 · 幼小衔接硬笔A班（第12课）</div>
+        <div class="card">
+          <div class="roll"><div class="nm"><b>陈一诺</b><span>剩余 3 课时</span></div><div class="bset"><span class="on">出勤</span><span>请假</span><span class="lv">缺勤</span></div></div>
+          <div class="roll"><div class="nm"><b>张沐宸</b><span>剩余 3 课时 · 已提交请假</span></div><div class="bset"><span class="on">请假✓</span><span class="lv">驳回</span></div></div>
+          <div class="roll"><div class="nm"><b>刘一诺</b><span>剩余 6 课时</span></div><div class="bset"><span>出勤</span><span>请假</span><span class="lv on">缺勤</span></div></div>
+          <div class="roll" style="border:none;"><div class="nm" style="color:var(--ink2);font-size:11px;">… 共 12 名学员</div></div>
+        </div>
+        <div style="margin:0 14px;display:flex;gap:10px;">
+          <div class="cta" style="margin:0;flex:1;">完成点名并消课</div>
+          <div class="cta" style="margin:0;flex:none;background:#26241f;box-shadow:none;">📸 上传作品</div>
+        </div>
+        <div class="sec-t">待我审批的请假</div>
+        <div class="card" style="font-size:11px;line-height:1.9;color:var(--ink2);">
+          <b style="color:var(--ink);">张沐宸</b> · 第13课 · 11-01 09:00 · 家中有事<br>
+          判定：课前 4 小时以上，<b style="color:var(--green);">通过后不扣课时</b>
+          <div style="margin-top:8px;display:flex;gap:8px;">
+            <button style="flex:1;background:var(--green);border:none;color:#fff;border-radius:14px;padding:7px 0;font-size:11px;">同意</button>
+            <button style="flex:1;background:#f0ece1;border:none;color:var(--ink2);border-radius:14px;padding:7px 0;font-size:11px;">驳回</button>
+          </div>
+        </div>
+        <div class="sec-t">我的排课</div>
+        <div class="card" style="font-size:11px;color:var(--ink2);line-height:2;">
+          14:00 幼小衔接硬笔A班（教室1）· 待上课<br>
+          16:30 硬笔提高班（教室1）· 待上课
+        </div>
+      </div>
+    </div></div>
+    <div class="cap"><b><span class="n">11</span>教师端 · 点名与消课 <span class="pl pl0">P0</span></b>
+      <p>模块五/七：按身份进入教师视图，课中点名签到（出勤/请假/缺勤）触发自动消课、请假审批、作品上传、我的排课；消课结果同步家长并推送通知。</p></div>
+  </div>
+
+</div>
+</body>
+</html>

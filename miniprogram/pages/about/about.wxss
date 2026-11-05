@@ -1,0 +1,57 @@
+.about-label {
+  color: var(--red);
+  font-size: 19rpx;
+  letter-spacing: 3rpx;
+  font-weight: 600;
+  margin-bottom: 10rpx;
+}
+.about-text { color: var(--ink2); font-size: 23rpx; line-height: 1.95; }
+.about-since {
+  margin-top: 20rpx;
+  text-align: right;
+  color: var(--muted);
+  font-size: 19rpx;
+  letter-spacing: 2rpx;
+}
+.env-list { padding: 0 28rpx; display: flex; flex-direction: column; gap: 16rpx; }
+.env-item { border-radius: 22rpx; overflow: hidden; height: 260rpx; }
+.env-item image { width: 100%; height: 100%; }
+.env-placeholder {
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: 24rpx;
+  overflow: hidden;
+}
+.ep-char {
+  position: absolute;
+  right: 10rpx;
+  top: -30rpx;
+  font-family: "Songti SC", serif;
+  font-size: 220rpx;
+  line-height: 1;
+  color: rgba(248, 242, 230, .13);
+}
+.ep-title { color: #F8F2E6; font-size: 24rpx; position: relative; letter-spacing: 2rpx; }
+.qual-item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 22rpx 24rpx;
+  border-bottom: 1rpx solid var(--line2);
+}
+.qual-item:last-child { border-bottom: none; }
+.qi-icon {
+  width: 58rpx;
+  height: 58rpx;
+  border-radius: 16rpx;
+  background: rgba(194, 160, 94, .14);
+  color: var(--gold2);
+  font-family: "Songti SC", serif;
+  font-size: 26rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}

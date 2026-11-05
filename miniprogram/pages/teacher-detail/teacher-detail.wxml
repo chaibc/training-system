@@ -1,0 +1,58 @@
+<view wx:if="{{teacher}}" class="page has-bottom-bar">
+  <view class="td-hero">
+    <view class="avatar lg" style="background:#6B503A">{{teacher.avatarChar}}</view>
+    <view class="td-name serif">{{teacher.name}}</view>
+    <view class="td-meta">{{teacher.title}} · {{teacher.years}} 年教龄</view>
+    <view class="td-tags">
+      <text wx:for="{{teacher.stylesList}}" wx:key="*this" class="tag dark">{{item}}</text>
+    </view>
+    <view class="td-watermark">师</view>
+  </view>
+
+  <view class="pad" style="margin-top:24rpx">
+    <view class="quote-card">
+      <view class="q-mark">“</view>
+      <view class="q-text">{{teacher.quote || '以传统书法教育，陪孩子养成专注与耐心。'}}</view>
+      <view class="q-by">— {{teacher.name}}</view>
+    </view>
+  </view>
+
+  <view class="section"><view class="title">教学履历</view></view>
+  <view class="pad">
+    <view class="card padc">
+      <view class="about-text">{{teacher.bio}}</view>
+      <view class="hr"></view>
+      <view class="kv"><text class="k">擅长书体</text><text class="v">{{teacher.styles}}</text></view>
+      <view class="kv"><text class="k">所授课程</text><text class="v">{{teacher.coursesText}}</text></view>
+      <view class="kv"><text class="k">教学特点</text><text class="v">{{teacher.tags}}</text></view>
+    </view>
+  </view>
+
+  <view class="section"><view class="title">所授课程</view><view class="more">{{courses.length}} 门</view></view>
+  <view class="pad">
+    <view class="stack">
+      <view wx:for="{{courses}}" wx:key="id" class="card course-mini" bindtap="goCourse" data-id="{{item.id}}">
+        <view class="course-cover small" style="{{item.coverStyle}}">{{item.coverChar}}</view>
+        <view class="course-body">
+          <view class="name" style="font-size:27rpx">{{item.name}}</view>
+          <view class="meta">{{item.metaText}}</view>
+          <view class="price">{{item.priceText}} <text class="unit">/ {{item.priceUnit}}</text></view>
+        </view>
+        <text class="muted" style="align-self:center">›</text>
+      </view>
+      <view wx:if="{{!courses.length}}" class="empty">课程信息整理中</view>
+    </view>
+  </view>
+
+  <view class="foot-note">教师档案由管理后台统一维护
+试听安排以教务电话确认为准</view>
+
+  <view class="bottom-bar">
+    <button class="btn ghost" bindtap="goTrial">预约试听</button>
+    <button class="btn primary" bindtap="goTrial">咨询这位老师</button>
+  </view>
+</view>
+
+<view wx:else class="page">
+  <view class="empty" style="padding-top:200rpx"><view class="seal">师</view>{{loading ? '正在加载教师…' : '教师不存在'}}</view>
+</view>

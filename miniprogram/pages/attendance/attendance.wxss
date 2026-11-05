@@ -1,0 +1,22 @@
+.att-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  padding: 24rpx;
+  border-bottom: 1rpx solid var(--line2);
+}
+.att-item:last-child { border-bottom: none; }
+.att-date { width: 66rpx; flex: none; text-align: center; }
+.att-date .d { display: block; font-family: Georgia, serif; font-size: 34rpx; font-weight: 600; line-height: 1.1; }
+.att-date .m { display: block; color: var(--muted); font-size: 17rpx; margin-top: 3rpx; }
+.att-line { width: 1rpx; align-self: stretch; background: var(--line2); margin: 2rpx 0; }
+.att-name { font-size: 24rpx; font-weight: 500; }
+.att-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10rpx;
+  padding-top: 8rpx;
+  border-top: 1rpx dashed var(--line2);
+}
+.att-item .arrow { align-self: center; color: #C0B7A7; }

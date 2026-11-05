@@ -1,0 +1,35 @@
+.profile-hero {
+  min-height: 310rpx;
+  padding: 40rpx 32rpx 34rpx;
+  background: linear-gradient(118deg, #26221B 0%, #3A342A 58%, #4B3B2F 100%);
+  color: #F8F2E6;
+  position: relative;
+  overflow: hidden;
+}
+.ph-name { font-size: 44rpx; letter-spacing: 3rpx; margin-top: 18rpx; }
+.ph-no { color: #BFB6A5; font-size: 20rpx; margin-top: 6rpx; }
+.ph-tags { display: flex; gap: 10rpx; margin-top: 14rpx; }
+.ph-watermark {
+  position: absolute;
+  right: -20rpx;
+  bottom: -80rpx;
+  font-family: "Songti SC", serif;
+  font-size: 260rpx;
+  color: rgba(246, 241, 231, .06);
+  line-height: 1;
+}
+.hours-summary { display: flex; align-items: center; padding: 24rpx 26rpx; }
+.hs-action { color: var(--red); font-size: 21rpx; }
+.recent-item {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  padding: 20rpx 24rpx;
+  border-bottom: 1rpx solid var(--line2);
+}
+.recent-item:last-child { border-bottom: none; }
+.ri-date { width: 74rpx; text-align: center; flex: none; }
+.ri-date .d { display: block; font-family: Georgia, serif; font-size: 34rpx; font-weight: 600; }
+.ri-date .m { display: block; color: var(--muted); font-size: 17rpx; }
+.class-line { display: flex; align-items: center; gap: 18rpx; padding: 12rpx 0; }
+.picker { display: flex; align-items: center; }

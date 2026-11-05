@@ -1,0 +1,63 @@
+.roll-lesson {
+  padding: 26rpx 30rpx;
+  background: linear-gradient(110deg, rgba(255, 253, 248, .95), rgba(239, 232, 218, .75));
+  border-bottom: 1rpx solid var(--line2);
+}
+.rl-name { font-size: 32rpx; font-weight: 600; letter-spacing: 1rpx; }
+.rl-meta { color: var(--muted); font-size: 20rpx; margin-top: 6rpx; }
+.rl-note { color: var(--ink2); font-size: 19rpx; line-height: 1.7; margin-top: 14rpx; }
+.roll-summary { position: static; border-top: 1rpx solid var(--line2); }
+.roll-summary .jade { color: #45644D; }
+.roll-summary .gold { color: var(--gold2); }
+.roll-summary .red { color: var(--red); }
+.done-banner {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  margin: 18rpx 28rpx 0;
+  padding: 18rpx 22rpx;
+  border-radius: 16rpx;
+  background: rgba(92, 122, 99, .1);
+  border: 1rpx solid rgba(92, 122, 99, .18);
+  color: #45644D;
+}
+.db-icon {
+  width: 38rpx;
+  height: 38rpx;
+  border-radius: 50%;
+  background: #45644D;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+  flex: none;
+}
+.roll-list { border-radius: 22rpx; overflow: hidden; }
+.roll-student { gap: 12rpx; }
+.roll-actions { gap: 6rpx; }
+.roll-pill { padding: 8rpx 12rpx; font-size: 18rpx; }
+.roll-tip {
+  display: flex;
+  gap: 10rpx;
+  margin: 20rpx 28rpx;
+  padding: 16rpx 18rpx;
+  border-radius: 14rpx;
+  background: rgba(194, 160, 94, .09);
+  color: #6F5A32;
+  font-size: 19rpx;
+  line-height: 1.7;
+}
+.rt-icon {
+  width: 30rpx;
+  height: 30rpx;
+  border-radius: 50%;
+  border: 1rpx solid rgba(169, 120, 42, .5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  font-family: Georgia, serif;
+  font-size: 19rpx;
+  margin-top: 2rpx;
+}

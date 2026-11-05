@@ -1,0 +1,62 @@
+<view wx:if="{{lesson}}" class="page has-bottom-bar">
+  <view class="roll-lesson">
+    <view class="between">
+      <view>
+        <view class="rl-name serif">{{lesson.className}}</view>
+        <view class="rl-meta">{{lesson.dateText}} {{lesson.weekdayText}} · {{lesson.timeText}} · {{lesson.classroomName}}</view>
+      </view>
+      <text class="tag {{lesson.statusClass}}">{{lesson.statusText}}</text>
+    </view>
+    <view class="rl-note">第 {{lesson.lessonNo}} 课 · 出勤与缺勤自动消 1 课时，请假按审批结果处理</view>
+  </view>
+
+  <view class="roll-summary">
+    <view class="rs"><view class="v">{{summary.total}}</view><view class="k">应到</view></view>
+    <view class="rs"><view class="v jade">{{summary.present}}</view><view class="k">出勤</view></view>
+    <view class="rs"><view class="v gold">{{summary.leave}}</view><view class="k">请假</view></view>
+    <view class="rs"><view class="v red">{{summary.absent}}</view><view class="k">缺勤</view></view>
+  </view>
+
+  <view wx:if="{{done}}" class="done-banner">
+    <view class="db-icon">✓</view>
+    <view class="flex1">
+      <view class="bold small">本课次已完成点名</view>
+      <view class="tiny" style="margin-top:2rpx">如发现点名有误，可重新提交，课时差额会自动修正并留痕。</view>
+    </view>
+  </view>
+
+  <view class="roll-list card" style="margin:20rpx 28rpx">
+    <view wx:for="{{students}}" wx:key="studentId" class="roll-student">
+      <view class="roll-avatar">{{item.avatarChar}}</view>
+      <view class="flex1" style="min-width:0">
+        <view class="between">
+          <text class="bold" style="font-size:25rpx">{{item.name}}</text>
+          <text wx:if="{{item.pendingLeave}}" class="tag gold">有请假申请</text>
+        </view>
+        <view class="muted tiny" style="margin-top:3rpx">{{item.studentNo}}<text wx:if="{{item.leaveReason}}"> · {{item.leaveReason}}</text></view>
+      </view>
+      <view class="roll-actions">
+        <view class="roll-pill present {{item.mark === 'PRESENT' ? 'on' : ''}}" data-index="{{index}}" data-mark="PRESENT" bindtap="setMark">出勤</view>
+        <view class="roll-pill leave {{item.mark === 'LEAVE' ? 'on' : ''}}" data-index="{{index}}" data-mark="LEAVE" bindtap="setMark">请假</view>
+        <view class="roll-pill absent {{item.mark === 'ABSENT' ? 'on' : ''}}" data-index="{{index}}" data-mark="ABSENT" bindtap="setMark">缺勤</view>
+      </view>
+    </view>
+    <view wx:if="{{!students.length && !loading}}" class="empty" style="padding:60rpx 0">该班级暂无学员</view>
+  </view>
+
+  <view class="roll-tip">
+    <text class="rt-icon">!</text>
+    <text>点名提交后，家长端课表、上课记录与课时账户将同步更新。已点名修正不会重复扣课，差额写入课时流水。</text>
+  </view>
+
+  <view class="foot-note">缺勤按消课处理；请假是否扣课时以审批结果为准</view>
+
+  <view class="bottom-bar">
+    <button class="btn ghost" bindtap="goBack">返回</button>
+    <button class="btn primary" loading="{{submitting}}" bindtap="submit">{{done ? '重新提交点名' : '完成点名并消课'}}</button>
+  </view>
+</view>
+
+<view wx:else class="page">
+  <view class="empty" style="padding-top:200rpx"><view class="seal">点</view>{{blocked ? '请使用教师账号登录' : (loading ? '正在加载名单…' : '课次不存在')}}</view>
+</view>

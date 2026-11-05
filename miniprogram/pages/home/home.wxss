@@ -1,0 +1,91 @@
+.teacher-entry { margin-top: 24rpx; }
+.teacher-scroll, .works-scroll { width: 100%; }
+.teacher-horizontal {
+  display: flex;
+  gap: 18rpx;
+  padding: 0 28rpx 8rpx;
+}
+.teacher-mini {
+  width: 460rpx;
+  flex: none;
+  display: flex;
+  gap: 18rpx;
+  padding: 24rpx;
+  align-items: center;
+}
+.tm-name { font-family: "Songti SC", serif; font-size: 29rpx; font-weight: 600; }
+.tm-meta { color: var(--muted); font-size: 19rpx; margin-top: 4rpx; }
+.tm-style { color: var(--ink2); font-size: 19rpx; margin-top: 8rpx; }
+.env-grid {
+  display: flex;
+  gap: 14rpx;
+  padding: 0 28rpx;
+}
+.env-card { flex: 1; border-radius: 20rpx; overflow: hidden; }
+.env-art {
+  height: 180rpx;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: 16rpx;
+  color: #F8F2E6;
+  overflow: hidden;
+}
+.env-char {
+  position: absolute;
+  right: 4rpx;
+  top: -12rpx;
+  font-family: "Songti SC", serif;
+  font-size: 130rpx;
+  color: rgba(248, 242, 230, .16);
+  line-height: 1;
+}
+.env-title { font-size: 20rpx; position: relative; }
+.works-horizontal {
+  display: flex;
+  gap: 16rpx;
+  padding: 0 28rpx 8rpx;
+}
+.work-mini { width: 270rpx; flex: none; overflow: hidden; }
+.org-name { font-size: 32rpx; letter-spacing: 2rpx; font-weight: 600; }
+.org-line { color: var(--ink2); font-size: 21rpx; margin-top: 10rpx; }
+.org-traffic { color: var(--muted); font-size: 19rpx; margin-top: 8rpx; }
+.org-actions { display: flex; gap: 12rpx; margin-top: 24rpx; }
+.org-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  padding: 14rpx 4rpx;
+  border-radius: 14rpx;
+  background: var(--paper2);
+  color: var(--ink2);
+  font-size: 20rpx;
+}
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 26rpx 10rpx;
+}
+.service-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10rpx;
+  font-size: 20rpx;
+  color: var(--ink2);
+}
+.service-item .si {
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 20rpx;
+  background: var(--paper2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Songti SC", serif;
+  font-size: 27rpx;
+  color: var(--red);
+}
+.hero .h2 { white-space: pre-line; }

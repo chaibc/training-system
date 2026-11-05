@@ -1,0 +1,69 @@
+<view class="page">
+  <view class="page-head">
+    <view class="eyebrow">ATTENDANCE</view>
+    <view class="h1">上课记录</view>
+    <view class="sub">每次上课的时间、教师、出勤状态与消课结果，与课表和课时账户同口径。</view>
+  </view>
+
+  <view wx:if="{{blocked}}" class="empty" style="padding-top:160rpx"><view class="seal">登</view>请先使用家长账号登录</view>
+
+  <view wx:elif="{{!hasChildren}}" class="empty" style="padding-top:130rpx">
+    <view class="seal">学</view>暂未绑定学员
+    <button class="btn primary sm" style="margin-top:24rpx" bindtap="goAccount">去绑定学员</button>
+  </view>
+
+  <block wx:else>
+    <scroll-view scroll-x class="chips" enhanced show-scrollbar="{{false}}" style="margin-top:10rpx">
+      <view wx:for="{{children}}" wx:key="id" class="chip {{childId === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="selectChild">{{item.name}}</view>
+    </scroll-view>
+
+    <view class="pad" style="margin-top:22rpx">
+      <view class="seg">
+        <view class="s {{filter === 'ALL' ? 'on' : ''}}" data-status="ALL" bindtap="setFilter">全部</view>
+        <view class="s {{filter === 'PRESENT' ? 'on' : ''}}" data-status="PRESENT" bindtap="setFilter">出勤</view>
+        <view class="s {{filter === 'LEAVE' ? 'on' : ''}}" data-status="LEAVE" bindtap="setFilter">请假</view>
+        <view class="s {{filter === 'ABSENT' ? 'on' : ''}}" data-status="ABSENT" bindtap="setFilter">缺勤</view>
+      </view>
+    </view>
+
+    <view class="pad" style="margin-top:18rpx">
+      <view class="between">
+        <text class="muted small">{{childName}} · 共 {{records.length}} 条</text>
+        <text class="muted tiny">消课以教师点名结果为准</text>
+      </view>
+    </view>
+
+    <view class="pad" style="margin-top:18rpx">
+      <view class="card">
+        <view wx:for="{{records}}" wx:key="id" class="att-item" bindtap="goLesson" data-lesson="{{item.lessonId}}">
+          <view class="att-date">
+            <text class="d">{{item.day}}</text>
+            <text class="m">{{item.month}}</text>
+          </view>
+          <view class="att-line"></view>
+          <view class="flex1">
+            <view class="between">
+              <text class="att-name">{{item.className}} · 第 {{item.lessonNo}} 课</text>
+              <text class="tag {{item.statusClass}}">{{item.statusText}}</text>
+            </view>
+            <view class="muted small" style="margin-top:5rpx">{{item.teacherName}} · {{item.timeText}} · {{item.classroomName}}</view>
+            <view class="att-note">
+              <text class="muted tiny">{{item.noteText}}</text>
+              <text class="red tiny">{{item.consumedText}}</text>
+            </view>
+          </view>
+          <text class="arrow">›</text>
+        </view>
+        <view wx:if="{{!records.length && !loading}}" class="empty" style="padding:50rpx 0">没有符合条件的上课记录</view>
+      </view>
+    </view>
+
+    <view class="btn-row pad" style="margin-top:26rpx">
+      <button class="btn ghost" bindtap="goSchedule">查看课表</button>
+      <button class="btn soft" bindtap="goAccount">切换学员</button>
+    </view>
+  </block>
+
+  <view class="foot-note">出勤自动消 1 课时，缺勤按消课处理
+请假是否扣课时以审批时的规则判定为准</view>
+</view>

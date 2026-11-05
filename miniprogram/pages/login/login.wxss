@@ -1,0 +1,65 @@
+.login-card-title {
+  font-size: 36rpx;
+  letter-spacing: 2rpx;
+  font-weight: 600;
+}
+.login-card-sub {
+  color: var(--muted);
+  font-size: 21rpx;
+  line-height: 1.8;
+  margin-top: 10rpx;
+}
+.teacher-login {
+  padding: 22rpx 20rpx;
+  border-radius: 18rpx;
+  background: #F9F5EC;
+}
+.login-scope {
+  margin-top: 36rpx;
+  padding: 26rpx 28rpx;
+  border-radius: 22rpx;
+  background: rgba(255, 253, 248, .55);
+  border: 1rpx solid var(--line2);
+}
+.scope-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  color: var(--ink2);
+  font-size: 21rpx;
+  line-height: 1.7;
+  margin-bottom: 12rpx;
+}
+.scope-row:last-child { margin-bottom: 0; }
+.scope-row .dot {
+  width: 7rpx;
+  height: 7rpx;
+  border-radius: 50%;
+  background: var(--gold);
+  margin-top: 13rpx;
+  flex: none;
+}
+.dev-panel {
+  margin-top: 36rpx;
+  padding: 22rpx 24rpx;
+  border-radius: 18rpx;
+  border: 1rpx dashed rgba(194, 160, 94, .45);
+  background: rgba(194, 160, 94, .07);
+}
+.dev-title {
+  display: flex;
+  justify-content: space-between;
+  font-size: 21rpx;
+  color: var(--gold2);
+  font-weight: 600;
+}
+.dev-body { margin-top: 20rpx; }
+.dev-btns { display: flex; gap: 14rpx; margin-top: 8rpx; }
+.dev-btns .btn { flex: 1; }
+.dev-note {
+  color: var(--muted);
+  font-size: 18rpx;
+  line-height: 1.8;
+  margin-top: 18rpx;
+  white-space: pre-line;
+}

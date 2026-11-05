@@ -1,0 +1,52 @@
+<view class="page">
+  <view class="page-head">
+    <view class="eyebrow">GROWTH ALBUM</view>
+    <view class="h1">成长相册</view>
+    <view class="sub">按时间回看孩子已获授权的作品与教师点评，记录一笔一画的进步。</view>
+  </view>
+
+  <view wx:if="{{blocked}}" class="empty" style="padding-top:160rpx"><view class="seal">登</view>请先使用家长账号登录</view>
+
+  <view wx:elif="{{child}}" class="pad" style="margin-top:20rpx">
+    <view class="card growth-head" bindtap="goProfile">
+      <view class="avatar" style="background:{{child.avatarColor}}">{{child.avatarChar}}</view>
+      <view class="flex1">
+        <view class="serif" style="font-size:30rpx;font-weight:600">{{child.name}}</view>
+        <view class="muted small" style="margin-top:4rpx">{{child.classText}} · 已记录 {{workCount}} 幅作品</view>
+      </view>
+      <text class="muted">›</text>
+    </view>
+  </view>
+
+  <view wx:if="{{child}}" class="pad" style="margin-top:24rpx">
+    <view wx:for="{{timeline}}" wx:key="month" class="growth-month">
+      <view class="gm-head">
+        <view class="gm-dot"></view>
+        <view class="gm-month serif">{{item.month}}</view>
+        <view class="gm-line"></view>
+      </view>
+      <view class="gm-works">
+        <view wx:for="{{item.works}}" wx:for-item="work" wx:key="id" class="gm-work" bindtap="goWork" data-id="{{work.id}}">
+          <view class="work-art" style="height:230rpx">
+            <image wx:if="{{work.hasImage}}" src="{{work.image}}" mode="aspectFill" />
+            <text wx:else class="ch" style="font-size:86rpx">{{work.displayChar}}</text>
+            <view class="stamp">翰墨</view>
+          </view>
+          <view class="gm-work-title">{{work.title}}</view>
+          <view class="gm-work-meta">{{work.typeText}} · {{work.dateText}}</view>
+        </view>
+      </view>
+      <view wx:if="{{item.teacherComment}}" class="gm-comment">
+        <text class="gm-quote">“</text>
+        <text>{{item.teacherComment}}</text>
+      </view>
+    </view>
+    <view wx:if="{{!timeline.length && !loading}}" class="empty">
+      <view class="seal">长</view>还没有已授权的展示作品
+      <button class="btn ghost sm" style="margin-top:24rpx" bindtap="goWorks">去作品墙看看</button>
+    </view>
+  </view>
+
+  <view class="foot-note">仅展示已取得家长授权并通过教务审核的作品
+如需撤销授权，请联系教务</view>
+</view>

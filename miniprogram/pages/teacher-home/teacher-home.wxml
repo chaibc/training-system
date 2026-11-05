@@ -1,0 +1,108 @@
+<view class="page">
+  <view wx:if="{{blocked}}" class="empty" style="padding-top:160rpx">
+    <view class="seal">师</view>请使用教师账号登录
+    <button class="btn primary sm" style="margin-top:24rpx" bindtap="goLogin">去登录</button>
+  </view>
+
+  <block wx:elif="{{teacher}}">
+    <view class="workbench">
+      <view class="stamp">教师
+工作台</view>
+      <view class="hello">TODAY · {{today}}</view>
+      <view class="name">{{teacher.name}} 老师</view>
+      <view class="meta">{{teacher.title}} · 带班 {{classCount}} 个 · 学员 {{studentCount}} 人</view>
+      <view class="stats">
+        <view class="ws"><view class="v">{{todayLessons.length}}</view><view class="k">今日课程</view></view>
+        <view class="ws"><view class="v">{{pendingLeaveCount}}</view><view class="k">待审批请假</view></view>
+        <view class="ws"><view class="v">{{pendingWorks}}</view><view class="k">待审核作品</view></view>
+      </view>
+    </view>
+
+    <view class="tools-grid">
+      <view class="tool-card" bindtap="goRollcall" data-id="{{todayLessons.length ? todayLessons[0].id : ''}}">
+        <view class="ti">点</view>
+        <view><view class="tt">点名与消课</view><view class="ts">今日课程签到</view></view>
+      </view>
+      <view class="tool-card" bindtap="goLeave">
+        <view class="ti">假</view>
+        <view><view class="tt">请假审批</view><view class="ts">{{pendingLeaveCount}} 条待处理</view></view>
+      </view>
+      <view class="tool-card" bindtap="goUpload">
+        <view class="ti">作</view>
+        <view><view class="tt">上传作品</view><view class="ts">需家长授权</view></view>
+      </view>
+      <view class="tool-card" bindtap="goHome">
+        <view class="ti">校</view>
+        <view><view class="tt">机构首页</view><view class="ts">查看公开内容</view></view>
+      </view>
+    </view>
+
+    <view class="section"><view class="title">今日课程</view><view class="more">{{today}}</view></view>
+    <view class="stack pad">
+      <view wx:for="{{todayLessons}}" wx:key="id" class="card lesson-card">
+        <view class="lesson-time">
+          <view class="t">{{item.startText}}</view>
+          <view class="d">{{item.weekdayText}}</view>
+        </view>
+        <view class="lesson-info">
+          <view class="between">
+            <view class="n">{{item.className}}</view>
+            <text class="tag {{item.statusClass}}">{{item.statusText}}</text>
+          </view>
+          <view class="m">第 {{item.lessonNo}} 课 · {{item.classroomName || '教室待定'}} · 应到 {{item.rosterCount}} 人</view>
+          <view class="row gap8" style="margin-top:10rpx">
+            <text class="tag {{item.markedCount >= item.rosterCount ? 'green' : 'gold'}}">已点名 {{item.markedCount}} / {{item.rosterCount}}</text>
+          </view>
+        </view>
+        <view class="lesson-side">
+          <button class="btn sm primary" catchtap="goRollcall" data-id="{{item.id}}">{{item.status === 'DONE' ? '查看' : '去点名'}}</button>
+        </view>
+      </view>
+      <view wx:if="{{!todayLessons.length && !loading}}" class="empty">
+        <view class="seal">闲</view>今天没有排课
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="title">待审批请假</view>
+      <view class="more" bindtap="goLeave">全部 {{pendingLeaveCount}} 条 ›</view>
+    </view>
+    <view class="stack pad">
+      <view wx:for="{{pendingLeaves}}" wx:key="id" class="card leave-mini" bindtap="goLeave">
+        <view class="avatar sm" style="background:#7C5B6B">{{item.avatarChar}}</view>
+        <view class="flex1">
+          <view class="between">
+            <text class="bold" style="font-size:25rpx">{{item.studentName}}</text>
+            <text class="tag gold">待审批</text>
+          </view>
+          <view class="muted small" style="margin-top:4rpx">{{item.className}} · 第 {{item.lessonNo}} 课 · {{item.lessonDate}}</view>
+          <view class="muted tiny" style="margin-top:4rpx">原因：{{item.reasonText}} · {{item.deductText}}</view>
+        </view>
+        <text class="muted">›</text>
+      </view>
+      <view wx:if="{{!pendingLeaves.length && !loading}}" class="empty" style="padding:40rpx 0">没有待审批的请假</view>
+    </view>
+
+    <view class="section"><view class="title">本周排课</view><view class="more">{{weekLessons.length}} 节</view></view>
+    <view class="pad">
+      <view class="card week-list">
+        <view wx:for="{{weekLessons}}" wx:key="id" class="week-row">
+          <view class="wr-day">{{item.dateText}} {{item.weekdayText}}</view>
+          <view class="flex1">
+            <view style="font-size:23rpx">{{item.className}}</view>
+            <view class="muted tiny">{{item.timeText}} · {{item.classroomName}}</view>
+          </view>
+          <text class="tag {{item.statusClass}}">{{item.statusText}}</text>
+        </view>
+        <view wx:if="{{!weekLessons.length}}" class="empty" style="padding:36rpx 0">本周没有排课</view>
+      </view>
+    </view>
+
+    <view class="pad" style="margin-top:28rpx">
+      <button class="btn ghost block" bindtap="logout">退出登录</button>
+    </view>
+
+    <view class="foot-note">教师仅可查看自己所带班级与学员
+点名完成后出勤与消课结果同步家长端</view>
+  </block>
+</view>

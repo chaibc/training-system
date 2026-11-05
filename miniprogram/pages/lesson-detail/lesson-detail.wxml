@@ -1,0 +1,77 @@
+<view wx:if="{{lesson}}" class="page has-bottom-bar">
+  <view class="lesson-hero">
+    <view class="lh-date">{{lesson.dateText}} · {{lesson.weekdayText}}</view>
+    <view class="lh-time">{{lesson.timeText}}</view>
+    <view class="lh-name serif">{{lesson.className}}</view>
+    <view class="lh-tags">
+      <text class="tag {{lesson.statusClass}}">{{lesson.statusText}}</text>
+      <text wx:if="{{lesson.attendanceText}}" class="tag {{lesson.attendanceClass}}">{{lesson.attendanceText}}</text>
+      <text wx:if="{{lesson.leaveStatusText}}" class="tag gold">{{lesson.leaveStatusText}}</text>
+    </view>
+    <view class="lh-watermark">课</view>
+  </view>
+
+  <view class="pad" style="margin-top:24rpx">
+    <view class="card padc">
+      <view class="kv"><text class="k">学员</text><text class="v">{{child.name}}</text></view>
+      <view class="kv"><text class="k">课程</text><text class="v">{{lesson.courseName}}</text></view>
+      <view class="kv"><text class="k">第几次课</text><text class="v">第 {{lesson.lessonNo}} 课</text></view>
+      <view class="kv"><text class="k">任课教师</text><text class="v">{{lesson.teacherName || '待安排'}}</text></view>
+      <view class="kv"><text class="k">教室</text><text class="v">{{lesson.classroomName || '待安排'}}</text></view>
+      <view class="kv"><text class="k">本次消耗</text><text class="v red bold">{{lesson.consumedHours}} 课时</text></view>
+    </view>
+  </view>
+
+  <view class="section"><view class="title">出勤与请假</view></view>
+  <view class="pad">
+    <view class="card padc">
+      <view wx:if="{{leave}}" class="leave-status">
+        <view class="between">
+          <text class="bold">请假单 {{leave.leaveNo}}</text>
+          <text class="tag {{leave.status === 'APPROVED' ? 'green' : leave.status === 'REJECTED' ? 'red' : 'gold'}}">{{leave.status === 'APPROVED' ? '已通过' : leave.status === 'REJECTED' ? '已驳回' : '待审批'}}</text>
+        </view>
+        <view class="small muted" style="margin-top:8rpx">{{leave.reasonText}} · {{leave.deductText}}</view>
+        <view wx:if="{{leave.rejectReason}}" class="small red" style="margin-top:6rpx">驳回原因：{{leave.rejectReason}}</view>
+        <button class="btn sm soft" style="margin-top:18rpx" bindtap="goLeaveRecords">查看请假记录</button>
+      </view>
+      <view wx:elif="{{lesson.attendanceText}}" class="attend-box">
+        <view class="attend-char {{lesson.attendanceClass}}">{{lesson.attendanceText === '出勤' ? '到' : lesson.attendanceText === '请假' ? '假' : '缺'}}</view>
+        <view class="flex1">
+          <view class="bold">已记录{{lesson.attendanceText}}</view>
+          <view class="muted small" style="margin-top:4rpx">本次消耗 {{lesson.consumedHours}} 课时，记录同步至课时账户</view>
+        </view>
+      </view>
+      <view wx:else class="attend-box">
+        <view class="attend-char">待</view>
+        <view class="flex1">
+          <view class="bold">尚未点名</view>
+          <view class="muted small" style="margin-top:4rpx">教师完成点名后，出勤与消课结果将在此显示</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section"><view class="title">请假规则</view></view>
+  <view class="pad">
+    <view class="rule-card">
+      <view class="rule-line"><text class="rule-dot"></text>课前 4 小时以上请假，审批通过后不扣课时</view>
+      <view class="rule-line"><text class="rule-dot"></text>不足 4 小时或未到课，按消课处理</view>
+      <view class="rule-line"><text class="rule-dot"></text>同一课次只能提交一条有效申请</view>
+      <view class="rule-line"><text class="rule-dot"></text>请假通过后可申请补课，不重复计费</view>
+    </view>
+    <view wx:if="{{leaveHint}}" class="form-tip" style="margin-top:20rpx">{{leaveHint}}</view>
+  </view>
+
+  <view class="foot-note">课次状态以教务排课为准
+如需修改请假或补课安排，请联系教务</view>
+
+  <view class="bottom-bar">
+    <button class="btn ghost" bindtap="contact">联系教务</button>
+    <button wx:if="{{canLeave}}" class="btn primary" bindtap="goLeave">申请请假</button>
+    <button wx:elif="{{leave}}" class="btn dark" bindtap="goLeaveRecords">请假记录</button>
+  </view>
+</view>
+
+<view wx:else class="page">
+  <view class="empty" style="padding-top:200rpx"><view class="seal">课</view>{{blocked ? '请先登录家长账号' : (loading ? '正在加载课次…' : '课次不存在')}}</view>
+</view>

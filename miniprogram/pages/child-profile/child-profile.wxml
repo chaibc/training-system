@@ -1,0 +1,117 @@
+<view wx:if="{{child}}" class="page">
+  <view class="profile-hero">
+    <view class="avatar lg" style="background:{{child.avatarColor}}">{{child.avatarChar}}</view>
+    <view class="ph-name serif">{{child.name}}</view>
+    <view class="ph-no">{{child.studentNo}} · {{child.relationText}}</view>
+    <view class="ph-tags">
+      <text class="tag dark">{{child.status === 'ACTIVE' ? '在读' : child.status}}</text>
+      <text wx:if="{{child.primary}}" class="tag gold">主联系人</text>
+    </view>
+    <view class="ph-watermark">{{child.avatarChar}}</view>
+  </view>
+
+  <view class="pad" style="margin-top:22rpx">
+    <view class="card padc">
+      <view class="between">
+        <view class="serif" style="font-size:29rpx;font-weight:600">基础档案</view>
+        <text class="textlink" bindtap="openEdit">编辑资料 ›</text>
+      </view>
+      <view class="hr"></view>
+      <view class="kv"><text class="k">性别</text><text class="v">{{child.gender || '—'}}</text></view>
+      <view class="kv"><text class="k">出生日期</text><text class="v">{{child.birthDate || '—'}}</text></view>
+      <view class="kv"><text class="k">学校 / 年级</text><text class="v">{{child.school || '—'}} / {{child.grade || '—'}}</text></view>
+      <view class="kv"><text class="k">所属班级</text><text class="v">{{child.classText}}</text></view>
+      <view class="kv"><text class="k">教务备注</text><text class="v muted">关键信息修改需教务审核</text></view>
+    </view>
+  </view>
+
+  <view class="pad" style="margin-top:18rpx">
+    <view class="card hours-summary" bindtap="goHours">
+      <view class="flex1">
+        <view class="muted small">剩余课时</view>
+        <view class="big-hours" style="margin-top:6rpx"><text class="n">{{hours.remainingHours || 0}}</text><text class="u">课时</text></view>
+        <view class="muted tiny" style="margin-top:8rpx">已消耗 {{hours.usedHours || 0}} · 有效期至 {{hours.validUntil || '—'}}</view>
+      </view>
+      <view class="hs-action">查看明细 ›</view>
+    </view>
+  </view>
+
+  <view class="section"><view class="title">最近上课</view><view class="more" bindtap="goSchedule">查看课表 ›</view></view>
+  <view class="pad">
+    <view class="card">
+      <view wx:for="{{recent}}" wx:key="id" class="recent-item">
+        <view class="ri-date"><text class="d">{{item.day}}</text><text class="m">{{item.month}}</text></view>
+        <view class="flex1">
+          <view style="font-size:24rpx">{{item.className}} · 第 {{item.lessonNo}} 课</view>
+          <view class="muted small" style="margin-top:4rpx">{{item.teacherName}} · {{item.timeText}}</view>
+        </view>
+        <text class="tag {{item.statusClass}}">{{item.statusText}}</text>
+      </view>
+      <view wx:if="{{!recent.length}}" class="empty" style="padding:46rpx 0">还没有上课记录</view>
+    </view>
+  </view>
+
+  <view class="section"><view class="title">班级与成长</view></view>
+  <view class="pad">
+    <view class="card padc">
+      <view wx:for="{{classes}}" wx:key="id" class="class-line">
+        <view class="flex1">
+          <view class="bold" style="font-size:25rpx">{{item.name}}</view>
+          <view class="muted small" style="margin-top:4rpx">{{item.weekdayText}} · {{item.timeText}}</view>
+        </view>
+        <text class="tag green">在读</text>
+      </view>
+      <view wx:if="{{!classes.length}}" class="empty" style="padding:30rpx 0">暂未分班</view>
+      <view class="hr"></view>
+      <button class="btn soft block" bindtap="goGrowth">进入成长相册</button>
+    </view>
+  </view>
+
+  <view class="btn-row pad" style="margin-top:26rpx">
+    <button class="btn ghost" bindtap="contact">联系教务</button>
+    <button class="btn primary" bindtap="goHours">课时账户</button>
+  </view>
+
+  <view class="foot-note">学员档案由机构与家长共同维护
+姓名、学号等关键信息修改请联系教务</view>
+
+  <view wx:if="{{editOpen}}" class="mask" bindtap="closeEdit"></view>
+  <view wx:if="{{editOpen}}" class="sheet">
+    <view class="handle"></view>
+    <view class="st">编辑学员资料</view>
+    <view class="ss">姓名与学号由教务维护。修改学校、年级、性别与出生日期后立即同步。</view>
+    <view style="margin-top:24rpx">
+      <view class="field">
+        <view class="label">性别</view>
+        <picker range="{{genders}}" bindchange="onGender">
+          <view class="picker">{{form.gender || '请选择'}}<text class="muted" style="margin-left:auto">›</text></view>
+        </picker>
+      </view>
+      <view class="field">
+        <view class="label">出生日期</view>
+        <picker mode="date" value="{{form.birthDate}}" bindchange="onBirth">
+          <view class="picker">{{form.birthDate || '请选择'}}<text class="muted" style="margin-left:auto">›</text></view>
+        </picker>
+      </view>
+      <view class="field">
+        <view class="label">学校</view>
+        <input value="{{form.school}}" placeholder="学校名称" data-field="school" bindinput="onField" />
+      </view>
+      <view class="field">
+        <view class="label">年级 / 班级</view>
+        <input value="{{form.grade}}" placeholder="如 三年级" data-field="grade" bindinput="onField" />
+      </view>
+    </view>
+    <view class="btn-row" style="margin-top:24rpx">
+      <button class="btn ghost" bindtap="closeEdit">取消</button>
+      <button class="btn primary" loading="{{saving}}" bindtap="save">保存资料</button>
+    </view>
+  </view>
+</view>
+
+<view wx:else class="page">
+  <view class="empty" style="padding-top:160rpx">
+    <view class="seal">档</view>{{blocked ? '请先使用家长账号登录' : (loading ? '正在加载档案…' : '未选择学员')}}
+    <button class="btn primary sm" style="margin-top:24rpx" bindtap="goAccount">去绑定学员</button>
+  </view>
+</view>

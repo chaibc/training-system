@@ -1,0 +1,59 @@
+<view class="login-page">
+  <view class="login-seal">翰</view>
+  <view class="login-title">翰墨学堂</view>
+  <view class="login-desc">一笔一画，写好中国字。
+专注 5–12 岁书法启蒙，陪孩子养成受用一生的书写习惯。</view>
+
+  <view class="login-card card">
+    <view class="login-card-title serif">欢迎回来</view>
+    <view class="login-card-sub">游客可浏览机构、课程、师资与作品；登录后可查看课表、课时、报名与请假记录。</view>
+
+    <view wx:if="{{loggedIn}}" class="login-actions">
+      <button class="btn primary block" bindtap="enter">进入翰墨学堂</button>
+      <button class="btn ghost block" bindtap="browse">先随便逛逛</button>
+    </view>
+
+    <view wx:else class="login-actions">
+      <button class="btn primary block" loading="{{loading}}" bindtap="parentLogin">微信一键登录</button>
+      <button class="btn ghost block" bindtap="toggleTeacher">{{teacherOpen ? '收起教师登录' : '教师登录'}}</button>
+      <view wx:if="{{teacherOpen}}" class="teacher-login">
+        <view class="field">
+          <view class="label">教师手机号</view>
+          <input type="number" maxlength="11" value="{{phone}}" placeholder="请输入后台登记的教师手机号" bindinput="onPhoneInput" />
+        </view>
+        <button class="btn dark block" loading="{{loading}}" bindtap="teacherLogin">教师微信登录</button>
+        <view class="login-note">教师账号由后台创建，登录时按手机号匹配；不需要短信验证。</view>
+      </view>
+      <button class="btn soft block" bindtap="browse">先随便逛逛</button>
+    </view>
+  </view>
+
+  <view class="login-scope">
+    <view class="scope-row"><text class="dot"></text>公开内容：首页 / 课程体系 / 师资团队 / 作品墙 / 机构介绍</view>
+    <view class="scope-row"><text class="dot"></text>登录内容：我的课表 / 课时账户 / 报名记录 / 请假与上课记录</view>
+    <view class="scope-row"><text class="dot"></text>一个账号只有一种身份，教师与家长身份互斥</view>
+  </view>
+
+  <view wx:if="{{isDev}}" class="dev-panel">
+    <view class="dev-title" bindtap="toggleDev">
+      <text>开发者联调</text>
+      <text class="muted">{{devOpen ? '收起' : '展开'}}</text>
+    </view>
+    <view wx:if="{{devOpen}}" class="dev-body">
+      <view class="field">
+        <view class="label">微信 code（演示数据 openid）</view>
+        <input value="{{devCode}}" placeholder="seed_parent_wang" bindinput="onDevCodeInput" />
+      </view>
+      <view class="dev-btns">
+        <button class="btn sm ghost" bindtap="demoParent">家长演示登录</button>
+        <button class="btn sm ghost" bindtap="demoTeacher">教师演示登录</button>
+      </view>
+      <view class="dev-note">家长演示：seed_parent_wang（王女士，两名子女）
+教师演示：seed_teacher_wang（王砚秋）
+上线前请将 config.js 的 ENV 改为 production。</view>
+    </view>
+  </view>
+
+  <view class="login-foot">登录即表示同意《用户协议》与《隐私说明》
+机构信息与课程价格以管理后台维护为准</view>
+</view>

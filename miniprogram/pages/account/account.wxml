@@ -1,0 +1,144 @@
+<view class="page">
+  <view class="page-head">
+    <view class="eyebrow">ACCOUNT &amp; BINDING</view>
+    <view class="h1">账号与绑定</view>
+    <view class="sub">本账号为家长账号。教师账号由后台创建，两种身份不能在同一账号切换。</view>
+  </view>
+
+  <view wx:if="{{blocked}}" class="empty" style="padding-top:160rpx"><view class="seal">登</view>请使用家长账号登录</view>
+
+  <block wx:elif="{{account}}">
+    <view class="pad" style="margin-top:20rpx">
+      <view class="card padc">
+        <view class="row gap12">
+          <view class="avatar lg" style="background:#8A6A49">{{account.avatarChar}}</view>
+          <view class="flex1">
+            <view class="serif" style="font-size:34rpx;font-weight:600">{{account.name}}</view>
+            <view class="muted small" style="margin-top:4rpx">{{account.identity}}账号 · {{account.phone}}</view>
+          </view>
+          <text class="tag green">{{account.statusText}}</text>
+        </view>
+        <view class="hr"></view>
+        <view class="kv"><text class="k">微信绑定</text><text class="v">{{account.wechatBound ? '已绑定' : '未绑定'}}</text></view>
+        <view class="kv"><text class="k">登录方式</text><text class="v">微信授权登录（无需短信验证）</text></view>
+        <view class="kv"><text class="k">身份说明</text><text class="v">家长身份，不可切换教师</text></view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="title">子女绑定</view>
+      <view class="more" bindtap="openAdd">＋ 添加学员</view>
+    </view>
+    <view class="pad">
+      <view class="card">
+        <view wx:for="{{bindings}}" wx:key="id" class="binding-item">
+          <view class="avatar" style="background:#7C5B6B">{{item.avatarChar}}</view>
+          <view class="flex1">
+            <view class="between">
+              <view>
+                <text class="bold" style="font-size:26rpx">{{item.studentName}}</text>
+                <text wx:if="{{item.primary}}" class="tag gold" style="margin-left:8rpx">主联系人</text>
+              </view>
+              <text class="tag {{item.statusClass}}">{{item.statusText}}</text>
+            </view>
+            <view class="muted tiny" style="margin-top:4rpx">{{item.studentNo}} · {{item.relationText}}</view>
+            <view wx:if="{{item.canUnbind}}" class="bind-actions">
+              <text class="textlink" bindtap="unbind" data-id="{{item.id}}" data-name="{{item.studentName}}">申请解绑</text>
+            </view>
+          </view>
+        </view>
+        <view wx:if="{{!bindings.length}}" class="empty" style="padding:40rpx 0">
+          <view class="seal">学</view>还没有绑定学员
+          <button class="btn primary sm" style="margin-top:20rpx" bindtap="openAdd">添加学员</button>
+        </view>
+      </view>
+    </view>
+
+    <view class="pad" style="margin-top:20rpx">
+      <view class="form-tip">
+        新增学员或绑定已有学员均需教务审核。一个学员最多 2 位有效监护人，其中 1 位主联系人。关键信息修改请联系教务。
+      </view>
+    </view>
+
+    <view class="section"><view class="title">账号说明</view></view>
+    <view class="pad">
+      <view class="card account-note">
+        <view class="an-line"><text class="an-dot"></text>教师账号由后台创建，使用教师手机号匹配登录</view>
+        <view class="an-line"><text class="an-dot"></text>若同一个人既是家长又是教师，请使用另一个微信号</view>
+        <view class="an-line"><text class="an-dot"></text>后台账号不支持小程序登录，小程序账号也不能进入后台</view>
+        <view class="an-line"><text class="an-dot"></text>本版本不使用短信验证码，也不发送消息推送</view>
+      </view>
+    </view>
+
+    <view class="pad" style="margin-top:30rpx">
+      <button class="btn ghost block" bindtap="logout">退出登录</button>
+    </view>
+  </block>
+
+  <view class="foot-note">绑定与解绑均需教务审核
+审核结果请在「我的」页面查看</view>
+
+  <view wx:if="{{addOpen}}" class="mask" bindtap="closeAdd"></view>
+  <view wx:if="{{addOpen}}" class="sheet">
+    <view class="handle"></view>
+    <view class="st">添加学员</view>
+    <view class="ss">可绑定已有学员档案，或为孩子新建档案。提交后等待教务审核。</view>
+
+    <view class="seg" style="margin:20rpx 0 24rpx">
+      <view class="s {{mode === 'EXISTING' ? 'on' : ''}}" data-mode="EXISTING" bindtap="switchMode">绑定已有学员</view>
+      <view class="s {{mode === 'NEW' ? 'on' : ''}}" data-mode="NEW" bindtap="switchMode">新建学员档案</view>
+    </view>
+
+    <block wx:if="{{mode === 'EXISTING'}}">
+      <view class="field">
+        <view class="label">学员编号 <text class="req">*</text></view>
+        <input value="{{form.studentNo}}" placeholder="如 HX20240018" data-field="studentNo" bindinput="onField" />
+      </view>
+      <view class="field">
+        <view class="label">监护人手机号后四位 <text class="req">*</text></view>
+        <input type="number" maxlength="4" value="{{form.phoneTail}}" placeholder="用于核验身份" data-field="phoneTail" bindinput="onField" />
+      </view>
+    </block>
+
+    <block wx:else>
+      <view class="field">
+        <view class="label">学员姓名 <text class="req">*</text></view>
+        <input value="{{form.studentName}}" placeholder="请输入孩子姓名" data-field="studentName" bindinput="onField" />
+      </view>
+      <view class="field">
+        <view class="label">性别</view>
+        <picker range="{{genders}}" bindchange="onGender">
+          <view class="picker">{{form.gender || '请选择'}}<text class="muted" style="margin-left:auto">›</text></view>
+        </picker>
+      </view>
+      <view class="field">
+        <view class="label">出生日期</view>
+        <picker mode="date" value="{{form.birthDate}}" bindchange="onBirth">
+          <view class="picker">{{form.birthDate || '请选择'}}<text class="muted" style="margin-left:auto">›</text></view>
+        </picker>
+      </view>
+      <view class="field-row">
+        <view class="field">
+          <view class="label">学校</view>
+          <input value="{{form.school}}" placeholder="学校名称" data-field="school" bindinput="onField" />
+        </view>
+        <view class="field">
+          <view class="label">年级</view>
+          <input value="{{form.grade}}" placeholder="如 三年级" data-field="grade" bindinput="onField" />
+        </view>
+      </view>
+    </block>
+
+    <view class="field">
+      <view class="label">与学员关系</view>
+      <picker range="{{relations}}" range-key="label" value="{{relationIndex}}" bindchange="onRelation">
+        <view class="picker">{{relations[relationIndex].label}}<text class="muted" style="margin-left:auto">›</text></view>
+      </picker>
+    </view>
+
+    <view class="btn-row" style="margin-top:24rpx">
+      <button class="btn ghost" bindtap="closeAdd">取消</button>
+      <button class="btn primary" loading="{{saving}}" bindtap="submitBinding">提交审核</button>
+    </view>
+  </view>
+</view>
