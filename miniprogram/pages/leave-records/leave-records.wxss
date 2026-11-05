@@ -1,3 +1,4 @@
+/* ===== 请假记录卡 ===== */
 .leave-card { padding: 26rpx; }
 .lv-no { font-size: 25rpx; font-weight: 600; }
 .lv-time { color: var(--muted); font-size: 18rpx; margin-top: 4rpx; }
@@ -10,6 +11,7 @@
   background: #F9F5EC;
   margin-bottom: 10rpx;
 }
+/* ===== 驳回原因 ===== */
 .reject-box {
   margin-top: 12rpx;
   padding: 16rpx 18rpx;
@@ -19,6 +21,7 @@
   font-size: 20rpx;
   line-height: 1.7;
 }
+/* ===== 补课操作行 ===== */
 .makeup-row {
   display: flex;
   align-items: center;

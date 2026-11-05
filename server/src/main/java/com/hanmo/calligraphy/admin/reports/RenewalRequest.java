@@ -5,6 +5,12 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 
+/**
+ * 登记续费请求体。
+ *
+ * <p>studentId / amount / paymentMethodId / lessons 必填，lessons 至少 1；
+ * item 为空时 service 生成「续费 N 课时」，note 原样存入缴费记录。
+ */
 public record RenewalRequest(
         @NotNull(message = "请选择学员") Long studentId,
         @NotNull(message = "请输入续费金额") BigDecimal amount,

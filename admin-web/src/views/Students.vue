@@ -1,3 +1,11 @@
+/**
+ * 学员管理页：档案分页查询与筛选、新建/编辑档案、档案详情抽屉（课时流水、上课记录、家长与班级）、课时余额调整。
+ * 接口：studentApi.page / detail / create / update / adjustHours（api/index.js）
+ * 辅助接口：classApi.list（班级筛选下拉）
+ *
+ * 列表返回的字段不含生日与备注，编辑时会再取一次详情补全；
+ * 手机号等敏感信息按最小必要原则展示，完整信息由后端按数据范围控制。
+ */
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
@@ -8,6 +16,7 @@ import { PlusOutlined, ReloadOutlined, EditOutlined } from '@ant-design/icons-vu
 const loading = ref(false)
 const rows = ref([])
 const total = ref(0)
+// 列表查询条件：分页 + 关键字 + 状态 + 班级；任一条件变化都会把页码重置为 1
 const query = reactive({ current: 1, size: 10, keyword: '', status: undefined, classId: undefined })
 const classes = ref([])
 
@@ -25,6 +34,7 @@ const hoursSaving = ref(false)
 const hoursStudent = ref(null)
 const hoursForm = reactive({ type: 'ADD', hours: 1, reason: '' })
 
+// 学员状态码 → 中文标签 + 标签配色
 const statusMap = {
   ACTIVE: { text: '在读', cls: 'green' },
   PAUSED: { text: '停课', cls: 'gold' },
@@ -32,6 +42,7 @@ const statusMap = {
   LEFT: { text: '离校', cls: 'gray' }
 }
 
+// 表格列：只有最近上课时间用 customRender 统一格式（MM-DD HH:mm），空值显示 —
 const columns = [
   { title: '学员', key: 'student', width: 190 },
   { title: '家长 / 联系方式', key: 'parent', width: 160 },
@@ -44,6 +55,7 @@ const columns = [
   { title: '操作', key: 'actions', width: 170 }
 ]
 
+// 分页查询学员列表；空白的筛选条件转成 undefined，避免后端把空串当成关键字
 async function load() {
   loading.value = true
   try {
@@ -61,16 +73,19 @@ async function load() {
   }
 }
 
+// 加载班级下拉数据；失败时置空数组，不影响主列表与档案弹窗的使用
 async function loadClasses() {
   try { classes.value = await classApi.list() } catch { classes.value = [] }
 }
 
+// 打开新建弹窗：重置全部字段（性别默认男、状态默认在读），并清空 editingId
 function openCreate() {
   editingId.value = null
   Object.assign(form, { name: '', gender: '男', birthDate: null, school: '', grade: '', status: 'ACTIVE', remark: '' })
   formOpen.value = true
 }
 
+// 打开编辑弹窗：先用列表行回填可复用的字段，再异步用详情接口补生日与备注
 function openEdit(row) {
   editingId.value = row.id
   Object.assign(form, {
@@ -85,6 +100,7 @@ function openEdit(row) {
   formOpen.value = true
 }
 
+// 提交档案：姓名必填；生日是 dayjs 对象，需转成 YYYY-MM-DD 再提交
 async function submitForm() {
   if (!form.name) { message.warning('请填写学员姓名'); return }
   formSaving.value = true
@@ -108,6 +124,7 @@ async function submitForm() {
   }
 }
 
+// 打开档案抽屉：先清空旧数据再请求，避免加载期间闪出上一个学员的档案
 async function openDetail(row) {
   detailOpen.value = true
   detailLoading.value = true
@@ -115,12 +132,14 @@ async function openDetail(row) {
   try { detail.value = await studentApi.detail(row.id) } finally { detailLoading.value = false }
 }
 
+// 打开课时调整弹窗：默认「补发 1 课时」，原因留空强制重新填写
 function openHours(row) {
   hoursStudent.value = row
   Object.assign(hoursForm, { type: 'ADD', hours: 1, reason: '' })
   hoursOpen.value = true
 }
 
+// 提交课时调整：原因必填（会写进课时流水），数量由输入框限制为 0.5 的倍数
 async function submitHours() {
   if (!hoursForm.reason) { message.warning('请填写调整原因'); return }
   hoursSaving.value = true
@@ -131,17 +150,20 @@ async function submitHours() {
     message.success('课时调整已保存，已写入课时流水与操作记录')
     hoursOpen.value = false
     await load()
+    // 抽屉正开着同一个学员时，同步刷新抽屉里的课时与流水，避免数字对不上
     if (detail.value?.id === hoursStudent.value.id) openDetail(hoursStudent.value)
   } finally {
     hoursSaving.value = false
   }
 }
 
+// 进入页面并发加载学员列表与班级下拉
 onMounted(async () => { await Promise.all([load(), loadClasses()]) })
 </script>
 
 <template>
   <div>
+    <!-- 页头：标题、刷新与新建学员 -->
     <div class="page-head">
       <div>
         <div class="eyebrow">STUDENT RECORDS</div>
@@ -156,6 +178,7 @@ onMounted(async () => { await Promise.all([load(), loadClasses()]) })
     </div>
 
     <div class="paper-card" style="padding:16px">
+      <!-- 顶部筛选区：关键字、班级、状态；回车或点击查询都会重置到第一页 -->
       <div class="filters">
         <a-input v-model:value="query.keyword" placeholder="搜索学员姓名 / 学员编号" allow-clear style="width:220px" @press-enter="() => { query.current = 1; load() }" />
         <a-select v-model:value="query.classId" placeholder="全部班级" allow-clear style="width:160px" @change="() => { query.current = 1; load() }">
@@ -172,6 +195,7 @@ onMounted(async () => { await Promise.all([load(), loadClasses()]) })
         <span class="muted small">共 {{ total }} 名学员</span>
       </div>
 
+      <!-- 学员表格：课时账户列剩 3 课时及以下标红，分页由后端返回的 total 驱动 -->
       <a-table :columns="columns" :data-source="rows" :loading="loading" row-key="id" size="small"
                :pagination="{ current: query.current, pageSize: query.size, total, showSizeChanger: false }"
                @change="(p) => { query.current = p.current; load() }">
@@ -203,6 +227,7 @@ onMounted(async () => { await Promise.all([load(), loadClasses()]) })
       <div class="footnote">学员状态变更自动记录时间与操作人 · 手机号等敏感信息按最小必要原则展示 · 家长端仅可见本子女档案</div>
     </div>
 
+    <!-- 档案详情抽屉：基本信息 + 课时流水 / 上课记录 / 家长与班级 三个页签 -->
     <a-drawer v-model:open="detailOpen" title="学员档案" width="620" destroy-on-close>
       <a-spin :spinning="detailLoading">
         <template v-if="detail">
@@ -222,6 +247,7 @@ onMounted(async () => { await Promise.all([load(), loadClasses()]) })
             <a-descriptions-item label="班级" :span="2">{{ detail.classes.map(c => c.className).join('、') || '未分班' }}</a-descriptions-item>
             <a-descriptions-item label="备注" :span="2">{{ detail.remark || '—' }}</a-descriptions-item>
           </a-descriptions>
+          <!-- 详情页签：课时流水是余额变动依据，上课记录对应点名结果 -->
           <a-tabs style="margin-top:16px">
             <a-tab-pane key="ledger" tab="课时流水">
               <a-table :data-source="detail.ledger" :pagination="false" row-key="id" size="small">
@@ -255,6 +281,7 @@ onMounted(async () => { await Promise.all([load(), loadClasses()]) })
       </a-spin>
     </a-drawer>
 
+    <!-- 新建/编辑档案弹窗：两种状态共用一套表单，靠 editingId 判断 -->
     <a-modal v-model:open="formOpen" :title="editingId ? '编辑学员' : '新建学员档案'" ok-text="保存" cancel-text="取消" :confirm-loading="formSaving" @ok="submitForm">
       <a-form layout="vertical">
         <a-row :gutter="12">
@@ -269,6 +296,7 @@ onMounted(async () => { await Promise.all([load(), loadClasses()]) })
       </a-form>
     </a-modal>
 
+    <!-- 课时调整弹窗：补发/扣减/修正三种类型，提交后写流水 -->
     <a-modal v-model:open="hoursOpen" title="调整课时" ok-text="确认调整" cancel-text="取消" :confirm-loading="hoursSaving" @ok="submitHours">
       <a-form layout="vertical">
         <a-form-item label="学员"><a-input :value="hoursStudent?.name" disabled /></a-form-item>

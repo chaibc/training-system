@@ -1,3 +1,11 @@
+/**
+ * 教师请假审批页：查看待审批与历史请假，通过或驳回（驳回必须填原因）。
+ * 接口：GET /api/mini/teacher/leaves/pending；GET /api/mini/teacher/leaves/history；
+ *       POST /api/mini/teacher/leaves/{id}/approve
+ * 参数：无
+ * 需登录：是，且必须是教师（TEACHER）
+ */
+
 const api = require('../../utils/request');
 const auth = require('../../utils/auth');
 const fmt = require('../../utils/format');
@@ -12,6 +20,7 @@ Page({
     processingId: null
   },
 
+  // 教师守卫；非教师置 blocked 不再请求
   onLoad() {
     if (!auth.requireTeacher()) {
       this.setData({ blocked: true, loading: false });
@@ -20,10 +29,12 @@ Page({
     this.load();
   },
 
+  // 下拉同时刷新待审批与历史两个列表
   onPullDownRefresh() {
     this.load().finally(() => wx.stopPullDownRefresh());
   },
 
+  // 两个列表并行拉取；单个接口失败降级为空数组，避免整页报错
   async load() {
     this.setData({ loading: true });
     try {
@@ -41,6 +52,7 @@ Page({
     }
   },
 
+  // 列表项加工：头像首字、提交时间、状态样式；历史与待审批共用
   mapLeave(l) {
     return {
       ...l,
@@ -51,10 +63,12 @@ Page({
     };
   },
 
+  // 切换「待审批/历史」tab，仅切换展示不重新请求（两个列表已同时加载）
   setTab(e) {
     this.setData({ tab: e.currentTarget.dataset.tab });
   },
 
+  // 通过请假：二次确认后提交 approve=true，后端按规则同步出勤与课时
   async approve(e) {
     const id = e.currentTarget.dataset.id;
     const res = await wx.showModal({
@@ -67,6 +81,7 @@ Page({
     await this.handle(id, { approve: true });
   },
 
+  // 驳回请假：editable 弹窗收集原因，原因为空不提交
   async reject(e) {
     const id = e.currentTarget.dataset.id;
     const res = await wx.showModal({
@@ -86,6 +101,7 @@ Page({
     await this.handle(id, { approve: false, rejectReason: reason });
   },
 
+  // 审批提交：processingId 兼作防重复点击锁；成功后重新拉取两个列表
   async handle(id, payload) {
     if (this.data.processingId) return;
     this.setData({ processingId: id });
@@ -100,6 +116,7 @@ Page({
     }
   },
 
+  // 有上一页就返回，直接进入本页则回教师工作台
   goBack() {
     const pages = getCurrentPages();
     if (pages.length > 1) wx.navigateBack();

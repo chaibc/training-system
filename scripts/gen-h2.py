@@ -1,3 +1,23 @@
+# -*- coding: utf-8 -*-
+"""
+把 MySQL 版 SQL 转成 H2（MySQL 兼容模式）版，供本地 dev profile 使用。
+
+用法：
+    python scripts/gen-h2.py
+
+输入/输出：
+    sql/schema.sql        → server/src/main/resources/db/schema-h2.sql
+    sql/seed.sql          → server/src/main/resources/db/data-h2.sql
+
+⚠️ 输出文件是**生成物**，手工修改会在下次执行本脚本时被覆盖。
+    要改表结构请改 sql/ 下的源文件，再重新生成。
+
+转换内容（H2 不兼容 MySQL 的部分）：
+    1. 去掉 CREATE DATABASE / USE / SET NAMES；
+    2. 去掉 ENGINE=InnoDB、CHARSET、COMMENT、ON UPDATE CURRENT_TIMESTAMP；
+    3. 普通 KEY 索引直接丢弃；UNIQUE KEY 转成 CONSTRAINT ... UNIQUE；
+    4. 修正 H2 要求的约束间逗号。
+"""
 from pathlib import Path
 import re
 

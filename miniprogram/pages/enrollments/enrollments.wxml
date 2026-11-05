@@ -13,10 +13,12 @@
   </view>
 
   <block wx:else>
+    <!-- 学员切换标签 -->
     <scroll-view scroll-x class="chips" enhanced show-scrollbar="{{false}}" style="margin-top:8rpx">
       <view wx:for="{{children}}" wx:key="id" class="chip {{childId === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="selectChild">{{item.name}}</view>
     </scroll-view>
 
+    <!-- 报名状态筛选 -->
     <view class="pad" style="margin-top:24rpx">
       <view class="seg">
         <view class="s {{filter === 'ALL' ? 'on' : ''}}" data-status="ALL" bindtap="setFilter">全部</view>
@@ -26,6 +28,7 @@
       </view>
     </view>
 
+    <!-- 报名记录卡片 -->
     <view class="stack pad" style="margin-top:24rpx">
       <view wx:for="{{records}}" wx:key="id" class="card enroll-card">
         <view class="between">
@@ -45,6 +48,7 @@
           <button wx:if="{{item.canCancel}}" class="btn sm ghost" style="color:var(--red)" bindtap="cancel" data-id="{{item.id}}">取消申请</button>
         </view>
       </view>
+      <!-- 空状态 -->
       <view wx:if="{{!records.length && !loading}}" class="empty">
         <view class="seal">报</view>还没有报名记录
         <button class="btn primary sm" style="margin-top:24rpx" bindtap="goEnroll">去报名</button>
@@ -52,6 +56,7 @@
     </view>
   </block>
 
+  <!-- 页脚说明 -->
   <view class="foot-note">报名状态：待确认 → 待缴费 → 已入班
 如状态长时间未更新，请联系教务核对</view>
 </view>

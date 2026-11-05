@@ -1,3 +1,4 @@
+/* ===== 课程封面主视觉 ===== */
 .cd-hero {
   height: 370rpx;
   position: relative;
@@ -31,6 +32,7 @@
   z-index: 1;
   white-space: pre-line;
 }
+/* ===== 标题与标签 ===== */
 .cd-eyebrow {
   position: absolute;
   left: 32rpx;
@@ -60,6 +62,7 @@
 .cd-name { font-size: 44rpx; letter-spacing: 2rpx; font-weight: 600; }
 .cd-sub { color: var(--ink2); font-size: 23rpx; line-height: 1.8; margin-top: 14rpx; }
 .cd-tags { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 18rpx; }
+/* ===== 关键指标卡 ===== */
 .metric-card {
   display: flex;
   margin-top: 26rpx;
@@ -69,6 +72,7 @@
 .metric:last-child { border-right: none; }
 .metric .mv { font-family: "Songti SC", serif; font-size: 32rpx; font-weight: 600; }
 .metric .mk { color: var(--muted); font-size: 19rpx; margin-top: 6rpx; }
+/* ===== 教学目标引言 ===== */
 .goal-card { position: relative; overflow: hidden; }
 .goal-mark {
   position: absolute;
@@ -80,6 +84,7 @@
   line-height: 1;
 }
 .goal-text { color: var(--ink2); font-size: 23rpx; line-height: 1.9; position: relative; }
+/* ===== 班型价格列表 ===== */
 .price-list { overflow: hidden; }
 .price-row {
   display: flex;

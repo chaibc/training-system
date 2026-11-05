@@ -54,6 +54,18 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+/**
+ * 学员管理服务：学员档案的分页/详情/新建/编辑、课时手工调整，以及下拉选项。
+ *
+ * <p>档案详情聚合家长绑定、所在班级、最近 30 条课时流水与上课记录；课时调整是除报名/续费/点名外
+ * 唯一能直接改 hour_account 的入口，必须同时写 hour_ledger 留痕。</p>
+ *
+ * <p>依赖表：student、parent_student、sys_user、class_student、class_group、course、teacher_profile、
+ * hour_account、hour_ledger、attendance、lesson、sys_audit_log。</p>
+ *
+ * <p>本服务不处理家长绑定审核（见 UserAdminService），也不做角色数据范围过滤，后台管理者与教务
+ * 均按全量学员操作。</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class StudentAdminService {
@@ -71,6 +83,21 @@ public class StudentAdminService {
     private final LessonMapper lessonMapper;
     private final SysAuditLogMapper auditLogMapper;
 
+    /**
+     * 学员分页。
+     *
+     * <p>纯查询。keyword 匹配姓名或学员编号；status 精确过滤；classId 先查该班 ACTIVE 名单再
+     * 用 in 过滤，名单为空时直接返回空页。每页上限 200。</p>
+     *
+     * <p>每行都会补课时账户、班级、主监护人、最近点名时间，存在 N+1 查询。</p>
+     *
+     * @param current 页码（最小 1）
+     * @param size    每页条数（1~200）
+     * @param keyword 姓名/学员编号，可为空
+     * @param status  ACTIVE/PAUSED/GRADUATED/LEFT，可为空
+     * @param classId 班级过滤，可为空
+     * @return 学员行分页
+     */
     public PageResult<StudentRow> page(long current, long size, String keyword, String status, Long classId) {
         Page<Student> page = new Page<>(Math.max(1, current), Math.min(Math.max(1, size), 200));
         LambdaQueryWrapper<Student> qw = new LambdaQueryWrapper<>();
@@ -83,6 +110,7 @@ public class StudentAdminService {
                             .eq(ClassStudent::getClassId, classId)
                             .eq(ClassStudent::getStatus, "ACTIVE"))
                     .stream().map(ClassStudent::getStudentId).toList();
+            // 班级没有 ACTIVE 学员时直接返回空页：避免生成 in () 这种非法 SQL
             if (ids.isEmpty()) return PageResult.of(List.of(), 0, current, size);
             qw.in(Student::getId, ids);
         }
@@ -92,12 +120,23 @@ public class StudentAdminService {
         return PageResult.of(rows, page.getTotal(), page.getCurrent(), page.getSize());
     }
 
+    /**
+     * 学员档案详情：基本信息 + 课时账户 + 家长 + 班级 + 最近 30 条流水/上课记录。
+     *
+     * <p>纯查询。课时账户不存在时总/已消/剩余都按 0 返回，有效期返回 null；
+     * 家长手机号已脱敏。</p>
+     *
+     * @param id 学员 ID
+     * @return 档案聚合对象
+     * @throws BusinessException 404 学员不存在
+     */
     public StudentDetail detail(Long id) {
         Student student = requireStudent(id);
         HourAccount account = hourAccountMapper.selectOne(new LambdaQueryWrapper<HourAccount>()
                 .eq(HourAccount::getStudentId, id).last("limit 1"));
         List<ParentView> parents = parentViews(id);
         List<ClassView> classes = classViews(id);
+        // 档案页只取最近 30 条流水与上课记录，防止单个学员数据量大时拖慢响应
         List<LedgerView> ledger = hourLedgerMapper.selectList(new LambdaQueryWrapper<HourLedger>()
                         .eq(HourLedger::getStudentId, id).orderByDesc(HourLedger::getId).last("limit 30"))
                 .stream().map(l -> new LedgerView(l.getId(), l.getType(), l.getChangeHours(),
@@ -113,6 +152,17 @@ public class StudentAdminService {
                 parents, classes, ledger, attendance);
     }
 
+    /**
+     * 新建学员档案。
+     *
+     * <p>副作用：写 student 一行（编号 HX+年份+4 位随机数、状态 ACTIVE、入班日期=今天），
+     * 并写 sys_audit_log；不建课时账户、不绑定家长、不入班。@Transactional 覆盖。</p>
+     *
+     * @param request  姓名（必填，前后空格会 trim）、性别、生日、学校、年级、备注
+     * @param operator 操作人，用于审计
+     * @return 新建学员行（列表展示结构）
+     * @throws BusinessException 500 连续 20 次生成编号都撞唯一键
+     */
     @Transactional
     public StudentRow create(CreateStudentRequest request, LoginUser operator) {
         Student student = new Student();
@@ -130,6 +180,18 @@ public class StudentAdminService {
         return toRow(student);
     }
 
+    /**
+     * 编辑学员档案（局部更新）。
+     *
+     * <p>副作用：更新 student 的姓名/性别/生日/学校/年级/状态/备注，并写审计日志；
+     * 字段为 null 表示不修改，name 为空串也不会清空。@Transactional 覆盖。</p>
+     *
+     * @param id      学员 ID
+     * @param request 待更新字段，均可空
+     * @param operator 操作人，用于审计
+     * @return 更新后的学员行
+     * @throws BusinessException 404 学员不存在
+     */
     @Transactional
     public StudentRow update(Long id, UpdateStudentRequest request, LoginUser operator) {
         Student student = requireStudent(id);
@@ -145,6 +207,22 @@ public class StudentAdminService {
         return toRow(student);
     }
 
+    /**
+     * 手工调整课时（充值 / 扣课 / 修正）。
+     *
+     * <p>计算口径：ADD 时 total 与 remaining 同加 |hours|；DEDUCT 时 remaining 减 |hours|；
+     * CORRECT 时 remaining 直接加带符号的 hours。三种类型都不维护 used_hours。</p>
+     *
+     * <p>副作用：upsert hour_account（无账户先建 0 额度）、写一条 hour_ledger（ADD 记 PURCHASE，
+     * 其余记 CORRECT，change_hours 带符号、balance_after 为调整后余额）、写审计日志；
+     * 全程 @Transactional，任一步失败回滚。</p>
+     *
+     * @param id      学员 ID
+     * @param request type=ADD/DEDUCT/CORRECT、hours（不能为 0）、reason（必填）
+     * @param operator 操作人，写入流水 operator_id 与审计
+     * @return 调整后的剩余课时
+     * @throws BusinessException 404 学员不存在；400 调整量为 0、类型未知、调整后余额为负
+     */
     @Transactional
     public BigDecimal adjustHours(Long id, AdjustHoursRequest request, LoginUser operator) {
         Student student = requireStudent(id);
@@ -160,6 +238,7 @@ public class StudentAdminService {
             account.setRemainingHours(BigDecimal.ZERO);
             hourAccountMapper.insert(account);
         }
+        // 三种调整类型语义不同：ADD 增加总额与余额；DEDUCT 只减余额；CORRECT 按带符号值修余额
         BigDecimal delta;
         switch (request.type()) {
             case "ADD" -> {
@@ -170,12 +249,14 @@ public class StudentAdminService {
             case "CORRECT" -> delta = hours;
             default -> throw new BusinessException(400, "未知调整类型");
         }
+        // 余额不允许为负：扣课超过剩余课时直接拒绝，避免出现负数账户
         BigDecimal balance = account.getRemainingHours().add(delta);
         if (balance.compareTo(BigDecimal.ZERO) < 0) throw new BusinessException(400, "调整后剩余课时不能为负数");
         account.setRemainingHours(balance);
         hourAccountMapper.updateById(account);
         HourLedger ledger = new HourLedger();
         ledger.setStudentId(id);
+        // 流水类型：充值记 PURCHASE，扣课/修正都记 CORRECT；金额靠 change_hours 的正负区分
         ledger.setType("ADD".equals(request.type()) ? "PURCHASE" : "CORRECT");
         ledger.setChangeHours(delta);
         ledger.setBalanceAfter(balance);
@@ -186,21 +267,31 @@ public class StudentAdminService {
         return balance;
     }
 
+    /**
+     * 学员下拉选项（报名、加班级等表单用）。
+     *
+     * <p>纯查询；只返回 ACTIVE 学员，按姓名升序。</p>
+     *
+     * @return id/name/studentNo 列表
+     */
     public List<StudentOption> options() {
         return studentMapper.selectList(new LambdaQueryWrapper<Student>()
                         .eq(Student::getStatus, "ACTIVE").orderByAsc(Student::getName))
                 .stream().map(s -> new StudentOption(s.getId(), s.getName(), s.getStudentNo())).toList();
     }
 
+    // 列表行组装：逐学员查课时账户/班级/家长/最近点名，属于 N+1 查询，学员量大时需要改批量查
     private StudentRow toRow(Student s) {
         HourAccount account = hourAccountMapper.selectOne(new LambdaQueryWrapper<HourAccount>()
                 .eq(HourAccount::getStudentId, s.getId()).last("limit 1"));
         List<ClassView> classes = classViews(s.getId());
         List<ParentView> parents = parentViews(s.getId());
+        // 主联系人取 is_primary=1；历史数据没有主联系人时退化为第一位 ACTIVE 监护人
         ParentView primary = parents.stream().filter(ParentView::primary).findFirst()
                 .orElse(parents.isEmpty() ? null : parents.get(0));
         Attendance last = attendanceMapper.selectOne(new LambdaQueryWrapper<Attendance>()
                 .eq(Attendance::getStudentId, s.getId()).orderByDesc(Attendance::getRecordedAt).last("limit 1"));
+        // 年龄按生日到今天的整年数计算；未填生日按 0 处理
         int age = s.getBirthDate() == null ? 0 : Period.between(s.getBirthDate(), LocalDate.now()).getYears();
         return new StudentRow(s.getId(), s.getStudentNo(), s.getName(), s.getGender(), age,
                 s.getSchool(), s.getGrade(), s.getStatus(),
@@ -213,6 +304,7 @@ public class StudentAdminService {
                 last == null ? null : last.getRecordedAt());
     }
 
+    // 档案里只展示 ACTIVE 绑定：PENDING/REJECTED/REVOKED 不出现；手机号脱敏后返回
     private List<ParentView> parentViews(Long studentId) {
         List<ParentStudent> bindings = parentStudentMapper.selectList(new LambdaQueryWrapper<ParentStudent>()
                 .eq(ParentStudent::getStudentId, studentId)
@@ -230,6 +322,7 @@ public class StudentAdminService {
         return result;
     }
 
+    // 只取 ACTIVE 的班级关系；班级已被删除时跳过，课程/教师缺失用空串占位
     private List<ClassView> classViews(Long studentId) {
         List<ClassStudent> links = classStudentMapper.selectList(new LambdaQueryWrapper<ClassStudent>()
                 .eq(ClassStudent::getStudentId, studentId).eq(ClassStudent::getStatus, "ACTIVE"));
@@ -245,6 +338,7 @@ public class StudentAdminService {
         return result;
     }
 
+    // 上课记录取最近 30 条；课次被删时标题降级为「课次已删除」，保证历史点名仍可读
     private List<AttendanceView> attendanceViews(Long studentId) {
         List<Attendance> records = attendanceMapper.selectList(new LambdaQueryWrapper<Attendance>()
                 .eq(Attendance::getStudentId, studentId).orderByDesc(Attendance::getId).last("limit 30"));
@@ -258,6 +352,7 @@ public class StudentAdminService {
         }).toList();
     }
 
+    // 学员编号 = HX + 年份 + 4 位随机数；最多重试 20 次以规避唯一键冲突，仍失败则抛 500
     private String generateStudentNo() {
         for (int i = 0; i < 20; i++) {
             String no = "HX" + LocalDate.now().getYear()
@@ -269,12 +364,14 @@ public class StudentAdminService {
         throw new BusinessException(500, "生成学员编号失败");
     }
 
+    // 学员不存在统一抛 404
     private Student requireStudent(Long id) {
         Student s = studentMapper.selectById(id);
         if (s == null) throw new BusinessException(404, "学员不存在");
         return s;
     }
 
+    // 绑定关系英文枚举转中文展示；未知值统一显示「其他监护人」
     private String relationText(String relation) {
         if (relation == null) return "其他";
         return switch (relation) {
@@ -285,11 +382,13 @@ public class StudentAdminService {
         };
     }
 
+    // 手机号脱敏：保留前 3 位与后 4 位
     private String maskPhone(String phone) {
         if (phone == null || phone.length() < 7) return phone;
         return phone.substring(0, 3) + "****" + phone.substring(phone.length() - 4);
     }
 
+    // 学员模块审计：target_type 固定「学员」，action 为「学员变更」或「课时调整」
     private void audit(LoginUser operator, String action, Long targetId, String content) {
         SysAuditLog log = new SysAuditLog();
         log.setUserId(operator == null ? null : operator.getId());

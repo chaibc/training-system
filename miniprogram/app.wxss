@@ -1,18 +1,24 @@
 /* 翰墨学堂 · 全局视觉系统
    纸色底 / 墨色字 / 朱砂红 / 描金，配合宋体标题 */
 page {
+  /* 墨色文字：主墨 / 次级墨 / 弱化墨，正文、说明与辅助信息分层 */
   --ink: #232019;
   --ink2: #5F594E;
   --muted: #948C7C;
+  /* 宣纸底色：页面底 / 次级底 / 卡片底，卡片最亮，用来浮起内容 */
   --paper: #F6F1E7;
   --paper2: #EFE8DA;
   --card: #FFFDF8;
+  /* 描边：深一档用于可视分割，浅一档用于卡片内分隔线 */
   --line: #E7DFD0;
   --line2: #F0E9DC;
+  /* 朱印红主色：印章、主按钮、价格与强调数字；red2 用于深底上的红字 */
   --red: #B4473C;
   --red2: #93352C;
+  /* 鎏金辅助色：徽标、标签、金色按钮；gold2 是纸底上可读的深金 */
   --gold: #C2A05E;
   --gold2: #A9782A;
+  /* 玉青与靛蓝：出勤通过、链接与提示等语义色 */
   --jade: #5C7A63;
   --blue: #2E6A9E;
   background: var(--paper);
@@ -23,10 +29,12 @@ page {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ===== 基础重置：统一盒模型与原生控件外观 ===== */
 view, text, button, input, textarea, scroll-view, swiper, image {
   box-sizing: border-box;
 }
 
+/* 去掉原生 button 的默认边框、圆角与居中，交由业务样式控制 */
 button {
   margin: 0;
   padding: 0;
@@ -39,6 +47,7 @@ button {
   text-align: left;
 }
 
+/* button::after 是微信默认的 1px 边框伪元素，统一置空 */
 button::after {
   border: none;
 }
@@ -48,17 +57,20 @@ input, textarea {
   color: var(--ink);
 }
 
+/* ===== 页面容器与左右留白 ===== */
 .page {
   min-height: 100vh;
   padding-bottom: 60rpx;
   background: var(--paper);
 }
 
+/* .pad 与 .section 共用 32rpx 左右留白，保证标题与卡片对齐 */
 .pad {
   padding-left: 32rpx;
   padding-right: 32rpx;
 }
 
+/* ===== 页头：眉标 + 标题 + 说明 ===== */
 .page-head {
   padding: 26rpx 32rpx 4rpx;
 }
@@ -86,6 +98,7 @@ input, textarea {
   line-height: 1.75;
 }
 
+/* ===== 宋体标题与排版工具类 ===== */
 .serif {
   font-family: "Songti SC", "STSong", "SimSun", serif;
 }
@@ -113,6 +126,7 @@ input, textarea {
 .mb12 { margin-bottom: 24rpx; }
 .hr { height: 1rpx; background: var(--line2); margin: 24rpx 0; }
 
+/* ===== 卡片通用：宣纸白底；圆角与阴影规范以 28rpx / 0 4rpx 18rpx 为基准 ===== */
 .card {
   background: var(--card);
   border: 1rpx solid rgba(35, 32, 25, .055);
@@ -121,9 +135,11 @@ input, textarea {
 }
 
 .card.padc { padding: 28rpx; }
+/* ===== 布局工具：纵向堆叠与间距 ===== */
 .stack { display: flex; flex-direction: column; gap: 20rpx; }
 .stack-sm { display: flex; flex-direction: column; gap: 12rpx; }
 
+/* ===== 区块标题：左侧朱红竖线 + 右侧「更多」 ===== */
 .section {
   display: flex;
   align-items: flex-end;
@@ -332,6 +348,7 @@ input, textarea {
 .chip.on { background: var(--ink); border-color: var(--ink); color: #F8F3E9; }
 .chip.red.on { background: var(--red); border-color: var(--red); }
 
+/* ===== 分段控件：纸底凹槽 + 白底选中块 ===== */
 .seg {
   display: flex;
   gap: 6rpx;
@@ -377,6 +394,7 @@ input, textarea {
 .home-top .name { font-family: "Songti SC", "STSong", "SimSun", serif; font-size: 36rpx; letter-spacing: 4rpx; line-height: 1.2; }
 .home-top .slogan { color: var(--muted); font-size: 18rpx; letter-spacing: 2rpx; margin-top: 6rpx; }
 
+/* ===== 首页主视觉：墨色渐变 + 鎏金印章与水印 ===== */
 .hero {
   position: relative;
   margin: 0 28rpx;
@@ -420,6 +438,7 @@ input, textarea {
 .hero-actions { display: flex; gap: 16rpx; margin-top: 32rpx; position: relative; }
 .hero-actions .btn { padding: 16rpx 28rpx; font-size: 22rpx; }
 
+/* ===== 首页快捷入口宫格（四宫格，图标按序号取语义色） ===== */
 .quick-grid {
   margin: -2rpx 28rpx 0;
   background: var(--card);
@@ -455,6 +474,7 @@ input, textarea {
 .quick-grid .q:nth-child(3) .qi { background: rgba(92, 122, 99, .1); color: var(--jade); }
 .quick-grid .q:nth-child(4) .qi { background: rgba(46, 106, 158, .08); color: var(--blue); }
 
+/* ===== 公告条 ===== */
 .notice-bar {
   display: flex;
   align-items: center;
@@ -469,6 +489,7 @@ input, textarea {
 }
 .notice-bar .n { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* ===== 课程迷你卡：封面 + 文案两栏 ===== */
 .course-mini {
   display: flex;
   gap: 20rpx;

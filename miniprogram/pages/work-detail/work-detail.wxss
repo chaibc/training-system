@@ -1,3 +1,4 @@
+/* ===== 作品大图 ===== */
 .work-hero { background: #EFE7D8; }
 .wh-stamp {
   position: absolute;
@@ -16,6 +17,7 @@
   text-align: center;
   white-space: pre-line;
 }
+/* ===== 标题与教师点评 ===== */
 .wd-title { font-size: 42rpx; font-weight: 600; letter-spacing: 2rpx; }
 .wd-meta { color: var(--muted); font-size: 21rpx; margin-top: 8rpx; }
 .teacher-comment { position: relative; }
@@ -29,12 +31,14 @@
 }
 .tc-text { color: var(--ink2); font-size: 23rpx; line-height: 1.9; margin-top: 14rpx; }
 .tc-by { color: var(--muted); font-size: 20rpx; text-align: right; margin-top: 10rpx; }
+/* ===== 授权说明 ===== */
 .authorize-note {
   color: var(--muted);
   font-size: 18rpx;
   line-height: 1.7;
   padding: 18rpx 4rpx;
 }
+/* ===== 点赞 / 分享 / 查看大图 ===== */
 .interact-row {
   display: flex;
   gap: 14rpx;
@@ -53,6 +57,7 @@
 }
 .interact.on { color: var(--red); border-color: rgba(180, 71, 60, .35); background: rgba(180, 71, 60, .06); }
 .interact .ii { font-size: 26rpx; }
+/* ===== 留言列表 ===== */
 .comment { padding: 18rpx 0; border-bottom: 1rpx solid var(--line2); }
 .comment:last-of-type { border-bottom: none; }
 .comment-head { display: flex; align-items: center; gap: 14rpx; }
@@ -65,6 +70,7 @@
   justify-content: space-between;
   padding-top: 18rpx;
 }
+/* ===== 底部留言输入栏 ===== */
 .comment-bar {
   position: fixed;
   left: 0;

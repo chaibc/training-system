@@ -1,3 +1,9 @@
+/**
+ * 业务规则页：维护请假、课时、报名等全局规则（键值对），并给出小程序内容维护索引。
+ * 接口：GET /api/admin/rules/list、PUT /api/admin/rules/{id}（api/index.js 的 ruleApi）
+ *
+ * 规则由后端初始化，本页只改不增删；改完立即对新业务生效，历史记录不变。
+ */
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
@@ -5,12 +11,17 @@ import { ruleApi } from '../api'
 import { ReloadOutlined } from '@ant-design/icons-vue'
 
 const loading = ref(false)
+// 规则列表：ruleKey（规则键）/ ruleValue（当前值）/ description（说明）
 const rules = ref([])
 const editOpen = ref(false)
 const editSaving = ref(false)
+// 正在编辑的规则行，提交时用它的 id 调更新接口
 const editing = ref(null)
+// 编辑弹窗表单：只允许改规则值与说明，规则键不允许改（弹窗里置灰）
 const form = reactive({ ruleValue: '', description: '' })
 
+// 小程序内容维护索引：纯静态对照表，告诉运营每块内容在后台的哪个入口维护
+// 每行依次为 [小程序内容, 维护入口, 维护能力]
 const contentIndex = [
   ['机构资料 / 首页文案 / 联系方式 / 地址', '机构内容 → 机构资料', '编辑、保存'],
   ['师资团队', '机构内容 → 师资团队', '新增、编辑、停用'],
@@ -24,29 +35,35 @@ const contentIndex = [
   ['账号 / 角色 / 家长绑定', '用户与权限', '新建后台账号、编辑、停用、重置密码、绑定审核']
 ]
 
+// 加载全部规则，规则数量少，一次性取回不做分页
 async function load() {
   loading.value = true
   try { rules.value = await ruleApi.list() } finally { loading.value = false }
 }
+// 打开编辑弹窗：回填当前行，说明为空时用空串避免输入框显示 undefined
 function openEdit(row) {
   editing.value = row
   Object.assign(form, { ruleValue: row.ruleValue, description: row.description || '' })
   editOpen.value = true
 }
+// 保存规则：把当前行与表单合并后整体提交，成功后关闭弹窗并重新加载列表
 async function submit() {
   editSaving.value = true
   try {
+    // 提交时合并整行与表单：后端按整条记录更新，避免只传两个字段导致其它字段被清空
     await ruleApi.update(editing.value.id, { ...editing.value, ...form })
     message.success('规则已保存，已同步全机构')
     editOpen.value = false
     await load()
   } finally { editSaving.value = false }
 }
+// 进入页面即加载规则列表
 onMounted(load)
 </script>
 
 <template>
   <div>
+    <!-- 页头：标题与刷新 -->
     <div class="page-head">
       <div>
         <div class="eyebrow">BUSINESS RULES</div>
@@ -58,6 +75,7 @@ onMounted(load)
     </div>
 
     <div class="paper-card card-pad">
+      <!-- 规则表格：每行可编辑，规则键只读 -->
       <div class="card-title">课时与请假规则</div>
       <a-table :data-source="rules" :loading="loading" row-key="id" size="small" :pagination="false">
         <a-table-column title="规则键" data-index="ruleKey" key="ruleKey" width="220" />
@@ -71,6 +89,7 @@ onMounted(load)
     </div>
 
     <div class="paper-card card-pad mt14">
+      <!-- 小程序内容维护索引：静态对照表，帮助运营定位维护入口 -->
       <div class="card-title">小程序内容维护索引</div>
       <a-table :data-source="contentIndex.map((r, i) => ({ key: i, content: r[0], entry: r[1], action: r[2] }))" :pagination="false" size="small">
         <a-table-column title="小程序内容" data-index="content" key="content" />
@@ -80,6 +99,7 @@ onMounted(load)
       <div class="footnote">小程序端只读展示；上述内容修改均为真实后端数据，交付后可在管理后台直接维护。</div>
     </div>
 
+    <!-- 编辑规则弹窗：规则键禁用，只改值/说明 -->
     <a-modal v-model:open="editOpen" title="编辑业务规则" ok-text="保存" cancel-text="取消" :confirm-loading="editSaving" @ok="submit">
       <a-form layout="vertical">
         <a-form-item label="规则键"><a-input :value="editing?.ruleKey" disabled /></a-form-item>

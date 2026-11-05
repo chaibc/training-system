@@ -1,3 +1,4 @@
+/* ===== 子女绑定列表 ===== */
 .binding-item {
   display: flex;
   align-items: flex-start;
@@ -7,6 +8,7 @@
 }
 .binding-item:last-child { border-bottom: none; }
 .bind-actions { margin-top: 10rpx; }
+/* ===== 账号说明列表 ===== */
 .account-note { padding: 22rpx 24rpx; }
 .an-line {
   display: flex;
@@ -19,4 +21,5 @@
 }
 .an-line:last-child { margin-bottom: 0; }
 .an-dot { width: 7rpx; height: 7rpx; border-radius: 50%; background: var(--gold); margin-top: 13rpx; flex: none; }
+/* ===== 弹窗选择器（与全局 .field .picker 对齐） ===== */
 .picker { display: flex; align-items: center; }

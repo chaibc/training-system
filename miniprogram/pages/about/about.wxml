@@ -1,9 +1,11 @@
 <view wx:if="{{institution}}" class="page">
+  <!-- 机构形象头部：品牌名 + 口号 -->
   <view class="about-hero">
     <view class="t">{{institution.brand || '翰墨学堂'}}</view>
     <view class="s">{{institution.slogan || '一笔一画，写好中国字'}}</view>
   </view>
 
+  <!-- 机构简介与办学理念卡 -->
   <view class="pad" style="margin-top:26rpx">
     <view class="card padc">
       <view class="about-label">机构简介</view>
@@ -15,6 +17,7 @@
     </view>
   </view>
 
+  <!-- 教学环境：图片列表，无图时用色块占位 -->
   <view class="section"><view class="title">教学环境</view></view>
   <view class="env-list">
     <view wx:for="{{images}}" wx:key="id" class="env-item" bindtap="previewImage" data-index="{{index}}">
@@ -31,6 +34,7 @@
     </view>
   </view>
 
+  <!-- 资质公示：证书名称、编号与有效期 -->
   <view class="section"><view class="title">资质公示</view><view class="more">真实可核验</view></view>
   <view class="pad">
     <view class="card">
@@ -46,6 +50,7 @@
     </view>
   </view>
 
+  <!-- 联系我们：地址、电话、导航入口 -->
   <view class="section"><view class="title">联系我们</view></view>
   <view class="pad">
     <view class="card padc">
@@ -61,6 +66,7 @@
     </view>
   </view>
 
+  <!-- 关联入口：师资 / 作品 -->
   <view class="pad" style="margin-top:22rpx">
     <view class="btn-row">
       <button class="btn ghost" bindtap="goTeachers">查看师资</button>
@@ -73,5 +79,6 @@
 </view>
 
 <view wx:else class="page">
+  <!-- 兜底：机构信息未维护或加载中 -->
   <view class="empty" style="padding-top:200rpx"><view class="seal">机</view>{{loading ? '正在加载机构信息…' : '机构信息暂未维护'}}</view>
 </view>

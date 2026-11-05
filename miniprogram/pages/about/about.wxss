@@ -1,3 +1,4 @@
+/* ===== 机构简介文案 ===== */
 .about-label {
   color: var(--red);
   font-size: 19rpx;
@@ -13,9 +14,11 @@
   font-size: 19rpx;
   letter-spacing: 2rpx;
 }
+/* ===== 教学环境列表 ===== */
 .env-list { padding: 0 28rpx; display: flex; flex-direction: column; gap: 16rpx; }
 .env-item { border-radius: 22rpx; overflow: hidden; height: 260rpx; }
 .env-item image { width: 100%; height: 100%; }
+/* ===== 无图占位色块：大字水印 + 环境名 ===== */
 .env-placeholder {
   height: 100%;
   position: relative;
@@ -34,6 +37,7 @@
   color: rgba(248, 242, 230, .13);
 }
 .ep-title { color: #F8F2E6; font-size: 24rpx; position: relative; letter-spacing: 2rpx; }
+/* ===== 资质公示条目 ===== */
 .qual-item {
   display: flex;
   align-items: center;

@@ -9,6 +9,7 @@
 
   <block wx:elif="{{account}}">
     <view class="pad" style="margin-top:20rpx">
+      <!-- 账号信息卡：头像、身份与绑定状态 -->
       <view class="card padc">
         <view class="row gap12">
           <view class="avatar lg" style="background:#8A6A49">{{account.avatarChar}}</view>
@@ -25,6 +26,7 @@
       </view>
     </view>
 
+    <!-- 子女绑定列表：主联系人标记 + 解绑入口 -->
     <view class="section">
       <view class="title">子女绑定</view>
       <view class="more" bindtap="openAdd">＋ 添加学员</view>
@@ -54,12 +56,14 @@
       </view>
     </view>
 
+    <!-- 绑定审核说明 -->
     <view class="pad" style="margin-top:20rpx">
       <view class="form-tip">
         新增学员或绑定已有学员均需教务审核。一个学员最多 2 位有效监护人，其中 1 位主联系人。关键信息修改请联系教务。
       </view>
     </view>
 
+    <!-- 账号身份说明：家长 / 教师 / 后台互斥 -->
     <view class="section"><view class="title">账号说明</view></view>
     <view class="pad">
       <view class="card account-note">
@@ -70,6 +74,7 @@
       </view>
     </view>
 
+    <!-- 退出登录 -->
     <view class="pad" style="margin-top:30rpx">
       <button class="btn ghost block" bindtap="logout">退出登录</button>
     </view>
@@ -78,12 +83,14 @@
   <view class="foot-note">绑定与解绑均需教务审核
 审核结果请在「我的」页面查看</view>
 
+  <!-- 添加学员弹窗：遮罩 + 底部面板 -->
   <view wx:if="{{addOpen}}" class="mask" bindtap="closeAdd"></view>
   <view wx:if="{{addOpen}}" class="sheet">
     <view class="handle"></view>
     <view class="st">添加学员</view>
     <view class="ss">可绑定已有学员档案，或为孩子新建档案。提交后等待教务审核。</view>
 
+    <!-- 绑定方式切换：已有学员 / 新建档案 -->
     <view class="seg" style="margin:20rpx 0 24rpx">
       <view class="s {{mode === 'EXISTING' ? 'on' : ''}}" data-mode="EXISTING" bindtap="switchMode">绑定已有学员</view>
       <view class="s {{mode === 'NEW' ? 'on' : ''}}" data-mode="NEW" bindtap="switchMode">新建学员档案</view>
@@ -136,6 +143,7 @@
       </picker>
     </view>
 
+    <!-- 弹窗底部操作 -->
     <view class="btn-row" style="margin-top:24rpx">
       <button class="btn ghost" bindtap="closeAdd">取消</button>
       <button class="btn primary" loading="{{saving}}" bindtap="submitBinding">提交审核</button>

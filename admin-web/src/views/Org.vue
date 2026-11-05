@@ -1,3 +1,10 @@
+/**
+ * 机构内容页：四个页签 —— 机构资料（含教学环境图片）、师资团队、资质公示、公告管理。
+ * 接口：orgApi.info/save/images/createImage/updateImage/removeImage、teacherApi.list/create/update、
+ *       qualificationApi.page/create/update/remove、noticeApi.page/create/update/remove、uploadApi.image
+ *
+ * 机构资料是整表单保存；教学环境图片上传后立即创建记录，图片说明在输入框失焦时单独保存。
+ */
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
@@ -8,12 +15,15 @@ import { PlusOutlined, ReloadOutlined, UploadOutlined, DeleteOutlined } from '@a
 const activeTab = ref('info')
 const infoLoading = ref(false)
 const infoSaving = ref(false)
+// 机构资料表单：经纬度供小程序 wx.openLocation 地图导航使用，全站只维护一个机构地址
 const info = reactive({
   name: '', brand: '', slogan: '', heroIntro: '', intro: '', philosophy: '',
   phone: '', wechat: '', hours: '', address: '', longitude: null, latitude: null,
   traffic: '', sinceYear: 2014, status: 'OPEN'
 })
+// 机构 ID：新增图片记录时要带上；加载资料后会用后端返回的 id 覆盖这个默认值
 const institutionId = ref(1)
+// 教学环境图片列表（含说明与排序），上传成功后立即刷新
 const images = ref([])
 const imageUploading = ref(false)
 const imageLoading = ref(false)
@@ -23,6 +33,7 @@ const teacherLoading = ref(false)
 const teacherOpen = ref(false)
 const teacherSaving = ref(false)
 const editingTeacher = ref(null)
+// 教师表单：phone 是教师微信登录的匹配依据，必须是 11 位手机号
 const teacherForm = reactive({ name: '', phone: '', title: '', years: 0, styles: '', coursesText: '', bio: '', quote: '', tags: '', status: 'ACTIVE', sort: 0 })
 
 const quals = ref([])
@@ -30,6 +41,7 @@ const qualLoading = ref(false)
 const qualOpen = ref(false)
 const qualSaving = ref(false)
 const editingQual = ref(null)
+// 资质表单：validUntil 是文本（支持「长期」），visible 用布尔，提交时转 1/0
 const qualForm = reactive({ name: '', code: '', validUntil: '', verifyStatus: 'VERIFIED', visible: true, sort: 0 })
 
 const notices = ref([])
@@ -37,11 +49,14 @@ const noticeLoading = ref(false)
 const noticeOpen = ref(false)
 const noticeSaving = ref(false)
 const editingNotice = ref(null)
+// 公告表单：publishDate 是 dayjs 对象，提交时格式化为 YYYY-MM-DD
 const noticeForm = reactive({ title: '', type: 'NOTICE', content: '', publishDate: null, status: 'PUBLISHED' })
 
+// 公告类型与公告状态的中文映射，表格里直接查表展示
 const noticeTypes = { NOTICE: '通知公告', ADMISSION: '招生信息', HOLIDAY: '放假安排' }
 const noticeStatus = { DRAFT: '草稿', PUBLISHED: '展示中', HIDDEN: '已隐藏' }
 
+// 读取机构资料回填表单；字段缺失时给默认值，避免输入框里出现 undefined
 async function loadInfo() {
   infoLoading.value = true
   try {
@@ -56,6 +71,7 @@ async function loadInfo() {
     })
   } finally { infoLoading.value = false }
 }
+// 保存机构资料：整表单提交，保存后小程序端同步更新
 async function saveInfo() {
   infoSaving.value = true
   try {
@@ -63,10 +79,13 @@ async function saveInfo() {
     message.success('机构资料已保存，小程序同步更新')
   } finally { infoSaving.value = false }
 }
+// 加载教学环境图片列表（按后端排序返回）
 async function loadImages() {
   imageLoading.value = true
   try { images.value = await orgApi.images() } finally { imageLoading.value = false }
 }
+// 上传环境图片：先传文件拿 URL，再创建图片记录（标题固定「教学环境」，排序追加到末尾）
+// 返回 false 阻止 antd 的默认上传行为，改用项目自己的上传接口
 async function beforeImageUpload(file) {
   imageUploading.value = true
   try {
@@ -82,28 +101,34 @@ async function beforeImageUpload(file) {
   } finally { imageUploading.value = false }
   return false
 }
+// 图片说明保存：输入框失焦即触发，所以界面上没有单独的保存按钮
 async function saveImage(row) {
   await orgApi.updateImage(row.id, { ...row })
   message.success('图片说明已保存')
 }
+// 删除环境图片
 async function removeImage(row) {
   await orgApi.removeImage(row.id)
   message.success('图片已删除')
   await loadImages()
 }
+// 师资列表（教师数量少，一次性取回不分页）
 async function loadTeachers() {
   teacherLoading.value = true
   try { teachers.value = await teacherApi.list() } finally { teacherLoading.value = false }
 }
+// 资质列表：接口分页，这里固定取前 200 条
 async function loadQuals() {
   qualLoading.value = true
   try { const d = await qualificationApi.page({ current: 1, size: 200 }); quals.value = d.records } finally { qualLoading.value = false }
 }
+// 公告列表：接口分页，这里固定取前 200 条
 async function loadNotices() {
   noticeLoading.value = true
   try { const d = await noticeApi.page({ current: 1, size: 200 }); notices.value = d.records } finally { noticeLoading.value = false }
 }
 
+// 打开教师弹窗：传 row 为编辑（整行回填），不传为新增（用默认值），两种状态共用一个弹窗
 function openTeacher(row) {
   editingTeacher.value = row || null
   Object.assign(teacherForm, row ? {
@@ -113,6 +138,7 @@ function openTeacher(row) {
   } : { name: '', phone: '', title: '', years: 0, styles: '', coursesText: '', bio: '', quote: '', tags: '', status: 'ACTIVE', sort: 0 })
   teacherOpen.value = true
 }
+// 保存教师：姓名与 11 位手机号必填（手机号用于教师微信登录匹配），教龄与排序转数字
 async function submitTeacher() {
   if (!teacherForm.name) { message.warning('请填写教师姓名'); return }
   if (!/^1\d{10}$/.test(teacherForm.phone)) { message.warning('请填写正确的 11 位手机号'); return }
@@ -126,12 +152,14 @@ async function submitTeacher() {
     await loadTeachers()
   } finally { teacherSaving.value = false }
 }
+// 启停教师：整行回传并翻转状态；row 本身未被修改，所以提示语仍按旧状态判断
 async function toggleTeacher(row) {
   await teacherApi.update(row.id, { ...row, status: row.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE' })
   message.success(row.status === 'ACTIVE' ? '教师已停用，小程序不再展示' : '教师已启用')
   await loadTeachers()
 }
 
+// 打开资质弹窗：row 为编辑，visible 由 1/0 转成布尔给 switch
 function openQual(row) {
   editingQual.value = row || null
   Object.assign(qualForm, row ? {
@@ -140,6 +168,7 @@ function openQual(row) {
   } : { name: '', code: '', validUntil: '', verifyStatus: 'VERIFIED', visible: true, sort: 0 })
   qualOpen.value = true
 }
+// 保存资质：名称必填，visible 转 1/0、排序转数字
 async function submitQual() {
   if (!qualForm.name) { message.warning('请填写资质名称'); return }
   qualSaving.value = true
@@ -152,17 +181,20 @@ async function submitQual() {
     await loadQuals()
   } finally { qualSaving.value = false }
 }
+// 切换资质是否在小程序展示：整行回传并翻转 visible
 async function toggleQual(row) {
   await qualificationApi.update(row.id, { ...row, visible: row.visible === 1 ? 0 : 1 })
   message.success(row.visible === 1 ? '资质已隐藏' : '资质已展示')
   await loadQuals()
 }
+// 删除资质
 async function removeQual(row) {
   await qualificationApi.remove(row.id)
   message.success('资质已删除')
   await loadQuals()
 }
 
+// 打开公告弹窗：编辑时把发布日期字符串转成 dayjs 供日期选择器使用
 function openNotice(row) {
   editingNotice.value = row || null
   Object.assign(noticeForm, row ? {
@@ -171,6 +203,7 @@ function openNotice(row) {
   } : { title: '', type: 'NOTICE', content: '', publishDate: null, status: 'PUBLISHED' })
   noticeOpen.value = true
 }
+// 保存公告：标题必填；发布日期格式化后再提交
 async function submitNotice() {
   if (!noticeForm.title) { message.warning('请填写公告标题'); return }
   noticeSaving.value = true
@@ -183,23 +216,27 @@ async function submitNotice() {
     await loadNotices()
   } finally { noticeSaving.value = false }
 }
+// 发布/隐藏公告：整行回传后在 PUBLISHED 与 HIDDEN 之间切换
 async function toggleNotice(row) {
   await noticeApi.update(row.id, { ...row, status: row.status === 'PUBLISHED' ? 'HIDDEN' : 'PUBLISHED' })
   message.success(row.status === 'PUBLISHED' ? '公告已隐藏' : '公告已发布')
   await loadNotices()
 }
+// 删除公告
 async function removeNotice(row) {
   await noticeApi.remove(row.id)
   message.success('公告已删除')
   await loadNotices()
 }
 
+// 切换页签：除机构资料外的三个列表按需加载
 function onTab(key) {
   activeTab.value = key
   if (key === 'teachers') loadTeachers()
   if (key === 'quals') loadQuals()
   if (key === 'notices') loadNotices()
 }
+// 首屏并发加载机构资料、环境图片与师资列表（默认停在资料页签）
 onMounted(async () => {
   await Promise.all([loadInfo(), loadImages(), loadTeachers()])
 })
@@ -207,6 +244,7 @@ onMounted(async () => {
 
 <template>
   <div>
+    <!-- 页头：主操作按钮随页签变化（保存资料 / 新增教师 / 新增资质 / 新增公告） -->
     <div class="page-head">
       <div>
         <div class="eyebrow">INSTITUTION CONTENT</div>
@@ -224,7 +262,9 @@ onMounted(async () => {
     </div>
 
     <div class="paper-card" style="padding:0 16px 16px">
+      <!-- 四个页签：机构资料 / 师资团队 / 资质公示 / 公告管理 -->
       <a-tabs :active-key="activeTab" @change="onTab">
+        <!-- 机构资料页签：基础信息表单 + 教学环境图片管理 -->
         <a-tab-pane key="info" tab="机构资料">
           <a-spin :spinning="infoLoading">
             <a-form layout="vertical">
@@ -247,9 +287,11 @@ onMounted(async () => {
               </a-row>
               <div class="login-note">小程序仅展示一个机构地址，用于 wx.openLocation 地图导航；不设校区切换。</div>
             </a-form>
+            <!-- 教学环境图片区：上传即入库，说明文字失焦保存 -->
             <div class="org-images">
               <div class="between" style="margin-bottom:10px">
                 <div class="card-title" style="margin:0">教学环境图片</div>
+                <!-- 上传环境图片：before-upload 内完成上传与建记录 -->
                 <a-upload :before-upload="beforeImageUpload" :show-upload-list="false" accept="image/*">
                   <a-button size="small" :loading="imageUploading"><UploadOutlined /> 上传环境图片</a-button>
                 </a-upload>
@@ -274,7 +316,9 @@ onMounted(async () => {
           </a-spin>
         </a-tab-pane>
 
+        <!-- 师资团队页签 -->
         <a-tab-pane key="teachers" tab="师资团队">
+          <!-- 教师表格：行内可编辑与启停 -->
           <a-table :data-source="teachers" :loading="teacherLoading" row-key="id" size="small" :pagination="false">
             <a-table-column title="教师" key="name" width="180">
               <template #default="{ record }"><b>{{ record.name }}</b><div class="muted" style="font-size:9px">{{ record.title }} · 教龄 {{ record.years }} 年</div></template>
@@ -291,7 +335,9 @@ onMounted(async () => {
           <div class="footnote">教师账号由后台师资团队创建；教师微信登录后按手机号自动匹配，小程序不提供身份申请。</div>
         </a-tab-pane>
 
+        <!-- 资质公示页签 -->
         <a-tab-pane key="quals" tab="资质公示">
+          <!-- 资质表格：展示列是开关，切换即时生效 -->
           <a-table :data-source="quals" :loading="qualLoading" row-key="id" size="small" :pagination="false">
             <a-table-column title="资质名称" data-index="name" key="name" width="180" />
             <a-table-column title="编号" data-index="code" key="code" width="180" />
@@ -306,7 +352,9 @@ onMounted(async () => {
           </a-table>
         </a-tab-pane>
 
+        <!-- 公告管理页签 -->
         <a-tab-pane key="notices" tab="公告管理">
+          <!-- 公告表格：类型与状态查表显示中文，行内可发布/隐藏/删除 -->
           <a-table :data-source="notices" :loading="noticeLoading" row-key="id" size="small" :pagination="false">
             <a-table-column title="标题" data-index="title" key="title" />
             <a-table-column title="类型" key="type" width="100">
@@ -325,6 +373,7 @@ onMounted(async () => {
       </a-tabs>
     </div>
 
+    <!-- 新增/编辑教师弹窗 -->
     <a-modal v-model:open="teacherOpen" :title="editingTeacher ? '编辑教师' : '新增教师'" ok-text="保存" cancel-text="取消" :confirm-loading="teacherSaving" @ok="submitTeacher">
       <a-form layout="vertical">
         <a-row :gutter="12">
@@ -343,6 +392,7 @@ onMounted(async () => {
       </a-form>
     </a-modal>
 
+    <!-- 新增/编辑资质弹窗 -->
     <a-modal v-model:open="qualOpen" :title="editingQual ? '编辑资质' : '新增资质'" ok-text="保存" cancel-text="取消" :confirm-loading="qualSaving" @ok="submitQual">
       <a-form layout="vertical">
         <a-form-item label="资质名称" required><a-input v-model:value="qualForm.name" /></a-form-item>
@@ -355,6 +405,7 @@ onMounted(async () => {
       </a-form>
     </a-modal>
 
+    <!-- 新增/编辑公告弹窗 -->
     <a-modal v-model:open="noticeOpen" :title="editingNotice ? '编辑公告' : '新增公告'" ok-text="保存" cancel-text="取消" :confirm-loading="noticeSaving" @ok="submitNotice">
       <a-form layout="vertical">
         <a-form-item label="公告标题" required><a-input v-model:value="noticeForm.title" /></a-form-item>

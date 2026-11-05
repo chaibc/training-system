@@ -1,4 +1,5 @@
 <view wx:if="{{teacher}}" class="page has-bottom-bar">
+  <!-- 教师头部：头像、教龄与擅长书体 -->
   <view class="td-hero">
     <view class="avatar lg" style="background:#6B503A">{{teacher.avatarChar}}</view>
     <view class="td-name serif">{{teacher.name}}</view>
@@ -9,6 +10,7 @@
     <view class="td-watermark">师</view>
   </view>
 
+  <!-- 教学理念引言卡 -->
   <view class="pad" style="margin-top:24rpx">
     <view class="quote-card">
       <view class="q-mark">“</view>
@@ -17,6 +19,7 @@
     </view>
   </view>
 
+  <!-- 教学履历与风格 -->
   <view class="section"><view class="title">教学履历</view></view>
   <view class="pad">
     <view class="card padc">
@@ -28,6 +31,7 @@
     </view>
   </view>
 
+  <!-- 所授课程 -->
   <view class="section"><view class="title">所授课程</view><view class="more">{{courses.length}} 门</view></view>
   <view class="pad">
     <view class="stack">
@@ -47,6 +51,7 @@
   <view class="foot-note">教师档案由管理后台统一维护
 试听安排以教务电话确认为准</view>
 
+  <!-- 底部固定操作栏 -->
   <view class="bottom-bar">
     <button class="btn ghost" bindtap="goTrial">预约试听</button>
     <button class="btn primary" bindtap="goTrial">咨询这位老师</button>
@@ -54,5 +59,6 @@
 </view>
 
 <view wx:else class="page">
+  <!-- 兜底：教师不存在 / 加载中 -->
   <view class="empty" style="padding-top:200rpx"><view class="seal">师</view>{{loading ? '正在加载教师…' : '教师不存在'}}</view>
 </view>

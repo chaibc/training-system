@@ -1,3 +1,4 @@
+/* ===== 学员档案头部 ===== */
 .profile-hero {
   min-height: 310rpx;
   padding: 40rpx 32rpx 34rpx;
@@ -18,8 +19,10 @@
   color: rgba(246, 241, 231, .06);
   line-height: 1;
 }
+/* ===== 课时概览卡 ===== */
 .hours-summary { display: flex; align-items: center; padding: 24rpx 26rpx; }
 .hs-action { color: var(--red); font-size: 21rpx; }
+/* ===== 最近上课列表 ===== */
 .recent-item {
   display: flex;
   align-items: center;
@@ -31,5 +34,6 @@
 .ri-date { width: 74rpx; text-align: center; flex: none; }
 .ri-date .d { display: block; font-family: Georgia, serif; font-size: 34rpx; font-weight: 600; }
 .ri-date .m { display: block; color: var(--muted); font-size: 17rpx; }
+/* ===== 班级行 ===== */
 .class-line { display: flex; align-items: center; gap: 18rpx; padding: 12rpx 0; }
 .picker { display: flex; align-items: center; }

@@ -5,6 +5,7 @@
   </view>
 
   <block wx:elif="{{teacher}}">
+    <!-- 教师工作台头部：今日概览 -->
     <view class="workbench">
       <view class="stamp">教师
 工作台</view>
@@ -18,6 +19,7 @@
       </view>
     </view>
 
+    <!-- 快捷入口宫格 -->
     <view class="tools-grid">
       <view class="tool-card" bindtap="goRollcall" data-id="{{todayLessons.length ? todayLessons[0].id : ''}}">
         <view class="ti">点</view>
@@ -37,6 +39,7 @@
       </view>
     </view>
 
+    <!-- 今日课程 -->
     <view class="section"><view class="title">今日课程</view><view class="more">{{today}}</view></view>
     <view class="stack pad">
       <view wx:for="{{todayLessons}}" wx:key="id" class="card lesson-card">
@@ -63,6 +66,7 @@
       </view>
     </view>
 
+    <!-- 待审批请假 -->
     <view class="section">
       <view class="title">待审批请假</view>
       <view class="more" bindtap="goLeave">全部 {{pendingLeaveCount}} 条 ›</view>
@@ -83,6 +87,7 @@
       <view wx:if="{{!pendingLeaves.length && !loading}}" class="empty" style="padding:40rpx 0">没有待审批的请假</view>
     </view>
 
+    <!-- 本周排课 -->
     <view class="section"><view class="title">本周排课</view><view class="more">{{weekLessons.length}} 节</view></view>
     <view class="pad">
       <view class="card week-list">
@@ -98,10 +103,12 @@
       </view>
     </view>
 
+    <!-- 退出登录 -->
     <view class="pad" style="margin-top:28rpx">
       <button class="btn ghost block" bindtap="logout">退出登录</button>
     </view>
 
+    <!-- 页脚说明 -->
     <view class="foot-note">教师仅可查看自己所带班级与学员
 点名完成后出勤与消课结果同步家长端</view>
   </block>

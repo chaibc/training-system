@@ -8,10 +8,12 @@
   <view wx:if="{{blocked}}" class="empty" style="padding-top:160rpx"><view class="seal">登</view>请先使用家长账号登录</view>
 
   <block wx:else>
+    <!-- 学员切换标签 -->
     <scroll-view scroll-x class="chips" enhanced show-scrollbar="{{false}}" style="margin-top:10rpx">
       <view wx:for="{{children}}" wx:key="id" class="chip {{childId === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="selectChild">{{item.name}}</view>
     </scroll-view>
 
+    <!-- 请假表单卡：课次 / 原因 / 补充说明 -->
     <view class="pad" style="margin-top:24rpx">
       <view class="card padc">
         <view class="field">
@@ -44,6 +46,7 @@
       </view>
     </view>
 
+    <!-- 请假规则 -->
     <view class="section"><view class="title">请假规则</view></view>
     <view class="pad">
       <view class="rule-card">
@@ -53,12 +56,14 @@
       </view>
     </view>
 
+    <!-- 兜底：未绑定学员 -->
     <view wx:if="{{!childId}}" class="empty">
       <view class="seal">学</view>暂未绑定学员
       <button class="btn primary sm" style="margin-top:24rpx" bindtap="goAccount">去绑定学员</button>
     </view>
   </block>
 
+  <!-- 底部固定操作栏 -->
   <view wx:if="{{!blocked && childId}}" class="bottom-bar">
     <button class="btn ghost" bindtap="goAccount">切换学员</button>
     <button class="btn primary" loading="{{submitting}}" bindtap="submit">提交请假</button>

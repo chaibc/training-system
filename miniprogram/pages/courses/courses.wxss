@@ -1,3 +1,4 @@
+/* ===== 搜索栏 ===== */
 .search-row {
   display: flex;
   align-items: center;
@@ -18,6 +19,7 @@
 .search-icon { color: var(--muted); font-size: 30rpx; }
 .search-box input { flex: 1; font-size: 23rpx; }
 .clear { color: var(--muted); font-size: 32rpx; padding: 0 4rpx; }
+/* ===== 结果统计行 ===== */
 .count-row {
   display: flex;
   align-items: center;
@@ -25,6 +27,7 @@
   padding-top: 26rpx;
   padding-bottom: 18rpx;
 }
+/* ===== 课程卡片：封面 + 文案两段 ===== */
 .course-card { overflow: hidden; }
 .course-cover {
   height: 230rpx;
@@ -57,6 +60,7 @@
   overflow: hidden;
 }
 .course-tags { display: flex; flex-wrap: wrap; gap: 8rpx; margin-top: 14rpx; }
+/* ===== 价格与说明 ===== */
 .course-foot {
   display: flex;
   align-items: flex-end;

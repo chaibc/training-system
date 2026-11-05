@@ -1,3 +1,11 @@
+/**
+ * 家长请假申请页：选择学员与待请假课次、请假原因，提交后按开课时间提示是否扣课时。
+ * 接口：GET /api/mini/parent/children；GET /api/mini/parent/leave-options?studentId=；
+ *       POST /api/mini/parent/leaves
+ * 参数：lessonId（可选，预选课次）；studentId（可选，预选学员）
+ * 需登录：是，且必须是家长（PARENT）
+ */
+
 const api = require('../../utils/request');
 const auth = require('../../utils/auth');
 const view = require('../../utils/view');
@@ -23,6 +31,7 @@ Page({
     deductHint: ''
   },
 
+  // 家长守卫；暂存 URL 带入的课次/学员，等 options 接口返回后再匹配
   onLoad(options) {
     if (!auth.requireParent()) {
       this.setData({ blocked: true, loading: false });
@@ -33,6 +42,7 @@ Page({
     this.loadChildren();
   },
 
+  // 取学员列表定位当前学员：URL 指定 > 全局当前 > 第一条，并写回全局
   async loadChildren() {
     try {
       const list = (await api.get('/mini/parent/children')) || [];
@@ -49,6 +59,7 @@ Page({
     }
   },
 
+  // 拉该学员可请假课次与原因；有预选课次则直接定位到对应下拉项
   async loadOptions() {
     if (!this.data.childId) return;
     this.setData({ loading: true });
@@ -70,6 +81,7 @@ Page({
         reasons: data.reasons || [],
         cutoffHours: data.cutoffHours || 4,
         ruleText: data.ruleText || '',
+        // cutoffHours 判断是否扣课时的截止小时数（后端配置，默认 4）
         deductHint: selectedLesson ? this.calcHint(selectedLesson, data.cutoffHours || 4) : '',
         loading: false
       });
@@ -78,6 +90,7 @@ Page({
     }
   },
 
+  // 按「开课时间 - 现在」与截止小时数比较，提前告知审批通过后是否扣课时（最终以后端批准结果为准）
   calcHint(lesson, cutoff) {
     if (!lesson) return '';
     const start = new Date(lesson.lessonDate + 'T' + String(lesson.startTime).slice(0, 8));
@@ -87,6 +100,7 @@ Page({
       : '距开课不足 ' + cutoff + ' 小时，审批通过后按消课处理';
   },
 
+  // 换学员后清空已选课次/原因，URL 预选课次随之失效
   selectChild(e) {
     const id = Number(e.currentTarget.dataset.id);
     if (id === this.data.childId) return;
@@ -95,6 +109,7 @@ Page({
     this.setData({ childId: id, lessonIndex: -1, selectedLesson: null, reasonId: null, deductHint: '' }, () => this.loadOptions());
   },
 
+  // 选课次：同步选中项并重算扣课时提示
   selectLesson(e) {
     const index = Number(e.detail.value);
     const lesson = this.data.lessons[index];
@@ -105,15 +120,18 @@ Page({
     });
   },
 
+  // 选请假原因（后端下发的固定选项）
   selectReason(e) {
     const id = Number(e.currentTarget.dataset.id);
     this.setData({ reasonId: id });
   },
 
+  // 补充说明：非必填，提交时去首尾空格
   onReasonText(e) {
     this.setData({ reasonText: e.detail.value });
   },
 
+  // 提交请假：学员/课次/原因三项必填；成功后结果写 Storage 再 redirect 到结果页
   async submit() {
     if (this.data.submitting) return;
     if (!this.data.childId) return wx.showToast({ title: '请选择学员', icon: 'none' });
@@ -139,6 +157,7 @@ Page({
     }
   },
 
+  // 没有可请假学员时去绑定学员
   goAccount() {
     wx.navigateTo({ url: '/pages/account/account' });
   }

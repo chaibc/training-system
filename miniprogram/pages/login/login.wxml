@@ -1,9 +1,11 @@
 <view class="login-page">
+  <!-- 品牌标识与登录页标题 -->
   <view class="login-seal">翰</view>
   <view class="login-title">翰墨学堂</view>
   <view class="login-desc">一笔一画，写好中国字。
 专注 5–12 岁书法启蒙，陪孩子养成受用一生的书写习惯。</view>
 
+  <!-- 登录卡片：已登录 / 未登录两种状态 -->
   <view class="login-card card">
     <view class="login-card-title serif">欢迎回来</view>
     <view class="login-card-sub">游客可浏览机构、课程、师资与作品；登录后可查看课表、课时、报名与请假记录。</view>
@@ -16,6 +18,7 @@
     <view wx:else class="login-actions">
       <button class="btn primary block" loading="{{loading}}" bindtap="parentLogin">微信一键登录</button>
       <button class="btn ghost block" bindtap="toggleTeacher">{{teacherOpen ? '收起教师登录' : '教师登录'}}</button>
+      <!-- 教师登录表单 -->
       <view wx:if="{{teacherOpen}}" class="teacher-login">
         <view class="field">
           <view class="label">教师手机号</view>
@@ -28,12 +31,14 @@
     </view>
   </view>
 
+  <!-- 登录范围说明：公开内容 / 登录内容 / 身份互斥 -->
   <view class="login-scope">
     <view class="scope-row"><text class="dot"></text>公开内容：首页 / 课程体系 / 师资团队 / 作品墙 / 机构介绍</view>
     <view class="scope-row"><text class="dot"></text>登录内容：我的课表 / 课时账户 / 报名记录 / 请假与上课记录</view>
     <view class="scope-row"><text class="dot"></text>一个账号只有一种身份，教师与家长身份互斥</view>
   </view>
 
+  <!-- 开发者联调面板（仅开发环境显示） -->
   <view wx:if="{{isDev}}" class="dev-panel">
     <view class="dev-title" bindtap="toggleDev">
       <text>开发者联调</text>
@@ -54,6 +59,7 @@
     </view>
   </view>
 
+  <!-- 页脚协议说明 -->
   <view class="login-foot">登录即表示同意《用户协议》与《隐私说明》
 机构信息与课程价格以管理后台维护为准</view>
 </view>

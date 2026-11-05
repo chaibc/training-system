@@ -1,3 +1,4 @@
+/* ===== 课次信息条 ===== */
 .roll-lesson {
   padding: 26rpx 30rpx;
   background: linear-gradient(110deg, rgba(255, 253, 248, .95), rgba(239, 232, 218, .75));
@@ -6,10 +7,12 @@
 .rl-name { font-size: 32rpx; font-weight: 600; letter-spacing: 1rpx; }
 .rl-meta { color: var(--muted); font-size: 20rpx; margin-top: 6rpx; }
 .rl-note { color: var(--ink2); font-size: 19rpx; line-height: 1.7; margin-top: 14rpx; }
+/* ===== 出勤汇总：覆盖全局 sticky，改为随页面滚动 ===== */
 .roll-summary { position: static; border-top: 1rpx solid var(--line2); }
 .roll-summary .jade { color: #45644D; }
 .roll-summary .gold { color: var(--gold2); }
 .roll-summary .red { color: var(--red); }
+/* ===== 已点名提示 ===== */
 .done-banner {
   display: flex;
   align-items: center;
@@ -33,10 +36,12 @@
   font-size: 22rpx;
   flex: none;
 }
+/* ===== 点名列表 ===== */
 .roll-list { border-radius: 22rpx; overflow: hidden; }
 .roll-student { gap: 12rpx; }
 .roll-actions { gap: 6rpx; }
 .roll-pill { padding: 8rpx 12rpx; font-size: 18rpx; }
+/* ===== 点名说明 ===== */
 .roll-tip {
   display: flex;
   gap: 10rpx;

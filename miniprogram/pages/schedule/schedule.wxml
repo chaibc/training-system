@@ -13,10 +13,12 @@
   </view>
 
   <block wx:else>
+    <!-- 学员切换标签 -->
     <scroll-view scroll-x class="chips" enhanced show-scrollbar="{{false}}" style="margin-top:20rpx">
       <view wx:for="{{children}}" wx:key="id" class="chip {{childId === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="selectChild">{{item.name}}</view>
     </scroll-view>
 
+    <!-- 课时摘要条（点击进入课时账户） -->
     <view class="pad" style="margin-top:24rpx">
       <view class="card hours-strip" bindtap="goHours">
         <view class="hs-left">
@@ -30,12 +32,14 @@
       </view>
     </view>
 
+    <!-- 周切换 -->
     <view class="week-head pad">
       <view class="week-arrow" data-delta="-1" bindtap="changeWeek">‹</view>
       <view class="week-label">{{weekLabel}}</view>
       <view class="week-arrow" data-delta="1" bindtap="changeWeek">›</view>
     </view>
 
+    <!-- 星期选择条 -->
     <view class="week-strip">
       <view wx:for="{{weekDates}}" wx:key="date" class="week-day {{selectedDate === item.date ? 'on' : ''}} {{item.today ? 'today' : ''}}" data-date="{{item.date}}" bindtap="selectDay">
         <view class="w">{{item.week}}</view>
@@ -44,11 +48,13 @@
       </view>
     </view>
 
+    <!-- 当日课程标题 -->
     <view class="pad day-title">
       <text class="serif">{{selectedDate}} · {{dayLessons.length}} 节课</text>
       <text class="muted small">课表以教务排课为准</text>
     </view>
 
+    <!-- 当日课程列表 -->
     <view class="stack pad" style="margin-top:16rpx">
       <view wx:for="{{dayLessons}}" wx:key="id" class="card lesson-card" bindtap="goLesson" data-id="{{item.id}}">
         <view class="lesson-time">
@@ -72,11 +78,13 @@
           <text wx:if="{{item.canLeave}}" class="textlink" catchtap="goLeave" data-id="{{item.id}}">请假</text>
         </view>
       </view>
+      <!-- 空状态 -->
       <view wx:if="{{!dayLessons.length && !loading}}" class="empty">
         <view class="seal">闲</view>当天没有课程安排
       </view>
     </view>
 
+    <!-- 请假规则提示 -->
     <view class="form-tip" style="margin:30rpx 32rpx">
       请假规则：课前 4 小时以上请假不扣课时；不足 4 小时或未到课按消课处理。课次开始后不能在本小程序发起请假。
     </view>

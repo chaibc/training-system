@@ -1,4 +1,5 @@
 <view wx:if="{{child}}" class="page">
+  <!-- 学员档案头部：头像、学号与在读状态 -->
   <view class="profile-hero">
     <view class="avatar lg" style="background:{{child.avatarColor}}">{{child.avatarChar}}</view>
     <view class="ph-name serif">{{child.name}}</view>
@@ -10,6 +11,7 @@
     <view class="ph-watermark">{{child.avatarChar}}</view>
   </view>
 
+  <!-- 基础档案卡 -->
   <view class="pad" style="margin-top:22rpx">
     <view class="card padc">
       <view class="between">
@@ -25,6 +27,7 @@
     </view>
   </view>
 
+  <!-- 剩余课时概览卡（点击进入课时账户） -->
   <view class="pad" style="margin-top:18rpx">
     <view class="card hours-summary" bindtap="goHours">
       <view class="flex1">
@@ -36,6 +39,7 @@
     </view>
   </view>
 
+  <!-- 最近上课列表 -->
   <view class="section"><view class="title">最近上课</view><view class="more" bindtap="goSchedule">查看课表 ›</view></view>
   <view class="pad">
     <view class="card">
@@ -51,6 +55,7 @@
     </view>
   </view>
 
+  <!-- 班级与成长相册入口 -->
   <view class="section"><view class="title">班级与成长</view></view>
   <view class="pad">
     <view class="card padc">
@@ -67,6 +72,7 @@
     </view>
   </view>
 
+  <!-- 底部操作按钮 -->
   <view class="btn-row pad" style="margin-top:26rpx">
     <button class="btn ghost" bindtap="contact">联系教务</button>
     <button class="btn primary" bindtap="goHours">课时账户</button>
@@ -75,6 +81,7 @@
   <view class="foot-note">学员档案由机构与家长共同维护
 姓名、学号等关键信息修改请联系教务</view>
 
+  <!-- 编辑资料弹窗：遮罩 + 底部面板 -->
   <view wx:if="{{editOpen}}" class="mask" bindtap="closeEdit"></view>
   <view wx:if="{{editOpen}}" class="sheet">
     <view class="handle"></view>
@@ -110,6 +117,7 @@
 </view>
 
 <view wx:else class="page">
+  <!-- 兜底：未登录 / 加载中 / 未选择学员 -->
   <view class="empty" style="padding-top:160rpx">
     <view class="seal">档</view>{{blocked ? '请先使用家长账号登录' : (loading ? '正在加载档案…' : '未选择学员')}}
     <button class="btn primary sm" style="margin-top:24rpx" bindtap="goAccount">去绑定学员</button>

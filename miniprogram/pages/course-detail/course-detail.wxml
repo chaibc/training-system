@@ -1,4 +1,5 @@
 <view wx:if="{{course}}" class="page has-bottom-bar">
+  <!-- 课程封面主视觉：分类眉标 + 书体大字 + 印章 -->
   <view class="cd-hero" style="{{course.coverStyle}}">
     <view class="cd-stamp">翰墨
 课程</view>
@@ -7,6 +8,7 @@
     <view class="cd-watermark">习</view>
   </view>
 
+  <!-- 课程名称与适龄、课时标签 -->
   <view class="pad cd-head">
     <view class="cd-name serif">{{course.name}}</view>
     <view class="cd-sub">{{course.description}}</view>
@@ -18,6 +20,7 @@
     </view>
   </view>
 
+  <!-- 关键指标卡：总课时 / 单次时长 / 当前阶段 -->
   <view class="pad">
     <view class="card metric-card">
       <view class="metric"><view class="mv">{{course.lessons}}</view><view class="mk">总课时</view></view>
@@ -26,6 +29,7 @@
     </view>
   </view>
 
+  <!-- 教学目标 -->
   <view class="section">
     <view class="title">教学目标</view>
   </view>
@@ -36,6 +40,7 @@
     </view>
   </view>
 
+  <!-- 分阶段内容：大纲时间线 -->
   <view class="section">
     <view class="title">分阶段内容</view>
     <view class="more">共 {{outlines.length}} 个阶段</view>
@@ -55,6 +60,7 @@
     </view>
   </view>
 
+  <!-- 班型与价格：到店缴费说明 -->
   <view class="section">
     <view class="title">班型与价格</view>
     <view class="more">到店缴费</view>
@@ -76,6 +82,7 @@
   <view class="foot-note">试听与报名均不收取线上费用
 如有疑问请联系教务 0755-8888-6666</view>
 
+  <!-- 底部固定操作栏 -->
   <view class="bottom-bar">
     <button class="btn ghost" bindtap="call">联系教务</button>
     <button class="btn primary" bindtap="goTrial">预约试听</button>
@@ -84,5 +91,6 @@
 </view>
 
 <view wx:else class="page">
+  <!-- 兜底：课程不存在或加载中 -->
   <view class="empty" style="padding-top:200rpx"><view class="seal">课</view>{{loading ? '正在加载课程…' : '课程不存在或已下架'}}</view>
 </view>

@@ -1,5 +1,8 @@
+/* ===== 快捷入口 ===== */
 .tools-grid { margin-top: 20rpx; }
+/* ===== 待审批请假 ===== */
 .leave-mini { display: flex; align-items: center; gap: 16rpx; padding: 22rpx 24rpx; }
+/* ===== 本周排课 ===== */
 .week-list { overflow: hidden; }
 .week-row {
   display: flex;

@@ -1,9 +1,11 @@
 <view class="result-page">
+  <!-- 结果印章与标题 -->
   <view class="result-seal">约</view>
   <view class="result-title">预约已提交</view>
   <view class="result-sub">教务将按您留下的手机号电话确认
 请保持电话畅通，到店试听不收取费用</view>
 
+  <!-- 预约结果信息卡 -->
   <view class="card result-card">
     <view class="result-row"><text class="k">预约编号</text><text class="v num">{{result.bookingNo}}</text></view>
     <view class="result-row"><text class="k">学员姓名</text><text class="v">{{result.studentName}}</text></view>
@@ -12,6 +14,7 @@
     <view class="result-row"><text class="k">当前状态</text><text class="v"><text class="tag gold">待教务确认</text></text></view>
   </view>
 
+  <!-- 预约流程 -->
   <view class="result-flow">
     <view class="step on"><view class="dot"></view>已提交</view>
     <view class="step"><view class="dot"></view>电话确认</view>
@@ -19,6 +22,7 @@
     <view class="step"><view class="dot"></view>完成</view>
   </view>
 
+  <!-- 后续操作 -->
   <view class="result-actions">
     <button class="btn primary block" bindtap="goCourses">查看课程体系</button>
     <button class="btn ghost block" bindtap="goHome">返回首页</button>

@@ -1,3 +1,4 @@
+/* ===== 教师入口与横向滚动容器 ===== */
 .teacher-entry { margin-top: 24rpx; }
 .teacher-scroll, .works-scroll { width: 100%; }
 .teacher-horizontal {
@@ -5,6 +6,7 @@
   gap: 18rpx;
   padding: 0 28rpx 8rpx;
 }
+/* ===== 教师迷你卡：固定 460rpx 宽，横向排列 ===== */
 .teacher-mini {
   width: 460rpx;
   flex: none;
@@ -16,6 +18,7 @@
 .tm-name { font-family: "Songti SC", serif; font-size: 29rpx; font-weight: 600; }
 .tm-meta { color: var(--muted); font-size: 19rpx; margin-top: 4rpx; }
 .tm-style { color: var(--ink2); font-size: 19rpx; margin-top: 8rpx; }
+/* ===== 教学环境宫格 ===== */
 .env-grid {
   display: flex;
   gap: 14rpx;
@@ -41,12 +44,14 @@
   line-height: 1;
 }
 .env-title { font-size: 20rpx; position: relative; }
+/* ===== 学员作品横滑 ===== */
 .works-horizontal {
   display: flex;
   gap: 16rpx;
   padding: 0 28rpx 8rpx;
 }
 .work-mini { width: 270rpx; flex: none; overflow: hidden; }
+/* ===== 到店与联系 ===== */
 .org-name { font-size: 32rpx; letter-spacing: 2rpx; font-weight: 600; }
 .org-line { color: var(--ink2); font-size: 21rpx; margin-top: 10rpx; }
 .org-traffic { color: var(--muted); font-size: 19rpx; margin-top: 8rpx; }
@@ -63,6 +68,7 @@
   color: var(--ink2);
   font-size: 20rpx;
 }
+/* ===== 家长服务宫格 ===== */
 .service-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

@@ -1,3 +1,4 @@
+/* ===== 游客态引导 ===== */
 .me-guest {
   padding: 110rpx 48rpx 40rpx;
   display: flex;
@@ -20,6 +21,7 @@
 }
 .mg-title { font-size: 46rpx; letter-spacing: 3rpx; margin-top: 34rpx; }
 .mg-sub { color: var(--ink2); font-size: 23rpx; line-height: 1.9; margin-top: 14rpx; }
+/* ===== 身份卡片：家长 / 教师共用一套结构 ===== */
 .me-hero {
   margin: 20rpx 28rpx 0;
   border-radius: 30rpx;
@@ -43,6 +45,7 @@
 .mh-name { font-size: 38rpx; letter-spacing: 2rpx; }
 .mh-meta { color: #BFB6A5; font-size: 19rpx; margin-top: 6rpx; }
 .mh-quote { color: #BFB6A5; font-size: 20rpx; line-height: 1.75; margin-top: 20rpx; position: relative; }
+/* ===== 学员切换 ===== */
 .child-switch {
   display: flex;
   gap: 12rpx;
@@ -63,6 +66,7 @@
 }
 .cs-item.on { background: rgba(232, 201, 142, .18); color: #E8C98E; }
 .cs-hours { font-size: 17rpx; opacity: .8; }
+/* ===== 家长服务宫格 ===== */
 .me-service {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -89,6 +93,7 @@
   font-size: 27rpx;
   color: var(--red);
 }
+/* ===== 服务列表与绑定引导 ===== */
 .me-list { overflow: hidden; }
 .bind-card { background: linear-gradient(110deg, rgba(180, 71, 60, .05), rgba(255, 253, 248, .95)); }
 .mg-sub { white-space: pre-line; }

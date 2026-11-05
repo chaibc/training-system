@@ -8,6 +8,7 @@
   <view wx:if="{{blocked}}" class="empty" style="padding-top:160rpx"><view class="seal">登</view>请先使用家长账号登录</view>
 
   <view wx:elif="{{child}}" class="pad" style="margin-top:20rpx">
+    <!-- 学员信息入口（跳转学员档案） -->
     <view class="card growth-head" bindtap="goProfile">
       <view class="avatar" style="background:{{child.avatarColor}}">{{child.avatarChar}}</view>
       <view class="flex1">
@@ -18,6 +19,7 @@
     </view>
   </view>
 
+  <!-- 月度成长时间线：作品宫格 + 教师点评 -->
   <view wx:if="{{child}}" class="pad" style="margin-top:24rpx">
     <view wx:for="{{timeline}}" wx:key="month" class="growth-month">
       <view class="gm-head">
@@ -41,12 +43,14 @@
         <text>{{item.teacherComment}}</text>
       </view>
     </view>
+    <!-- 空状态 -->
     <view wx:if="{{!timeline.length && !loading}}" class="empty">
       <view class="seal">长</view>还没有已授权的展示作品
       <button class="btn ghost sm" style="margin-top:24rpx" bindtap="goWorks">去作品墙看看</button>
     </view>
   </view>
 
+  <!-- 页脚说明 -->
   <view class="foot-note">仅展示已取得家长授权并通过教务审核的作品
 如需撤销授权，请联系教务</view>
 </view>

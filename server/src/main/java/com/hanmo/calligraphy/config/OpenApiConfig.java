@@ -8,9 +8,19 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * OpenAPI / Swagger 文档配置。
+ *
+ * <p>声明接口文档标题、版本与 Bearer JWT 鉴权方案，使 Swagger UI 可以填入令牌调试需要登录的接口。</p>
+ */
 @Configuration
 public class OpenApiConfig {
 
+    /**
+     * 构建 OpenAPI 文档定义。
+     *
+     * @return 带全局 BearerAuth 安全要求的 OpenAPI 对象
+     */
     @Bean
     public OpenAPI hanmoOpenApi() {
         String schemeName = "BearerAuth";

@@ -12,10 +12,22 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.stream.Collectors;
 
+/**
+ * 全局异常处理器。
+ *
+ * <p>把各层抛出的异常统一转换为 ApiResponse 失败体与对应的 HTTP 状态码，
+ * 避免异常细节直接暴露给前端；未知异常会记录 error 日志。</p>
+ */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * 处理业务异常：401/403/404/409/423 分别映射为同名 HTTP 状态码，其余按 400 返回。
+     *
+     * @param e 业务异常
+     * @return 携带业务错误码的失败响应
+     */
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusiness(BusinessException e) {
         HttpStatus status = switch (e.getCode()) {
@@ -29,6 +41,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(ApiResponse.fail(e.getCode(), e.getMessage()));
     }
 
+    /**
+     * 处理请求体字段校验失败：把所有字段错误消息用「；」拼接后按 400 返回。
+     *
+     * @param e 参数校验异常
+     * @return 400 失败响应
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidation(MethodArgumentNotValidException e) {
         String message = e.getBindingResult().getFieldErrors().stream()
@@ -37,18 +55,36 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ApiResponse.fail(400, message));
     }
 
+    /**
+     * 处理方法级权限不足（@PreAuthorize 拒绝），返回 403。
+     *
+     * @param e 权限异常
+     * @return 403 失败响应
+     */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(ApiResponse.fail(403, "没有权限执行该操作"));
     }
 
+    /**
+     * 处理静态资源 / 路径不存在，返回 404。
+     *
+     * @param e 资源不存在异常
+     * @return 404 失败响应
+     */
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNotFound(NoResourceFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.fail(404, "资源不存在"));
     }
 
+    /**
+     * 兜底处理未预期异常：记录 error 日志，对外只返回 500 与通用提示。
+     *
+     * @param e 未捕获异常
+     * @return 500 失败响应
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleUnknown(Exception e) {
         log.error("Unhandled exception", e);

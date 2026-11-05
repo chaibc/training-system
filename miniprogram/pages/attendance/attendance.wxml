@@ -5,6 +5,7 @@
     <view class="sub">每次上课的时间、教师、出勤状态与消课结果，与课表和课时账户同口径。</view>
   </view>
 
+  <!-- 兜底：未登录或未绑定学员 -->
   <view wx:if="{{blocked}}" class="empty" style="padding-top:160rpx"><view class="seal">登</view>请先使用家长账号登录</view>
 
   <view wx:elif="{{!hasChildren}}" class="empty" style="padding-top:130rpx">
@@ -13,10 +14,12 @@
   </view>
 
   <block wx:else>
+    <!-- 学员切换标签 -->
     <scroll-view scroll-x class="chips" enhanced show-scrollbar="{{false}}" style="margin-top:10rpx">
       <view wx:for="{{children}}" wx:key="id" class="chip {{childId === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="selectChild">{{item.name}}</view>
     </scroll-view>
 
+    <!-- 出勤状态筛选 -->
     <view class="pad" style="margin-top:22rpx">
       <view class="seg">
         <view class="s {{filter === 'ALL' ? 'on' : ''}}" data-status="ALL" bindtap="setFilter">全部</view>
@@ -26,6 +29,7 @@
       </view>
     </view>
 
+    <!-- 记录条数与消课口径提示 -->
     <view class="pad" style="margin-top:18rpx">
       <view class="between">
         <text class="muted small">{{childName}} · 共 {{records.length}} 条</text>
@@ -33,6 +37,7 @@
       </view>
     </view>
 
+    <!-- 上课记录列表 -->
     <view class="pad" style="margin-top:18rpx">
       <view class="card">
         <view wx:for="{{records}}" wx:key="id" class="att-item" bindtap="goLesson" data-lesson="{{item.lessonId}}">
@@ -54,6 +59,7 @@
           </view>
           <text class="arrow">›</text>
         </view>
+        <!-- 空状态 -->
         <view wx:if="{{!records.length && !loading}}" class="empty" style="padding:50rpx 0">没有符合条件的上课记录</view>
       </view>
     </view>

@@ -5,11 +5,13 @@
     <view class="sub">选择学员与班级，提交后由教务电话确认，到店完成缴费并正式入班。本期不支持线上支付。</view>
   </view>
 
+  <!-- 兜底：未登录 -->
   <view wx:if="{{blocked}}" class="empty" style="padding-top:160rpx">
     <view class="seal">登</view>请先使用家长账号登录
   </view>
 
   <view wx:elif="{{!hasChildren}}" class="pad" style="margin-top:24rpx">
+    <!-- 兜底：未绑定学员 -->
     <view class="card padc center" style="padding:60rpx 32rpx">
       <view class="serif" style="font-size:32rpx">还没有绑定学员</view>
       <view class="muted small" style="margin-top:12rpx;line-height:1.8">报名前请先在「账号与绑定」中添加孩子，或联系教务完成绑定审核。</view>
@@ -18,6 +20,7 @@
   </view>
 
   <block wx:else>
+    <!-- 选择学员：横向学员标签 -->
     <view class="section"><view class="title">选择学员</view></view>
     <scroll-view scroll-x class="chips" enhanced show-scrollbar="{{false}}">
       <view wx:for="{{children}}" wx:key="id" class="child-chip {{childId === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="selectChild">
@@ -29,6 +32,7 @@
       </view>
     </scroll-view>
 
+    <!-- 选择课程：单选课程卡 -->
     <view class="section"><view class="title">选择课程</view><view class="more">共 {{courses.length}} 门</view></view>
     <view class="stack pad">
       <view wx:for="{{courses}}" wx:key="id" class="course-option card {{courseId === item.id ? 'sel' : ''}}" data-id="{{item.id}}" bindtap="selectCourse">
@@ -42,6 +46,7 @@
       </view>
     </view>
 
+    <!-- 选择班级：名额与价格 -->
     <view class="section"><view class="title">选择班级</view><view class="more">{{classOptions.length}} 个可选</view></view>
     <view class="pad">
       <view wx:if="{{classOptions.length}}" class="stack">
@@ -60,6 +65,7 @@
       <view wx:elif="{{!loading}}" class="empty">该课程暂无可选班级，可先提交报名由教务分班</view>
     </view>
 
+    <!-- 报名确认摘要 -->
     <view class="section"><view class="title">报名确认</view></view>
     <view class="pad">
       <view class="card padc summary-card">
@@ -73,6 +79,7 @@
     </view>
   </block>
 
+  <!-- 底部固定操作栏 -->
   <view wx:if="{{!blocked && hasChildren}}" class="bottom-bar">
     <button class="btn ghost" bindtap="goAccount">管理学员</button>
     <button class="btn primary" loading="{{submitting}}" bindtap="submit">提交报名</button>

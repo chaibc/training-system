@@ -1,3 +1,4 @@
+/* ===== 表单页头部 ===== */
 .form-hero {
   margin: 0 28rpx;
   border-radius: 30rpx;
@@ -7,6 +8,7 @@
   position: relative;
   overflow: hidden;
 }
+/* ===== 头部鎏金光晕 ===== */
 .form-hero::after {
   content: "";
   position: absolute;
@@ -17,9 +19,11 @@
   border-radius: 50%;
   background: radial-gradient(circle, rgba(194, 160, 94, .22), transparent 70%);
 }
+/* ===== 头部文案 ===== */
 .fh-eyebrow { color: var(--gold); font-size: 17rpx; letter-spacing: 5rpx; }
 .fh-title { font-size: 46rpx; letter-spacing: 4rpx; margin-top: 14rpx; }
 .fh-sub { color: #BFB6A5; font-size: 21rpx; line-height: 1.8; margin-top: 14rpx; max-width: 480rpx; }
+/* ===== 试听印章 ===== */
 .fh-stamp {
   position: absolute;
   right: 28rpx;

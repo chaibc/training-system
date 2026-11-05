@@ -1,9 +1,11 @@
 <view class="result-page">
+  <!-- 结果印章与标题 -->
   <view class="result-seal">报</view>
   <view class="result-title">报名已提交</view>
   <view class="result-sub">教务确认后将电话联系您到店缴费
 缴费完成即正式入班并计入课时账户</view>
 
+  <!-- 报名结果信息卡 -->
   <view class="card result-card">
     <view class="result-row"><text class="k">申请编号</text><text class="v num">{{result.enrollmentNo}}</text></view>
     <view class="result-row"><text class="k">学员</text><text class="v">{{result.childName}}</text></view>
@@ -13,6 +15,7 @@
     <view class="result-row"><text class="k">当前状态</text><text class="v"><text class="tag gold">{{result.statusText || '待确认'}}</text></text></view>
   </view>
 
+  <!-- 办理流程：提交 → 确认 → 缴费 → 入班 -->
   <view class="result-flow">
     <view class="step on"><view class="dot"></view>提交申请</view>
     <view class="step"><view class="dot"></view>教务确认</view>
@@ -22,6 +25,7 @@
 
   <view class="form-tip" style="margin-top:32rpx;width:100%">本期不包含线上缴费。请勿向任何个人账号转账，缴费以机构前台登记为准。</view>
 
+  <!-- 后续操作 -->
   <view class="result-actions">
     <button class="btn primary block" bindtap="goRecords">查看报名记录</button>
     <button class="btn ghost block" bindtap="goHome">返回首页</button>

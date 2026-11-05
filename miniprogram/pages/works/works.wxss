@@ -1,3 +1,4 @@
+/* ===== 作品书体角标 ===== */
 .work-art .work-type {
   position: absolute;
   left: 14rpx;
@@ -9,6 +10,7 @@
   font-size: 17rpx;
 }
 
+/* ===== 公告列表 ===== */
 .notice-list { margin: 0 32rpx 18rpx; border-radius: 18rpx; background: rgba(194,160,94,.08); border: 1rpx solid rgba(194,160,94,.16); overflow: hidden; }
 .notice-item { display: flex; align-items: center; gap: 12rpx; padding: 16rpx 18rpx; border-bottom: 1rpx solid rgba(194,160,94,.12); }
 .notice-item:last-child { border-bottom: none; }

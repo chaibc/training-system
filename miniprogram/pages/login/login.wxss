@@ -1,3 +1,4 @@
+/* ===== 登录卡片文案 ===== */
 .login-card-title {
   font-size: 36rpx;
   letter-spacing: 2rpx;
@@ -9,11 +10,13 @@
   line-height: 1.8;
   margin-top: 10rpx;
 }
+/* ===== 教师登录表单 ===== */
 .teacher-login {
   padding: 22rpx 20rpx;
   border-radius: 18rpx;
   background: #F9F5EC;
 }
+/* ===== 登录范围说明 ===== */
 .login-scope {
   margin-top: 36rpx;
   padding: 26rpx 28rpx;
@@ -39,6 +42,7 @@
   margin-top: 13rpx;
   flex: none;
 }
+/* ===== 开发者联调面板（仅开发环境） ===== */
 .dev-panel {
   margin-top: 36rpx;
   padding: 22rpx 24rpx;

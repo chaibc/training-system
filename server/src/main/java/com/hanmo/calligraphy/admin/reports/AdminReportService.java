@@ -56,6 +56,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * 统计报表服务：聚合核心指标（报名、消课、实收、出勤率、续费率、续费预警）、
+ * 报名/试听趋势、收入构成、教师与班级维度统计，并提供「登记续费」写入口。
+ *
+ * <p>报表只读部分不做角色数据范围过滤，是机构整体口径；所有金额为线下登记金额，
+ * 时间按服务器本地时区。</p>
+ *
+ * <p>依赖表：enrollment、payment_record、payment_method、student、class_group、class_student、
+ * lesson、attendance、leave_request、teacher_profile、hour_account、trial_booking、business_rule、
+ * hour_ledger、sys_audit_log。</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class AdminReportService {
@@ -76,9 +87,26 @@ public class AdminReportService {
     private final HourLedgerMapper hourLedgerMapper;
     private final SysAuditLogMapper auditLogMapper;
 
+    /**
+     * 报表总览：一次返回核心指标、趋势、收入构成、教师统计、班级统计与续费预警名单。
+     *
+     * <p>统计口径（关键公式）：
+     * ① 实收 revenue = 区间内 payment_record.amount 之和（按 paid_at）；
+     * ② 消课 consumedHours = 区间内课次的 attendance.consumed_hours 之和；
+     * ③ 出勤率 = PRESENT 条数 / 全部点名条数（PRESENT+LEAVE+ABSENT）× 100，保留 1 位小数；
+     * ④ 续费率 = 区间内有 RENEW 缴费的去重学员数 / 在读（ACTIVE）学员数 × 100；
+     * ⑤ 续费预警 = hour_account.remaining_hours ≤ 阈值（business_rule.renewal_threshold，缺省 3）。</p>
+     *
+     * <p>纯读操作，无副作用。多次全表/区间查询，数据量大时应加缓存或改聚合 SQL。</p>
+     *
+     * @param months 统计区间档位：≤1 取 1 个月，≤6 取 6 个月，其余取 12 个月
+     * @return period / stats / chart / revenueByMethod / teacherStats / classStats / renewals
+     */
     public Map<String, Object> overview(int months) {
+        // 只支持 1/6/12 三档：前端传任意数字都收敛到最近档位，避免出现没有实现的区间
         int span = months <= 1 ? 1 : months <= 6 ? 6 : 12;
         LocalDate end = LocalDate.now();
+        // 区间 = 从 (span-1) 个月前的 1 号 00:00 到 今天 23:59:59，含首尾
         LocalDate start = end.minusMonths(span - 1).withDayOfMonth(1);
         LocalDateTime from = start.atStartOfDay();
         LocalDateTime to = end.atTime(23, 59, 59);
@@ -100,8 +128,10 @@ public class AdminReportService {
                 .eq(Student::getStatus, "ACTIVE"));
         BigDecimal revenue = payments.stream().map(PaymentRecord::getAmount)
                 .filter(x -> x != null).reduce(BigDecimal.ZERO, BigDecimal::add);
+        // 消课口径：把区间内课次的点名明细 consumed_hours 直接求和（点名时已按出勤/缺勤/请假规则算好）
         BigDecimal consumed = attendance.stream().map(Attendance::getConsumedHours)
                 .filter(x -> x != null).reduce(BigDecimal.ZERO, BigDecimal::add);
+        // 出勤率分母 = 已点名条数，而不是班级人数或课次数；未点名的不进分母
         long present = attendance.stream().filter(a -> "PRESENT".equals(a.getStatus())).count();
         long leaveCount = attendance.stream().filter(a -> "LEAVE".equals(a.getStatus())).count();
         long absent = attendance.stream().filter(a -> "ABSENT".equals(a.getStatus())).count();
@@ -109,26 +139,34 @@ public class AdminReportService {
         long renewPayments = payments.stream().filter(p -> "RENEW".equals(p.getType())).count();
         Set<Long> renewStudents = payments.stream().filter(p -> "RENEW".equals(p.getType()))
                 .map(PaymentRecord::getStudentId).collect(Collectors.toSet());
+        // 预警阈值走业务规则表（renewal_threshold），缺省 3 课时，与文档「剩余 ≤ 3 课时」一致
         int threshold = ruleInt("renewal_threshold", 3);
         List<HourAccount> accounts = hourAccountMapper.selectList(new LambdaQueryWrapper<>());
+        // 预警按课时账户计：剩余 ≤ 阈值的账户都算（含 0 与负数）
         long warning = accounts.stream().filter(a -> a.getRemainingHours() != null
                 && a.getRemainingHours().compareTo(BigDecimal.valueOf(threshold)) <= 0).count();
 
         Map<String, Object> stats = new LinkedHashMap<>();
         stats.put("enrollments", enrollments.size());
+        // 新报名：区间内提交且未被取消的报名（已入班/待确认/待缴费）
         stats.put("newEnrollments", enrollments.stream().filter(e -> "ENROLLED".equals(e.getStatus())
                 || "PENDING_CONFIRM".equals(e.getStatus()) || "PENDING_PAYMENT".equals(e.getStatus())).count());
         stats.put("renewPayments", renewPayments);
         stats.put("consumedHours", consumed);
+        // 公式：出勤率 = PRESENT ÷ (PRESENT+LEAVE+ABSENT) × 100，保留 1 位；无点名时为 0
         stats.put("attendanceRate", pct(present, marked));
+        // 公式：续费率 = 区间内有 RENEW 缴费的去重学员数 ÷ 在读学员数 × 100
         stats.put("renewalRate", pct(renewStudents.size(), activeStudents));
         stats.put("activeStudents", activeStudents);
         stats.put("warningStudents", warning);
+        // 实收为缴费登记金额，未扣退款（本期无退款模型）
         stats.put("revenue", revenue);
+        // 请假条数按提交时间落在区间内统计，不区分审批状态
         stats.put("leaveCount", leaves.size());
         stats.put("renewalThreshold", threshold);
 
         // 近 6 个月报名 / 试听走势
+        // 趋势图至少展示 6 个月，选 12 个月档时跟着变成 12 个月
         int chartMonths = Math.max(6, span);
         LocalDate chartStart = end.minusMonths(chartMonths - 1).withDayOfMonth(1);
         List<Enrollment> chartEnrollments = enrollmentMapper.selectList(new LambdaQueryWrapper<Enrollment>()
@@ -159,12 +197,14 @@ public class AdminReportService {
             Long mid = p.getPaymentMethodId() == null ? -1L : p.getPaymentMethodId();
             amountByMethod.merge(mid, p.getAmount() == null ? BigDecimal.ZERO : p.getAmount(), BigDecimal::add);
         }
+        // 收入构成：按缴费方式分组求和，按金额降序；占比 = 该方式金额 ÷ 区间实收 × 100（1 位小数）
         List<Map<String, Object>> revenueByMethod = amountByMethod.entrySet().stream()
                 .sorted((a, b) -> b.getValue().compareTo(a.getValue()))
                 .map(e -> {
                     Map<String, Object> row = new LinkedHashMap<>();
                     row.put("name", methodNames.getOrDefault(e.getKey(), "未登记方式"));
                     row.put("amount", e.getValue());
+                    // 实收为 0 时占比直接给 0，避免除零
                     row.put("rate", revenue.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO
                             : e.getValue().multiply(BigDecimal.valueOf(100))
                             .divide(revenue, 1, RoundingMode.HALF_UP));
@@ -187,6 +227,7 @@ public class AdminReportService {
                 attendanceByTeacher.computeIfAbsent(lesson.getTeacherId(), k -> new ArrayList<>()).add(a);
             }
         }
+        // 教师统计：带班数看班级主表（不限状态），课次数按区间课次，出勤率按该教师课次下的点名明细
         List<Map<String, Object>> teacherStats = teachers.stream().map(t -> {
             List<Attendance> list = attendanceByTeacher.getOrDefault(t.getId(), List.of());
             long p = list.stream().filter(a -> "PRESENT".equals(a.getStatus())).count();
@@ -204,13 +245,16 @@ public class AdminReportService {
             row.put("teacherName", t.getName());
             row.put("classCount", classes.stream().filter(c -> t.getId().equals(c.getTeacherId())).count());
             row.put("lessonCount", lessonTeacher.getOrDefault(t.getId(), 0L));
+            // 教师出勤率分母是该教师课次的点名条数，与全局出勤率口径一致
             row.put("attendanceRate", pct(p, list.size()));
+            // 请假审批数只统计区间内提交且课次属于该教师的请假
             row.put("leaveApproved", approved);
             row.put("leaveTotal", totalLeaves);
             return row;
         }).toList();
 
         // 班级统计
+        // 班级统计：名单取 ACTIVE，课时消耗与出勤只算该班课次的点名记录
         List<Map<String, Object>> classStats = new ArrayList<>();
         for (ClassGroup g : classes) {
             List<ClassStudent> links = classStudentMapper.selectList(new LambdaQueryWrapper<ClassStudent>()
@@ -226,6 +270,7 @@ public class AdminReportService {
             BigDecimal remaining = accounts.stream().filter(a -> studentIds.contains(a.getStudentId()))
                     .map(HourAccount::getRemainingHours).filter(x -> x != null)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
+            // 班级出勤率/请假率的分母都是该班区间内的点名条数
             long p = classAttendance.stream().filter(a -> "PRESENT".equals(a.getStatus())).count();
             long l = classAttendance.stream().filter(a -> "LEAVE".equals(a.getStatus())).count();
             Map<String, Object> row = new LinkedHashMap<>();
@@ -240,6 +285,7 @@ public class AdminReportService {
         }
 
         // 续费预警
+        // 续费预警名单：逐个课时账户判断（N+1 查询学员/班级/最近缴费），按剩余课时升序，最紧急在前
         List<Map<String, Object>> renewals = new ArrayList<>();
         for (HourAccount account : accounts) {
             if (account.getRemainingHours() == null
@@ -250,6 +296,7 @@ public class AdminReportService {
                     .eq(ClassStudent::getStudentId, student.getId()).eq(ClassStudent::getStatus, "ACTIVE"));
             String classNames = links.stream().map(l -> classGroupMapper.selectById(l.getClassId()))
                     .filter(x -> x != null).map(ClassGroup::getName).collect(Collectors.joining(" / "));
+            // 最近一次缴费按 paid_at 倒序取 1 条，供教务电话跟进时参考
             List<PaymentRecord> studentPayments = paymentMapper.selectList(new LambdaQueryWrapper<PaymentRecord>()
                     .eq(PaymentRecord::getStudentId, student.getId())
                     .orderByDesc(PaymentRecord::getPaidAt).last("limit 1"));
@@ -264,6 +311,7 @@ public class AdminReportService {
             row.put("lastPaymentItem", last == null ? "" : last.getItem());
             renewals.add(row);
         }
+        // 剩余课时最少的排最前
         renewals.sort(Comparator.comparing(r -> ((BigDecimal) r.get("remainingHours"))));
 
         Map<String, Object> data = new LinkedHashMap<>();
@@ -281,6 +329,21 @@ public class AdminReportService {
         return data;
     }
 
+    /**
+     * 登记线下续费：写缴费记录、充值课时、写课时流水、写审计日志。
+     *
+     * <p>副作用（全部在 @Transactional 内）：① payment_record 写一条 type=RENEW；
+     * ② hour_account 累加 lessons（无账户则先建 0 额度账户）；③ hour_ledger 写 PURCHASE 流水；
+     * ④ sys_audit_log 记「续费登记」。不改变报名状态、不动班级名单。</p>
+     *
+     * <p>注意：本方法没有幂等键/去重检查，重复提交会重复充值，前端需自行防抖；
+     * 有效期在原值过期或为空时顺延 12 个月，未过期则保持不变。</p>
+     *
+     * @param request  学员、金额、缴费方式、课时（均必填，金额与课时须为正）、项目、备注
+     * @param operator 操作人，写入 registered_by、流水与审计
+     * @return paymentNo / studentName / lessons / amount / remainingHours / validUntil
+     * @throws BusinessException 404 学员不存在；400 缴费方式不存在、金额或课时非正
+     */
     @Transactional
     public Map<String, Object> renew(RenewalRequest request, LoginUser operator) {
         Student student = studentMapper.selectById(request.studentId());
@@ -294,6 +357,7 @@ public class AdminReportService {
             throw new BusinessException(400, "续费课时必须大于 0");
         }
 
+        // ① 缴费记录：type=RENEW，item 缺省为「续费 N 课时」，payment_no = JF+日期+4 位随机
         PaymentRecord payment = new PaymentRecord();
         payment.setPaymentNo("JF" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
                 + String.format("%04d", ThreadLocalRandom.current().nextInt(10000)));
@@ -308,6 +372,7 @@ public class AdminReportService {
         payment.setNote(request.note());
         paymentMapper.insert(payment);
 
+        // ② 课时账户：没有则先建 0 额度账户，再统一累加，保证后续 update 走同一分支
         HourAccount account = hourAccountMapper.selectOne(new LambdaQueryWrapper<HourAccount>()
                 .eq(HourAccount::getStudentId, student.getId()).last("limit 1"));
         if (account == null) {
@@ -319,14 +384,17 @@ public class AdminReportService {
             account.setValidUntil(LocalDate.now().plusMonths(12));
             hourAccountMapper.insert(account);
         }
+        // 课时按 DECIMAL(8,1) 存储，这里把整数课时转成 BigDecimal 参与累加
         BigDecimal add = BigDecimal.valueOf(request.lessons());
         account.setTotalHours((account.getTotalHours() == null ? BigDecimal.ZERO : account.getTotalHours()).add(add));
         account.setRemainingHours((account.getRemainingHours() == null ? BigDecimal.ZERO : account.getRemainingHours()).add(add));
+        // 仅在有效期为空或已过期时顺延 12 个月；仍在有效期内则保留原到期日
         if (account.getValidUntil() == null || account.getValidUntil().isBefore(LocalDate.now())) {
             account.setValidUntil(LocalDate.now().plusMonths(12));
         }
         hourAccountMapper.updateById(account);
 
+        // ③ 课时流水：正数表示充值，balance_after 为续费后余额，供对账与家长端查询
         HourLedger ledger = new HourLedger();
         ledger.setStudentId(student.getId());
         ledger.setType("PURCHASE");
@@ -336,6 +404,7 @@ public class AdminReportService {
         ledger.setReason("续费充值 " + payment.getPaymentNo());
         hourLedgerMapper.insert(ledger);
 
+        // ④ 审计日志：action_type 存中文「续费登记」（与 schema 注释的英文枚举不一致）
         SysAuditLog log = new SysAuditLog();
         log.setUserId(operator == null ? null : operator.getId());
         log.setOperatorName(operator == null ? "系统" : operator.getName());
@@ -357,12 +426,14 @@ public class AdminReportService {
         return data;
     }
 
+    // 百分比工具：part/total×100，保留 1 位小数、四舍五入；total<=0 时返回 0，避免除零
     private BigDecimal pct(long part, long total) {
         if (total <= 0) return BigDecimal.ZERO;
         return BigDecimal.valueOf(part).multiply(BigDecimal.valueOf(100))
                 .divide(BigDecimal.valueOf(total), 1, RoundingMode.HALF_UP);
     }
 
+    // 读取 business_rule 的整型配置：记录缺失、值为空或解析失败都回落到兜底值，不影响报表出数
     private int ruleInt(String key, int fallback) {
         BusinessRule rule = ruleMapper.selectOne(new LambdaQueryWrapper<BusinessRule>()
                 .eq(BusinessRule::getRuleKey, key).last("limit 1"));

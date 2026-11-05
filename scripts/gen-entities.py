@@ -1,3 +1,19 @@
+# -*- coding: utf-8 -*-
+"""
+由 sql/schema.sql 生成 MyBatis-Plus 实体类与 Mapper 接口。
+
+用法：
+    python scripts/gen-entities.py
+
+⚠️ 注意：本脚本会**整体覆盖** server/.../domain/entity 与 domain/mapper 下由它生成的文件，
+    因此不要在这些实体里手写会被生成的逻辑（注释也会被覆盖）。
+    需要保留的实体放 system/ 包（脚本里 skip 列表中的表）。
+
+生成规则：
+    1. 表名 → 类名（下划线转驼峰，首字母大写）；列名 → 属性名（小驼峰）；
+    2. id 列 → @TableId(AUTO)；deleted 列 → @TableLogic（逻辑删除）；
+    3. 只处理 type_map 里出现的列类型，其余（如 JSON、BLOB）跳过，需手工补。
+"""
 from pathlib import Path
 import re
 
@@ -7,9 +23,10 @@ base = root / 'server' / 'src' / 'main' / 'java' / 'com' / 'hanmo' / 'calligraph
 (base / 'entity').mkdir(parents=True, exist_ok=True)
 (base / 'mapper').mkdir(parents=True, exist_ok=True)
 
-# existing classes in system package: skip those table names
+# 这些表已由 system 包手工实现（含额外业务字段/方法），生成时跳过，避免被覆盖
 skip = {'sys_user', 'sys_role', 'sys_role_permission', 'sys_audit_log', 'parent_profile'}
 
+# MySQL 列类型 → Java 类型；未列出的类型直接跳过该列
 type_map = {
     'BIGINT': 'Long',
     'INT': 'Integer',
@@ -23,8 +40,10 @@ type_map = {
 }
 
 def pascal(name):
+    """下划线命名 → 大驼峰（student_no → StudentNo）。"""
     return ''.join(p[:1].upper() + p[1:] for p in name.split('_'))
 
+# 逐张表解析：正则捕获「表名」与「列定义块」（到 ENGINE= 为止）
 blocks = re.findall(r'CREATE TABLE `([^`]+)` \((.*?)\) ENGINE=', schema, re.S)
 for table, body in blocks:
     if table in skip:

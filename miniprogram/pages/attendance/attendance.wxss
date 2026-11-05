@@ -1,3 +1,4 @@
+/* ===== 上课记录条目 ===== */
 .att-item {
   display: flex;
   align-items: flex-start;
@@ -6,11 +7,13 @@
   border-bottom: 1rpx solid var(--line2);
 }
 .att-item:last-child { border-bottom: none; }
+/* ===== 日期列：日 + 月两行 ===== */
 .att-date { width: 66rpx; flex: none; text-align: center; }
 .att-date .d { display: block; font-family: Georgia, serif; font-size: 34rpx; font-weight: 600; line-height: 1.1; }
 .att-date .m { display: block; color: var(--muted); font-size: 17rpx; margin-top: 3rpx; }
 .att-line { width: 1rpx; align-self: stretch; background: var(--line2); margin: 2rpx 0; }
 .att-name { font-size: 24rpx; font-weight: 500; }
+/* ===== 备注与消课结果（虚线分隔） ===== */
 .att-note {
   display: flex;
   align-items: center;

@@ -1,3 +1,11 @@
+/**
+ * 家长账号页：查看账号资料与已绑定学员，提交新学员绑定/解绑申请，退出登录。
+ * 接口：GET /api/mini/parent/account；POST /api/mini/parent/bindings；
+ *       POST /api/mini/parent/bindings/{id}/unbind
+ * 参数：无
+ * 需登录：是，且必须是家长（PARENT）
+ */
+
 const api = require('../../utils/request');
 const auth = require('../../utils/auth');
 const view = require('../../utils/view');
@@ -30,6 +38,7 @@ Page({
     saving: false
   },
 
+  // 家长守卫：未登录/教师账号置 blocked 展示无权限态，不再发请求
   onLoad() {
     if (!auth.requireParent()) {
       this.setData({ blocked: true, loading: false });
@@ -38,10 +47,12 @@ Page({
     this.load();
   },
 
+  // 从其他页返回时静默刷新绑定列表；saving 中跳过，避免提交结果被旧数据覆盖
   onShow() {
     if (this.data.account && !this.data.saving) this.load(true);
   },
 
+  // 拉账号与绑定列表；silent=true 时不显示整页 loading（onShow 回刷用）
   async load(silent) {
     if (!silent) this.setData({ loading: true });
     try {
@@ -57,34 +68,42 @@ Page({
     }
   },
 
+  // 打开「添加学员」弹层
   openAdd() {
     this.setData({ addOpen: true });
   },
 
+  // 关闭弹层（不清表单，便于用户改完再提交）
   closeAdd() {
     this.setData({ addOpen: false });
   },
 
+  // 切换绑定模式：EXISTING 用学员编号核验已有档案，NEW 登记新学员等待审核
   switchMode(e) {
     this.setData({ mode: e.currentTarget.dataset.mode });
   },
 
+  // 通用字段输入：按 data-field 写入 form 对应键
   onField(e) {
     this.setData({ ['form.' + e.currentTarget.dataset.field]: e.detail.value });
   },
 
+  // 选择与学员的关系（母亲/父亲/祖辈/其他），提交时转成 value
   onRelation(e) {
     this.setData({ relationIndex: Number(e.detail.value) });
   },
 
+  // 选择性别：picker 返回下标，这里存「男/女」原文供后端直接使用
   onGender(e) {
     this.setData({ 'form.gender': this.data.genders[Number(e.detail.value)] });
   },
 
+  // 选择出生日期，格式 yyyy-MM-dd
   onBirth(e) {
     this.setData({ 'form.birthDate': e.detail.value });
   },
 
+  // 提交绑定申请：两种模式各自校验后组装 payload；成功后弹审核提示并刷新列表
   async submitBinding() {
     if (this.data.saving) return;
     const form = this.data.form;
@@ -92,6 +111,7 @@ Page({
     let payload;
     if (this.data.mode === 'EXISTING') {
       if (!form.studentNo.trim()) return wx.showToast({ title: '请输入学员编号', icon: 'none' });
+      // 学员编号 + 监护人手机号后四位是后端核验归属的凭据，前端先做非空与 4 位数字校验
       if (!/^\d{4}$/.test(form.phoneTail.trim())) return wx.showToast({ title: '请输入监护人手机号后四位', icon: 'none' });
       payload = {
         studentNo: form.studentNo.trim(),
@@ -99,6 +119,7 @@ Page({
         relation
       };
     } else {
+      // 新建学员模式只有姓名必填，性别/生日/学校/年级都可后补
       if (!form.studentName.trim()) return wx.showToast({ title: '请输入学员姓名', icon: 'none' });
       payload = {
         newStudent: true,
@@ -125,6 +146,7 @@ Page({
     }
   },
 
+  // 申请解绑：需教务审核，审核期间仍可查看学员，所以只提示「已提交」并刷新状态
   async unbind(e) {
     const id = e.currentTarget.dataset.id;
     const name = e.currentTarget.dataset.name;
@@ -144,6 +166,7 @@ Page({
     }
   },
 
+  // 退出登录：清凭证与 globalData 后 reLaunch 回首页
   async logout() {
     const res = await wx.showModal({
       title: '退出登录',

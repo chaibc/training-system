@@ -8,6 +8,7 @@
   <view wx:if="{{blocked}}" class="empty" style="padding-top:160rpx"><view class="seal">师</view>请使用教师账号登录</view>
 
   <block wx:else>
+    <!-- 待审批 / 已处理 切换 -->
     <view class="pad" style="margin-top:20rpx">
       <view class="seg">
         <view class="s {{tab === 'PENDING' ? 'on' : ''}}" data-tab="PENDING" bindtap="setTab">待审批 {{pending.length}}</view>
@@ -15,6 +16,7 @@
       </view>
     </view>
 
+    <!-- 待审批列表 -->
     <view wx:if="{{tab === 'PENDING'}}" class="stack pad" style="margin-top:24rpx">
       <view wx:for="{{pending}}" wx:key="id" class="card leave-card">
         <view class="between">
@@ -42,6 +44,7 @@
       </view>
     </view>
 
+    <!-- 已处理列表 -->
     <view wx:if="{{tab === 'HISTORY'}}" class="stack pad" style="margin-top:24rpx">
       <view wx:for="{{history}}" wx:key="id" class="card leave-card">
         <view class="between">
@@ -63,6 +66,7 @@
       <view wx:if="{{!history.length && !loading}}" class="empty"><view class="seal">史</view>还没有已处理记录</view>
     </view>
 
+    <!-- 审批规则 -->
     <view class="rule-tip">
       <view class="rt-title">审批规则</view>
       <view class="rt-line">· 课前 4 小时以上请假，通过后不扣课时</view>

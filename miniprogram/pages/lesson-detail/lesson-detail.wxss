@@ -1,3 +1,4 @@
+/* ===== 课次头部 ===== */
 .lesson-hero {
   min-height: 280rpx;
   padding: 38rpx 32rpx;
@@ -19,6 +20,7 @@
   color: rgba(246, 241, 231, .06);
   line-height: 1;
 }
+/* ===== 出勤状态盒（到 / 假 / 缺 / 待） ===== */
 .attend-box { display: flex; align-items: center; gap: 20rpx; }
 .attend-char {
   width: 80rpx;
@@ -35,6 +37,7 @@
 .attend-char.green { background: rgba(92, 122, 99, .12); color: #45644D; }
 .attend-char.gold { background: rgba(194, 160, 94, .18); color: #7C5A20; }
 .attend-char.red { background: rgba(180, 71, 60, .1); color: var(--red); }
+/* ===== 请假规则卡 ===== */
 .rule-card {
   padding: 26rpx;
   border-radius: 22rpx;

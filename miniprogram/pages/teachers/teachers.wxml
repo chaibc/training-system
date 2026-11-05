@@ -5,6 +5,7 @@
     <view class="sub">教龄、擅长书体与教学特点均来自教师档案。小班教学，逐字点评。</view>
   </view>
 
+  <!-- 教师列表 -->
   <view class="stack pad" style="margin-top:24rpx">
     <view wx:for="{{teachers}}" wx:key="id" class="teacher-card card" bindtap="goTeacher" data-id="{{item.id}}">
       <view class="avatar" style="background:{{index % 2 === 0 ? '#6B503A' : '#4C6455'}}">{{item.avatarChar}}</view>
@@ -24,6 +25,7 @@
     <view wx:if="{{!teachers.length && !loading}}" class="empty"><view class="seal">师</view>师资信息整理中</view>
   </view>
 
+  <!-- 试听引导 -->
   <view class="teach-note">
     <view class="tn-art">教</view>
     <view class="flex1">
@@ -35,6 +37,7 @@
     <button class="btn primary block" bindtap="goTrial">预约试听</button>
   </view>
 
+  <!-- 页脚说明 -->
   <view class="foot-note">教师账号由机构后台创建
 所有教师均按所带班级与学员范围查看教学数据</view>
 </view>

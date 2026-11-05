@@ -4,6 +4,7 @@
     <text class="link" bindtap="goLogin">去登录 ›</text>
   </view>
 
+  <!-- 顶部机构卡片：印章 + 品牌名 + 当前学员 -->
   <view class="home-top">
     <view class="seal">翰</view>
     <view class="flex1">
@@ -13,6 +14,7 @@
     <view wx:if="{{user && !isTeacher}}" class="tag gold">{{child ? child.name : user.name}}</view>
   </view>
 
+  <!-- 首屏主视觉：品牌宣言 + 试听与课程双入口 -->
   <view class="hero">
     <view class="stamp">翰墨
 学堂</view>
@@ -27,6 +29,7 @@
     <view class="watermark">墨</view>
   </view>
 
+  <!-- 快捷入口宫格：课程 / 试听 / 师资 / 导航 -->
   <view class="quick-grid">
     <view class="q" bindtap="goCourses"><view class="qi">课</view><text>课程体系</text></view>
     <view class="q" bindtap="goTrial"><view class="qi">听</view><text>试听预约</text></view>
@@ -40,6 +43,7 @@
     <text>›</text>
   </view>
 
+  <!-- 教师工作台入口（教师身份可见） -->
   <view wx:if="{{isTeacher}}" class="teacher-entry card padc" bindtap="goWorkbench">
     <view class="row gap8">
       <view class="avatar" style="background:#4C6455">师</view>
@@ -51,6 +55,7 @@
     </view>
   </view>
 
+  <!-- 推荐课程：区块标题 + 课程迷你卡列表 -->
   <view class="section">
     <view class="title">推荐课程</view>
     <view class="more" bindtap="goCourses">全部课程 ›</view>
@@ -71,6 +76,7 @@
     <view wx:if="{{!courses.length && !loading}}" class="empty"><view class="seal">课</view>课程正在整理中</view>
   </view>
 
+  <!-- 师资团队：横向滚动教师卡 -->
   <view class="section">
     <view class="title">师资团队</view>
     <view class="more" bindtap="goTeachers">全部教师 ›</view>
@@ -111,6 +117,7 @@
     </view>
   </view>
 
+  <!-- 学员作品：横向滚动作品卡 -->
   <view class="section">
     <view class="title">学员作品</view>
     <view class="more" bindtap="goWorks">作品墙 ›</view>
@@ -134,6 +141,7 @@
   <view class="section">
     <view class="title">到店与联系</view>
   </view>
+  <!-- 到店与联系：地址、营业时间与拨号 / 导航入口 -->
   <view class="pad">
     <view class="card padc org-card">
       <view class="org-name serif">{{institution.name || '翰墨学堂书法培训中心'}}</view>

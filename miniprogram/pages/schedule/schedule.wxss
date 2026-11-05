@@ -1,3 +1,4 @@
+/* ===== 课时摘要条 ===== */
 .hours-strip {
   display: flex;
   align-items: center;
@@ -9,6 +10,7 @@
 .hs-meta { color: var(--muted); font-size: 19rpx; margin-top: 8rpx; }
 .hs-right { text-align: right; }
 .hs-link { color: var(--muted); font-size: 18rpx; text-align: right; margin-top: 2rpx; }
+/* ===== 周切换 ===== */
 .week-head {
   display: flex;
   align-items: center;
@@ -34,6 +36,7 @@
   font-size: 25rpx;
   letter-spacing: 1rpx;
 }
+/* ===== 星期条与课程数角标 ===== */
 .week-day { position: relative; }
 .dot-count {
   position: absolute;
@@ -50,6 +53,7 @@
   text-align: center;
 }
 .week-day.on .dot-count { background: #E8C98E; color: #2E291F; }
+/* ===== 当日课程标题 ===== */
 .day-title {
   display: flex;
   align-items: baseline;

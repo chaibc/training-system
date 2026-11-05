@@ -1,3 +1,4 @@
+/* ===== 教师头部 ===== */
 .td-hero {
   min-height: 360rpx;
   padding: 44rpx 32rpx;
@@ -18,6 +19,7 @@
   color: rgba(246, 241, 231, .06);
   line-height: 1;
 }
+/* ===== 教学理念引言卡 ===== */
 .quote-card {
   position: relative;
   padding: 30rpx 28rpx;
@@ -34,6 +36,8 @@
   font-size: 170rpx;
   color: rgba(169, 120, 42, .12);
 }
+/* ===== 引言正文（宋体 + 深金色） ===== */
 .q-text { font-family: "Songti SC", serif; color: #6F5A32; font-size: 26rpx; line-height: 1.9; position: relative; }
 .q-by { color: var(--muted); font-size: 20rpx; text-align: right; margin-top: 12rpx; }
+/* ===== 教学履历正文 ===== */
 .about-text { color: var(--ink2); font-size: 23rpx; line-height: 1.9; }

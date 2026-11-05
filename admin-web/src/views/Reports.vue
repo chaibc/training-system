@@ -1,3 +1,11 @@
+/**
+ * 统计报表页：核心指标卡、报名与试听趋势、线下收入构成、教师课时统计、班级课时与出勤、续费分析。
+ * 接口：reportApi.overview（GET /api/admin/reports/overview）、reportApi.renew（POST /api/admin/reports/renew）
+ * 辅助接口：studentApi.options、basicApi.list(缴费方式)
+ * 交互：切换统计区间、刷新、导出 CSV、登记线下续费（弹窗）
+ *
+ * 指标口径全部由后端计算，前端只负责展示与导出；CSV 为纯前端拼装，不调导出接口。
+ */
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
@@ -8,18 +16,23 @@ import { ReloadOutlined, DownloadOutlined, PlusOutlined } from '@ant-design/icon
 const loading = ref(false)
 const data = ref(null)
 const months = ref(6)
+// 趋势图基准：取报名与试听两个系列的最大值，同一组两根柱子共用比例尺；最小取 1 避免除零
 const maxChart = computed(() => Math.max(1, ...((data.value?.chart || []).flatMap((x) => [Number(x.enrollments || 0), Number(x.trials || 0)]))))
+// 收入构成条形图基准：取各缴费方式金额的最大值，最小取 1 避免除零
 const maxRevenue = computed(() => Math.max(1, ...((data.value?.revenueByMethod || []).map((x) => Number(x.amount || 0)))))
 
 const students = ref([])
 const methods = ref([])
 const renewOpen = ref(false)
 const renewSaving = ref(false)
+// 续费登记表单：24 课时 / 2880 元只是常用套餐的默认值，打开弹窗时会被重新赋值
 const renewForm = reactive({
   studentId: undefined, lessons: 24, amount: 2880, paymentMethodId: undefined, item: '', note: ''
 })
+// 弹窗里展示的学员名：从续费名单点进来时有值，从页头按钮打开时为空
 const renewStudentName = ref('')
 
+// 按当前月份跨度拉取报表；失败提示由 http.js 统一弹出，这里只负责 loading
 async function load() {
   loading.value = true
   try {
@@ -27,12 +40,14 @@ async function load() {
   } finally { loading.value = false }
 }
 
+// 加载续费弹窗的数据源：学员下拉 + 缴费方式字典（两者互不依赖，并发请求）
 async function loadBasics() {
   const [s, m] = await Promise.all([studentApi.options(), basicApi.list(basicApi.paymentMethods)])
   students.value = s
   methods.value = m
 }
 
+// 从续费名单某行打开弹窗：预填学员与该行班级，缴费方式默认取字典第一项
 function openRenew(row) {
   renewStudentName.value = row.studentName
   Object.assign(renewForm, {
@@ -46,6 +61,7 @@ function openRenew(row) {
   renewOpen.value = true
 }
 
+// 页头「登记续费」打开空表单：不预选学员，适合临时到店缴费
 function openRenewBlank() {
   renewStudentName.value = ''
   Object.assign(renewForm, {
@@ -55,6 +71,7 @@ function openRenewBlank() {
   renewOpen.value = true
 }
 
+// 提交续费登记：学员、缴费方式、课时、金额四项必填，课时与金额转成数字后再提交
 async function submitRenew() {
   if (!renewForm.studentId) return message.warning('请选择学员')
   if (!renewForm.paymentMethodId) return message.warning('请选择缴费方式')
@@ -73,8 +90,10 @@ async function submitRenew() {
   } finally { renewSaving.value = false }
 }
 
+// 导出 CSV：全部在前端拼装，字段顺序与页面表格一致，不请求导出接口
 function exportCsv() {
   if (!data.value) return
+  // CSV 行结构：先抬头与核心指标，再依次拼接教师、班级、续费名单三个明细表
   const lines = []
   const s = data.value.stats
   lines.push(['翰墨学堂统计报表'])
@@ -100,16 +119,20 @@ function exportCsv() {
   lines.push(['学员', '班级', '剩余课时', '有效期至', '上次缴费'])
   data.value.renewals.forEach((r) => lines.push([r.studentName, r.classNames, r.remainingHours, r.validUntil || '', r.lastPaymentAt || '']))
   const csv = '﻿' + lines.map((row) => row.map((cell) => `"${String(cell ?? '').replaceAll('"', '""')}"`).join(',')).join('\n')
+  // 报表内容已前置 UTF-8 BOM，Excel 直接双击打开不会乱码
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
+  // 用临时 a 标签触发浏览器下载，文件名带导出日期便于区分
   link.download = `翰墨学堂-统计报表-${dayjs().format('YYYYMMDD')}.csv`
   link.click()
+  // 下载已开始，立即释放 object URL，避免内存泄漏
   URL.revokeObjectURL(url)
   message.success('报表已导出，可用 Excel 打开')
 }
 
+// 先加载下拉数据源再取报表：openRenew 里要用到 methods[0] 作默认缴费方式
 onMounted(async () => {
   await loadBasics()
   await load()
@@ -118,6 +141,7 @@ onMounted(async () => {
 
 <template>
   <div>
+    <!-- 页头：统计区间选择、刷新与导出 CSV -->
     <div class="page-head">
       <div>
         <div class="eyebrow">REPORTS & ANALYTICS</div>
@@ -137,6 +161,7 @@ onMounted(async () => {
     </div>
 
     <a-spin :spinning="loading">
+      <!-- 顶部指标卡：报名申请 / 累计消课 / 本期实收 / 续费预警 -->
       <div class="stats">
         <div class="stat-card"><div class="lbl">报名申请</div><div class="v">{{ data?.stats.enrollments ?? '—' }}<em>条</em></div><div class="foot">其中续费缴费 {{ data?.stats.renewPayments ?? 0 }} 笔</div></div>
         <div class="stat-card jade"><div class="lbl">累计消课</div><div class="v">{{ data?.stats.consumedHours ?? '—' }}<em>课时</em></div><div class="foot">平均出勤率 {{ data?.stats.attendanceRate ?? 0 }}%</div></div>
@@ -146,6 +171,7 @@ onMounted(async () => {
 
       <div class="grid-2">
         <div class="paper-card card-pad">
+          <!-- 报名与试听趋势：双柱图，柱高按 maxChart 等比换算 -->
           <div class="card-title">报名与试听趋势</div>
           <div class="legend">
             <span><i class="dot red"></i>报名申请</span>
@@ -166,6 +192,7 @@ onMounted(async () => {
         </div>
 
         <div class="paper-card card-pad">
+          <!-- 线下收入构成：按缴费方式展示金额占比，宽度按 maxRevenue 等比换算 -->
           <div class="card-title">线下收入构成</div>
           <div class="funnel">
             <div v-for="item in (data?.revenueByMethod || [])" :key="item.name" class="funnel-row">
@@ -181,6 +208,7 @@ onMounted(async () => {
 
       <div class="grid-2 mt14">
         <div class="paper-card card-pad">
+          <!-- 教师课时统计表：出勤率 ≥ 95% 标绿，否则标黄 -->
           <div class="card-title">教师课时统计</div>
           <a-table :data-source="data?.teacherStats || []" row-key="teacherId" size="small" :pagination="false">
             <a-table-column title="教师" data-index="teacherName" key="teacherName" />
@@ -196,6 +224,7 @@ onMounted(async () => {
         </div>
 
         <div class="paper-card card-pad">
+          <!-- 班级课时与出勤统计表 -->
           <div class="card-title">课时与出勤（按班级）</div>
           <a-table :data-source="data?.classStats || []" row-key="classId" size="small" :pagination="false">
             <a-table-column title="班级" data-index="className" key="className" />
@@ -214,6 +243,7 @@ onMounted(async () => {
 
       <div class="paper-card card-pad mt14">
         <div class="between" style="margin-bottom:10px">
+          <!-- 续费分析：剩余课时预警名单，行内可直接登记续费 -->
           <div class="card-title" style="margin:0">续费分析</div>
           <a-button size="small" @click="openRenewBlank"><PlusOutlined /> 登记续费</a-button>
         </div>
@@ -237,6 +267,7 @@ onMounted(async () => {
       </div>
     </a-spin>
 
+    <!-- 登记续费弹窗：提交后立即加课时并写流水，所以提示需确认线下已收款 -->
     <a-modal v-model:open="renewOpen" title="登记线下续费" ok-text="确认充值" cancel-text="取消"
              :confirm-loading="renewSaving" @ok="submitRenew">
       <a-form layout="vertical">

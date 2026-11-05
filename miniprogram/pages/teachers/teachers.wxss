@@ -1,4 +1,6 @@
+/* ===== 教师卡片标签 ===== */
 .t-tags { display: flex; flex-wrap: wrap; gap: 6rpx; margin-top: 10rpx; }
+/* ===== 试听引导 ===== */
 .teach-note {
   display: flex;
   align-items: center;

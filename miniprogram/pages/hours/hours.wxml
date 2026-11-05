@@ -10,10 +10,12 @@
   <view wx:elif="{{!hasChildren}}" class="empty" style="padding-top:130rpx"><view class="seal">学</view>暂未绑定学员</view>
 
   <block wx:else>
+    <!-- 学员切换标签 -->
     <scroll-view scroll-x class="chips" enhanced show-scrollbar="{{false}}" style="margin-top:10rpx">
       <view wx:for="{{children}}" wx:key="id" class="chip {{studentId === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="selectChild">{{item.name}}</view>
     </scroll-view>
 
+    <!-- 课时总览卡：大字余额 + 三项统计 -->
     <view class="pad" style="margin-top:24rpx">
       <view class="hours-hero">
         <view class="hh-label">{{child.name}} · 当前剩余</view>
@@ -27,6 +29,7 @@
       </view>
     </view>
 
+    <!-- 余额偏低提醒 -->
     <view wx:if="{{account.renewalWarning}}" class="pad" style="margin-top:18rpx">
       <view class="renew-warning">
         <text class="rw-icon">!</text>
@@ -38,6 +41,7 @@
       </view>
     </view>
 
+    <!-- 课时流水列表 -->
     <view class="section"><view class="title">课时流水</view><view class="more">{{ledger.length}} 条记录</view></view>
     <view class="pad">
       <view class="card">
@@ -54,15 +58,18 @@
             </view>
           </view>
         </view>
+        <!-- 空状态 -->
         <view wx:if="{{!ledger.length}}" class="empty" style="padding:46rpx 0">暂无课时流水</view>
       </view>
     </view>
 
+    <!-- 底部操作按钮 -->
     <view class="btn-row pad" style="margin-top:26rpx">
       <button class="btn ghost" bindtap="goSchedule">查看课表</button>
       <button class="btn primary" bindtap="contact">联系教务续费</button>
     </view>
 
+    <!-- 页脚说明 -->
     <view class="foot-note">本版本不支持线上缴费
 续费与实际到账以教务线下登记为准</view>
   </block>

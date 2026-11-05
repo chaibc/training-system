@@ -1,6 +1,10 @@
+/**
+ * 应用根组件：只负责全局 antd 主题与中文语言包，具体页面由 router-view 渲染。
+ */
 <script setup>
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
 
+// 全局主题令牌：赭红主色 + 米白底色，改这里会影响全站所有 antd 组件的配色与圆角
 const theme = {
   token: {
     colorPrimary: '#B4473C',
@@ -24,8 +28,10 @@ const theme = {
 }
 </script>
 
+<!-- 全局配置：注入品牌主题与中文语言包（分页、日期、空状态等内置文案） -->
 <template>
   <a-config-provider :locale="zhCN" :theme="theme">
+    <!-- 登录页与后台主框架都渲染在这里，具体路由见 router/index.js -->
     <router-view />
   </a-config-provider>
 </template>

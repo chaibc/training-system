@@ -1,3 +1,4 @@
+/* ===== 作品图片上传区 ===== */
 .uploader {
   position: relative;
   height: 360rpx;
@@ -20,6 +21,7 @@
 .up-plus { font-size: 56rpx; color: var(--gold2); line-height: 1; }
 .up-text { font-size: 23rpx; color: var(--ink2); }
 .up-tip { font-size: 18rpx; }
+/* ===== 「重新选择」角标 ===== */
 .reupload {
   position: absolute;
   right: 14rpx;
@@ -31,6 +33,7 @@
   font-size: 18rpx;
 }
 .picker { display: flex; align-items: center; }
+/* ===== 无学员 / 未授权提示 ===== */
 .no-auth { padding: 18rpx; border-radius: 14rpx; background: #F9F5EC; color: var(--muted); font-size: 21rpx; }
 .auth-warning {
   display: flex;
@@ -56,6 +59,7 @@
   font-size: 18rpx;
   margin-top: 2rpx;
 }
+/* ===== 我的作品列表 ===== */
 .my-work {
   display: flex;
   align-items: center;

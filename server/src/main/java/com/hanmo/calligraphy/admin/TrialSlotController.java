@@ -7,6 +7,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 试听时段字典：trial_slot 表（名称、说明、排序、启停）的增删改查。
+ *
+ * <p>业务模块：基础数据字典；接口前缀 {@code /api/admin/trial-slots}。</p>
+ * <p>后台页面：管理端「基础数据」(/basic，BasicData.vue) 的试听时段页签；小程序试听预约的时段选项也读该表。</p>
+ * <p>权限：GET 允许 ADMIN 与 ACADEMIC；POST/PUT/DELETE 由 SecurityConfig 限定仅 ADMIN。</p>
+ * <p>通道：继承 {@link BaseCrudController}，六个通道全部开放；分页 keyword 命中 name 列；
+ * 删除为物理删除，不校验 trial_booking.slot_id 的引用。</p>
+ */
 @Tag(name = "管理端-试听时段")
 @RestController
 @RequestMapping("/api/admin/trial-slots")

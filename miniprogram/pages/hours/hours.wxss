@@ -1,3 +1,4 @@
+/* ===== 课时总览卡：深墨底 + 鎏金数字 ===== */
 .hours-hero {
   border-radius: 30rpx;
   padding: 34rpx 30rpx 28rpx;
@@ -29,6 +30,7 @@
   color: rgba(246, 241, 231, .06);
   line-height: 1;
 }
+/* ===== 余额偏低提醒 ===== */
 .renew-warning {
   display: flex;
   align-items: center;
@@ -52,6 +54,7 @@
   font-size: 24rpx;
   flex: none;
 }
+/* ===== 课时流水 ===== */
 .ledger-item {
   display: flex;
   align-items: center;

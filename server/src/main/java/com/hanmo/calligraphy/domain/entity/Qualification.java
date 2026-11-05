@@ -6,6 +6,11 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.time.*;
 import lombok.Data;
 
+/**
+ * 机构资质，对应表 qualification。
+ *
+ * <p>保存资质名称、证书编号、有效期与核验 / 展示状态。</p>
+ */
 @Data
 @TableName("qualification")
 public class Qualification {
@@ -14,9 +19,13 @@ public class Qualification {
     private Long id;
 
     private String name;
+    // 证书编号
     private String code;
+    // 有效期（按原文以字符串存储）
     private String validUntil;
+    // 核验状态：VERIFIED 已核验 / PENDING 待核验
     private String verifyStatus;
+    // 是否前台展示：1=展示 / 0=隐藏
     private Integer visible;
     private Integer sort;
     private LocalDateTime createdAt;

@@ -1,3 +1,4 @@
+/* ===== 学员选择标签 ===== */
 .child-chip {
   display: flex;
   align-items: center;
@@ -11,6 +12,7 @@
 .child-chip.on { border-color: var(--red); background: rgba(180, 71, 60, .06); }
 .cc-name { font-size: 24rpx; font-weight: 600; }
 .cc-meta { color: var(--muted); font-size: 18rpx; }
+/* ===== 课程选项 ===== */
 .course-option {
   display: flex;
   align-items: center;
@@ -22,6 +24,7 @@
 .co-name { font-size: 26rpx; font-weight: 600; }
 .co-meta { color: var(--muted); font-size: 19rpx; margin-top: 4rpx; }
 .co-price { color: var(--red); font-size: 24rpx; font-weight: 600; margin-top: 6rpx; }
+/* ===== 单选圆点 ===== */
 .radio {
   width: 36rpx;
   height: 36rpx;
@@ -35,6 +38,7 @@
   flex: none;
 }
 .radio.on { background: var(--red); border-color: var(--red); }
+/* ===== 班级选项与确认摘要 ===== */
 .class-option { padding: 22rpx; border: 1rpx solid transparent; }
 .class-option.sel { border-color: rgba(180, 71, 60, .45); background: rgba(255, 253, 248, .95); }
 .summary-card { background: rgba(255, 253, 248, .8); }

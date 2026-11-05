@@ -12,22 +12,45 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+/**
+ * JWT 签发与解析服务。
+ *
+ * <p>使用 HMAC-SHA 对令牌签名（具体算法由密钥长度决定），密钥来自 app.jwt.secret；
+ * 有效期由 app.jwt.expire-hours 控制，默认 8 小时。令牌内携带用户 ID、姓名、账号类型与角色编码，
+ * 供 JwtAuthenticationFilter 恢复登录态。</p>
+ */
 @Service
 public class JwtService {
 
+    // HMAC 签名密钥（由 app.jwt.secret 派生）
     private final SecretKey key;
+    // 令牌有效期（毫秒），由 app.jwt.expire-hours 换算
     private final long expireMillis;
 
+    /**
+     * @param secret      签名密钥（app.jwt.secret）
+     * @param expireHours 有效期小时数（app.jwt.expire-hours，默认 8）
+     */
     public JwtService(@Value("${app.jwt.secret}") String secret,
                       @Value("${app.jwt.expire-hours:8}") long expireHours) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expireMillis = expireHours * 60L * 60L * 1000L;
     }
 
+    /**
+     * 为登录成功的账号签发 JWT。
+     *
+     * <p>副作用：无（纯计算，不写库）。</p>
+     *
+     * @param user 账号
+     * @param role 角色，可为空（为空时 role / roleName 声明为 null）
+     * @return 签名后的 JWT 字符串
+     */
     public String generate(SysUser user, SysRole role) {
         Date now = new Date();
         Date exp = new Date(now.getTime() + expireMillis);
         return Jwts.builder()
+                // 标准 subject 与自定义 uid 都放用户 ID，便于不同解析方式取用
                 .subject(String.valueOf(user.getId()))
                 .claim("uid", user.getId())
                 .claim("name", user.getName())
@@ -40,6 +63,15 @@ public class JwtService {
                 .compact();
     }
 
+    /**
+     * 解析并校验令牌。
+     *
+     * <p>校验签名与 exp 过期时间；失败时抛出 io.jsonwebtoken.JwtException 的子类
+     * （如 ExpiredJwtException、SignatureException），由调用方决定如何处理。</p>
+     *
+     * @param token 不含 "Bearer " 前缀的 JWT 字符串
+     * @return 令牌中的 claims
+     */
     public Claims parse(String token) {
         return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
     }

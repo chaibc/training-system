@@ -1,4 +1,5 @@
 <view class="page">
+  <!-- 游客态引导 -->
   <view wx:if="{{guest}}" class="me-guest">
     <view class="mg-seal">翰</view>
     <view class="mg-title serif">还未登录</view>
@@ -9,6 +10,7 @@
   </view>
 
   <block wx:elif="{{isTeacher}}">
+    <!-- 教师身份卡片 -->
     <view class="me-hero teacher-hero">
       <view class="row gap12">
         <view class="avatar lg" style="background:#4C6455">{{userAvatar}}</view>
@@ -24,6 +26,7 @@
   </block>
 
   <block wx:else>
+    <!-- 家长身份卡片：当前学员切换 -->
     <view class="me-hero">
       <view class="row gap12">
         <view class="avatar lg" style="background:{{child ? child.avatarColor : '#8A6A49'}}">{{child ? child.avatarChar : userAvatar}}</view>
@@ -44,6 +47,7 @@
       </view>
     </view>
 
+    <!-- 学员数据统计 -->
     <view wx:if="{{child}}" class="pad" style="margin-top:22rpx">
       <view class="stat-grid">
         <view class="stat"><view class="v">{{stats.remainingHours}}<small>课时</small></view><view class="k">剩余课时</view></view>
@@ -52,6 +56,7 @@
       </view>
     </view>
 
+    <!-- 家长服务宫格 -->
     <view wx:if="{{child}}" class="pad" style="margin-top:22rpx">
       <view class="me-service card">
         <view class="ms-item" bindtap="nav" data-url="/pages/child-profile/child-profile"><view class="msi">档</view><text>学员档案</text></view>
@@ -64,6 +69,7 @@
     </view>
 
     <view wx:else class="pad" style="margin-top:24rpx">
+      <!-- 未绑定学员引导 -->
       <view class="card padc bind-card">
         <view class="serif" style="font-size:29rpx">还没有绑定孩子</view>
         <view class="muted small" style="margin-top:8rpx;line-height:1.7">绑定后即可查看课表与课时，绑定申请需教务审核。</view>
@@ -71,6 +77,7 @@
       </view>
     </view>
 
+    <!-- 账号与服务列表 -->
     <view class="section"><view class="title">账号与服务</view></view>
     <view class="pad">
       <view class="card me-list">
@@ -98,6 +105,7 @@
     </view>
   </block>
 
+  <!-- 退出登录 -->
   <view wx:if="{{!guest}}" class="pad" style="margin-top:32rpx">
     <button class="btn ghost block" bindtap="logout">退出登录</button>
   </view>

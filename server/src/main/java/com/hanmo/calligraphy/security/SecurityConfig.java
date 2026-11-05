@@ -24,6 +24,14 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+/**
+ * Spring Security 配置：无状态 JWT 鉴权、URL 级权限规则与 BCrypt 密码编码。
+ *
+ * <p>安全策略：关闭 CSRF 与 Session（纯 Bearer Token）；除登录、公开接口、静态资源、
+ * 接口文档、健康检查与 H2 控制台外一律要求认证；/api/admin/** 按角色与 HTTP 方法细分权限。
+ * 认证失败返回 401、权限不足返回 403，均为统一 JSON 结构。后台密码使用 BCrypt 校验（见 AuthService），
+ * 连续 5 次密码错误会锁定账号 5 分钟（见 sys_user.failed_attempts / locked_until）。</p>
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -36,18 +44,38 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
 
+    /**
+     * 密码编码器：BCrypt。
+     *
+     * <p>BCrypt 每次编码使用随机盐，密文自带盐值，校验用 matches 而非明文比较；
+     * 由 AuthService 在登录与改密时使用。</p>
+     *
+     * @return BCryptPasswordEncoder 实例
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * 构建安全过滤器链。
+     *
+     * <p>规则顺序敏感：先放行公开路径、再收紧具体写操作，最后的 anyRequest 兜底要求认证；
+     * JWT 过滤器在 UsernamePasswordAuthenticationFilter 之前执行。</p>
+     *
+     * @param http HttpSecurity 构建器
+     * @return 安全过滤器链
+     * @throws Exception 构建失败
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // 纯 Token 认证、不使用 Cookie 会话，关闭 CSRF；会话策略设为 STATELESS
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .authorizeHttpRequests(auth -> auth
+                        // 登录、公开数据、静态资源、接口文档与健康检查无需令牌
                         .requestMatchers("/api/auth/login", "/api/auth/wx-login").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
@@ -82,6 +110,7 @@ public class SecurityConfig {
                                 "/api/admin/trial-slots/**", "/api/admin/org/**", "/api/admin/institution-images/**",
                                 "/api/admin/qualifications/**", "/api/admin/notices/**", "/api/admin/rules/**",
                                 "/api/admin/teachers/**").hasRole("ADMIN")
+                        // 其余后台接口管理员与教务均可访问；写操作已在上方单独收紧为仅管理员
                         .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "ACADEMIC")
                         .requestMatchers("/api/mini/**").authenticated()
                         .requestMatchers("/api/auth/**").authenticated()
@@ -91,10 +120,12 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, e) -> writeJson(response, 401, "未登录或登录已失效"))
                         .accessDeniedHandler((request, response, e) -> writeJson(response, 403, "没有权限执行该操作"))
                 )
+                // 先执行 JWT 过滤器恢复登录态，再交给用户名密码过滤器链
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
+    // 以统一 ApiResponse JSON 结构输出认证 / 授权失败，避免 Spring 默认的 HTML 错误页
     private void writeJson(HttpServletResponse response, int code, String message) throws java.io.IOException {
         response.setStatus(code);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
@@ -102,13 +133,20 @@ public class SecurityConfig {
         response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.fail(code, message)));
     }
 
+    /**
+     * CORS 配置：允许管理端等来源跨域访问，并暴露 Content-Disposition 供下载场景读取文件名。
+     *
+     * @return 作用于 /** 的 CORS 配置源
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
+        // 允许来源来自 app.cors.allowed-origins（逗号分隔），忽略空白项
         config.setAllowedOrigins(Arrays.stream(allowedOrigins.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList());
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
         config.setExposedHeaders(Arrays.asList("Content-Disposition"));
+        // 允许携带凭证，因此允许来源不能配置为通配符 *
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

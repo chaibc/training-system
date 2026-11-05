@@ -1,5 +1,7 @@
+/* ===== 报名记录卡 ===== */
 .enroll-card { padding: 26rpx; }
 .en-name { font-size: 31rpx; font-weight: 600; letter-spacing: 1rpx; }
 .en-no { color: var(--muted); font-size: 19rpx; margin-top: 6rpx; }
+/* ===== 卡片操作按钮 ===== */
 .en-actions { display: flex; gap: 12rpx; margin-top: 20rpx; flex-wrap: wrap; }
 .en-actions .btn { flex: none; }

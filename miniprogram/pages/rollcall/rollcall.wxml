@@ -1,4 +1,5 @@
 <view wx:if="{{lesson}}" class="page has-bottom-bar">
+  <!-- 课次信息条 -->
   <view class="roll-lesson">
     <view class="between">
       <view>
@@ -10,6 +11,7 @@
     <view class="rl-note">第 {{lesson.lessonNo}} 课 · 出勤与缺勤自动消 1 课时，请假按审批结果处理</view>
   </view>
 
+  <!-- 出勤汇总 -->
   <view class="roll-summary">
     <view class="rs"><view class="v">{{summary.total}}</view><view class="k">应到</view></view>
     <view class="rs"><view class="v jade">{{summary.present}}</view><view class="k">出勤</view></view>
@@ -17,6 +19,7 @@
     <view class="rs"><view class="v red">{{summary.absent}}</view><view class="k">缺勤</view></view>
   </view>
 
+  <!-- 已点名提示 -->
   <view wx:if="{{done}}" class="done-banner">
     <view class="db-icon">✓</view>
     <view class="flex1">
@@ -25,6 +28,7 @@
     </view>
   </view>
 
+  <!-- 学员点名列表 -->
   <view class="roll-list card" style="margin:20rpx 28rpx">
     <view wx:for="{{students}}" wx:key="studentId" class="roll-student">
       <view class="roll-avatar">{{item.avatarChar}}</view>
@@ -41,9 +45,11 @@
         <view class="roll-pill absent {{item.mark === 'ABSENT' ? 'on' : ''}}" data-index="{{index}}" data-mark="ABSENT" bindtap="setMark">缺勤</view>
       </view>
     </view>
+    <!-- 空状态 -->
     <view wx:if="{{!students.length && !loading}}" class="empty" style="padding:60rpx 0">该班级暂无学员</view>
   </view>
 
+  <!-- 点名说明 -->
   <view class="roll-tip">
     <text class="rt-icon">!</text>
     <text>点名提交后，家长端课表、上课记录与课时账户将同步更新。已点名修正不会重复扣课，差额写入课时流水。</text>
@@ -51,6 +57,7 @@
 
   <view class="foot-note">缺勤按消课处理；请假是否扣课时以审批结果为准</view>
 
+  <!-- 底部固定操作栏 -->
   <view class="bottom-bar">
     <button class="btn ghost" bindtap="goBack">返回</button>
     <button class="btn primary" loading="{{submitting}}" bindtap="submit">{{done ? '重新提交点名' : '完成点名并消课'}}</button>
@@ -58,5 +65,6 @@
 </view>
 
 <view wx:else class="page">
+  <!-- 兜底：非教师 / 课次不存在 -->
   <view class="empty" style="padding-top:200rpx"><view class="seal">点</view>{{blocked ? '请使用教师账号登录' : (loading ? '正在加载名单…' : '课次不存在')}}</view>
 </view>

@@ -1,3 +1,4 @@
+/* ===== 请假卡片与审批按钮 ===== */
 .leave-card { padding: 24rpx; }
 .approve-actions {
   display: flex;
@@ -7,6 +8,7 @@
   border-top: 1rpx solid var(--line2);
 }
 .approve-actions .btn { flex: 1; }
+/* ===== 驳回原因 ===== */
 .reject-box {
   margin-top: 12rpx;
   padding: 14rpx 16rpx;
@@ -16,6 +18,7 @@
   font-size: 20rpx;
   line-height: 1.7;
 }
+/* ===== 审批规则 ===== */
 .rule-tip {
   margin: 28rpx 32rpx 0;
   padding: 20rpx 24rpx;

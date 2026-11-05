@@ -1,4 +1,5 @@
 <view class="page">
+  <!-- 表单页头部：试听说明 + 印章 -->
   <view class="form-hero">
     <view class="fh-eyebrow">TRIAL BOOKING</view>
     <view class="fh-title serif">来写第一笔</view>
@@ -7,6 +8,7 @@
 听</view>
   </view>
 
+  <!-- 预约表单卡 -->
   <view class="pad" style="margin-top:26rpx">
     <view class="card padc">
       <view class="field">
@@ -52,6 +54,7 @@
         <textarea value="{{form.note}}" placeholder="孩子的书写基础、希望改善的问题等" data-field="note" bindinput="onInput" maxlength="200" />
       </view>
 
+      <!-- 隐私授权勾选 -->
       <view class="check" bindtap="toggleAgree">
         <view class="box {{agreed ? 'on' : ''}}">{{agreed ? '✓' : ''}}</view>
         <view>我已阅读并同意机构收集以上信息，仅用于试听预约与教务联系；不使用短信或模板消息推送。</view>
@@ -62,6 +65,7 @@
     </view>
   </view>
 
+  <!-- 页脚说明 -->
   <view class="foot-note">如需改期或取消，请直接联系教务
 咨询电话以机构主页维护为准</view>
 </view>
