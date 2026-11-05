@@ -81,7 +81,7 @@ CREATE TABLE `sys_audit_log` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `user_id` BIGINT DEFAULT NULL,
   `operator_name` VARCHAR(50) DEFAULT NULL,
-  `action_type` VARCHAR(30) NOT NULL COMMENT 'LOGIN/ACCOUNT/BINDING/PASSWORD/WORK/PAYMENT',
+  `action_type` VARCHAR(30) NOT NULL COMMENT '中文动作名：登录/账号变更/绑定审核/点名消课/报名登记/缴费登记/续费登记/课时调整/作品上传/作品审核/授权补录/授权撤回/补课安排',
   `target_type` VARCHAR(30) DEFAULT NULL,
   `target_id` BIGINT DEFAULT NULL,
   `content` VARCHAR(1000) DEFAULT NULL,

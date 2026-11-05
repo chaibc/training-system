@@ -168,10 +168,4 @@ public class MiniDtos {
      */
     public record CommentRequest(@NotBlank(message = "请输入留言内容") String content) {}
 
-    /**
-     * 金额入参（预留 DTO；当前代码中未见引用）。
-     *
-     * @param amount 金额
-     */
-    public record AmountRequest(BigDecimal amount) {}
 }

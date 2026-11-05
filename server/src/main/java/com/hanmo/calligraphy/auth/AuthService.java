@@ -57,8 +57,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    // 微信登录开发模式：dev/local profile 为 true；主配置读环境变量 WX_DEV_MODE（默认 false）
-    @Value("${app.wx.dev-mode:true}")
+    // 微信登录开发模式：dev/local profile 显式配置为 true；默认 false，避免漏配时在生产误用演示 code
+    @Value("${app.wx.dev-mode:false}")
     private boolean wxDevMode;
 
     // 真实模式换取 openid 所需的小程序凭证；两者任一为空都会导致登录失败

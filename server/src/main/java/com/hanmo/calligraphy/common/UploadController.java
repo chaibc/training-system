@@ -80,6 +80,8 @@ public class UploadController {
         // 扩展名与大小都校验，避免把非图片文件或超大文件写入上传目录
         if (!IMAGE_EXT.contains(ext)) throw new BusinessException(400, "仅支持 JPG、PNG、WEBP、GIF 图片");
         if (file.getSize() > 10 * 1024 * 1024) throw new BusinessException(400, "图片不能超过 10MB");
+        // 扩展名可伪造，再按文件头 magic bytes 校验一次真实类型
+        if (!looksLikeImage(file)) throw new BusinessException(400, "文件内容不是有效的图片");
 
         String datePath = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM"));
         String storedName = UUID.randomUUID().toString().replace("-", "") + "." + ext;
@@ -109,5 +111,32 @@ public class UploadController {
         data.put("name", original);
         data.put("size", file.getSize());
         return ApiResponse.ok(data);
+    }
+
+    /**
+     * 按文件头判断是否为允许的图片类型（防御伪造扩展名）。
+     *
+     * <p>JPG: {@code FF D8 FF}；PNG: {@code 89 50 4E 47}；GIF: {@code 47 49 46 38}；
+     * WEBP: {@code RIFF....WEBP}。只读前 12 字节，不影响后续落盘。</p>
+     *
+     * @param file 上传文件
+     * @return true 表示头部符合任一允许格式
+     */
+    private boolean looksLikeImage(MultipartFile file) {
+        try (java.io.InputStream in = file.getInputStream()) {
+            byte[] head = in.readNBytes(12);
+            if (head.length < 12) return false;
+            // JPEG
+            if ((head[0] & 0xFF) == 0xFF && (head[1] & 0xFF) == 0xD8 && (head[2] & 0xFF) == 0xFF) return true;
+            // PNG
+            if ((head[0] & 0xFF) == 0x89 && head[1] == 'P' && head[2] == 'N' && head[3] == 'G') return true;
+            // GIF87a / GIF89a
+            if (head[0] == 'G' && head[1] == 'I' && head[2] == 'F' && head[3] == '8') return true;
+            // WEBP：RIFF + 4 字节长度 + WEBP
+            return head[0] == 'R' && head[1] == 'I' && head[2] == 'F' && head[3] == 'F'
+                    && head[8] == 'W' && head[9] == 'E' && head[10] == 'B' && head[11] == 'P';
+        } catch (IOException e) {
+            return false;
+        }
     }
 }

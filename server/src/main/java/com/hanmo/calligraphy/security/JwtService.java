@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
 /**
@@ -57,10 +59,41 @@ public class JwtService {
                 .claim("userType", user.getUserType())
                 .claim("role", role == null ? null : role.getCode())
                 .claim("roleName", role == null ? null : role.getName())
+                // 密码指纹：改密后指纹变化，旧令牌在过滤器里会被判定失效
+                .claim("pwd", passwordFingerprint(user))
                 .issuedAt(now)
                 .expiration(exp)
                 .signWith(key)
                 .compact();
+    }
+
+    /**
+     * 计算密码指纹，写入令牌的 {@code pwd} 声明。
+     *
+     * <p>取 BCrypt 哈希的 SHA-256 前 8 字节转十六进制。改密后哈希变化 → 指纹变化，
+     * 过滤器比对不上就把该令牌当作失效，等于「改密后旧令牌立即作废」，无需额外的版本号字段。</p>
+     *
+     * <p>微信登录的教师/家长没有密码，统一返回 "-"，不参与失效判断。</p>
+     *
+     * @param user 账号
+     * @return 指纹字符串
+     */
+    public static String passwordFingerprint(SysUser user) {
+        if (user == null || user.getPasswordHash() == null || user.getPasswordHash().isBlank()) {
+            return "-";
+        }
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256")
+                    .digest(user.getPasswordHash().getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder(16);
+            for (int i = 0; i < 8; i++) {
+                sb.append(String.format("%02x", digest[i]));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            // SHA-256 在所有 JVM 上都必须存在；退化成固定值只是让令牌更容易失效，不会放行
+            return "-";
+        }
     }
 
     /**

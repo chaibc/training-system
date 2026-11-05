@@ -56,8 +56,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Claims claims = jwtService.parse(token);
                 Long uid = claims.get("uid", Long.class);
                 SysUser user = userMapper.selectById(uid);
-                // 令牌有效还不够：账号必须仍存在、状态为 ENABLED 且未被逻辑删除
-                if (user != null && "ENABLED".equals(user.getStatus()) && (user.getDeleted() == null || user.getDeleted() == 0)) {
+                // 令牌有效还不够：账号必须仍存在、状态为 ENABLED、未被逻辑删除，
+                // 且密码指纹与令牌内一致（改密后旧令牌立即失效）
+                if (user != null && "ENABLED".equals(user.getStatus())
+                        && (user.getDeleted() == null || user.getDeleted() == 0)
+                        && JwtService.passwordFingerprint(user).equals(claims.get("pwd", String.class))) {
                     SysRole role = roleMapper.selectById(user.getRoleId());
                     LoginUser principal = new LoginUser(
                             user.getId(), user.getUsername(), user.getName(), user.getUserType(),

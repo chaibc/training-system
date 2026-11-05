@@ -274,8 +274,7 @@ export const teacherApi = {
   create: (data) => http.post('/admin/teachers', data),
   // 修改教师档案（启停也走这里）
   update: (id, data) => http.put(`/admin/teachers/${id}`, data),
-  // 删除教师
-  remove: (id) => http.delete(`/admin/teachers/${id}`)
+  // 后端未提供 DELETE /api/admin/teachers/{id}（教师只停用不删除），故不导出 remove
 }
 
 // 点名与消课模块：按课次取花名册、提交点名，历史记录单独查询
